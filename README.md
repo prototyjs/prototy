@@ -193,3 +193,4 @@ const app = prototy({
 })
 ```
 
+_Single-file prototyping for instant UI validation..._
