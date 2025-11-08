@@ -1,7 +1,8 @@
-
-<img src="https://github.com/user-attachments/assets/f65cf3b0-c0a2-4184-9d93-89a5c0de6419" width="250px" alt="prototy">
+<p align="center">
+<img src="https://github.com/user-attachments/assets/f65cf3b0-c0a2-4184-9d93-89a5c0de6419" width="280px" alt="prototy">
 
 A simple JS framework for rapid UI prototyping on the web. 💚
+</p>
 
 ## Installation
 
