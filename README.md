@@ -141,3 +141,55 @@ In components with `eachItems`, the following variables are available in props:
   props="{ item: item, index: index }">
 </list-item>
 ```
+
+## Screen Management
+
+Prototy includes a built-in screen system for emulating routing and managing different views:
+
+### Basic Screen Setup
+```html
+<!-- Define screens with [screen] attribute -->
+<div screen="home">
+  <h1>Home Screen</h1>
+  <button :onclick="screen.push('settings')">Go to Settings</button>
+</div>
+
+<div screen="settings">
+  <h1>Settings Screen</h1>
+  <button :onclick="screen.back()">Go Back</button>
+</div>
+```
+
+### Screen Methods
+```js
+// Navigate to a screen
+screen.push('screen-name')
+
+// Go back to previous screen
+screen.back()
+
+// Access current screen info
+console.log(screen.current.name) // Current screen name
+console.log(screen.prev) // Previous screen name
+```
+
+## loaded Hook
+The loaded hook executes after DOM is fully initialized:
+```js
+const app = prototy({
+  state: {
+    user: { name: "John" },
+    items: []
+  },
+  handles: {
+    // Event handlers
+  },
+  loaded: function() {
+    // 'this' refers to the Prototy instance
+    console.log('App loaded!')
+    this.screen.push('home') // Navigate to home screen
+    this.state.isReady = true // Update state
+  }
+})
+```
+
