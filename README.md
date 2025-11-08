@@ -116,6 +116,19 @@ All attributes starting with `:` are supported:
 </user-card>
 ```
 ### List Rendering
+In components with eachItems, the following variables are available in props:
+
+item - current array element
+
+index - current element index (0, 1, 2...)
+
 ```html
-<user-card eachItems="state.users" props="{ user: item }"></user-card>
+<template component="list-item">
+    <span bind :text="props.index + ': ' + props.item.name"></span>
+</template>
+
+<list-item 
+  eachItems="state.items" 
+  props="{ item: item, index: index }">
+</list-item>
 ```
