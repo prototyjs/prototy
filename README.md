@@ -40,55 +40,56 @@ app.state.todos.push({ text: "New task" }); // Triggers re-render
 ```
 ## Directives
 
-Add `bind` attribute to any element that needs reactive updates from state changes
+Add `bind` attribute to any element that needs reactive updates from state changes.
 
-Events don't need `bind` - they work automatically with `:on` directives
+Events don't need `bind` - they work automatically with `:on` directives.
 
-All `:`-prefixed attributes are supported and evaluated as JavaScript expressions
+All `:`-prefixed attributes are supported and evaluated as JavaScript expressions.
 
-Components automatically handle reactivity - no need for `bind` on component elements
+Components automatically handle reactivity - no need for `bind` on component elements.
 
-Use `bind` for: text, html, show, class, style, value, and any custom attribute binding
+Use `bind` for: text, html, show, class, style, value, and any custom attribute binding.
 
 
 ### Text Binding
 ```html
-<h1 :text="state.user.name"></h1>
-<span :text="'Hello, ' + state.user.name"></span>
+<h1 :text="state.user.name" bind></h1>
+<span :text="'Hello, ' + state.user.name" bind></span>
 ```
 ### HTML Binding
 ```html
-<div :html="state.formattedContent"></div>
+<div :html="state.formattedContent" bind></div>
 ```
 ### Conditional Display
 ```html
-<div :html="state.formattedContent"></div>
+<div :show="state.isVisible" bind>Visible content</div>
+<div :show="state.user.isAdmin" bind>Admin panel</div>
 ```
 ### Class Binding
 ```html
-<div :class="state.cssClass"></div>
-<div :class="{ active: state.isActive, disabled: !state.isEnabled }"></div>
+<div :class="state.cssClass" bind></div>
+<div :class="{ active: state.isActive, disabled: !state.isEnabled }" bind></div>
 ```
 ### Style Binding
 ```html
-<div :style="{ color: state.textColor, fontSize: state.fontSize + 'px' }"></div>
+<div :style="{ color: state.textColor, fontSize: state.fontSize + 'px' }" bind></div>
 ```
 ### Event Handling
 ```html
-<button :onclick="state.count++">Increment</button>
-<input :oninput="state.searchTerm = event.target.value">
-<button :onclick="handles.submitForm">Submit</button>
+<button :onclick="state.count++" bind>Increment</button>
+<input :oninput="state.searchTerm = event.target.value" bind>
+<button :onclick="handles.submitForm" bind>Submit</button>
 ```
 ### Form Inputs
 ```html
-<input :value="state.username">
+<input :value="state.username" bind>
 ```
 ### Any Attribute Binding
 All attributes starting with `:` are supported:
 ```html
-<img bind :src="state.imageUrl" :alt="state.altText">
-<a bind :href="state.linkUrl" :target="state.targetWindow"></a>
-<div bind :data-testid="state.testId" :aria-hidden="state.isHidden"></div>
+<img :src="state.imageUrl" :alt="state.altText" bind>
+<a :href="state.linkUrl" :target="state.targetWindow" bind></a>
+<div :data-testid="state.testId" :aria-hidden="state.isHidden" bind></div>
 ```
 
 ## Components
@@ -100,8 +101,8 @@ Prototy supports native-like slot functionality with both default and named slot
 ```html
 <template component="user-card">
   <div class="user-card">
-    <h3 bind :text="props.user.name"></h3>
-    <p bind :text="props.user.email"></p>
+    <h3 :text="props.user.name" bind></h3>
+    <p :text="props.user.email" bind></p>
     <!-- Default slot -->
     <slot>Default content if no slot provided</slot>
     <!-- Named slot -->
@@ -116,7 +117,7 @@ Prototy supports native-like slot functionality with both default and named slot
   <p>This goes into the default slot</p>
   
   <!-- Named slot content -->
-  <button slot="actions" :onclick="handles.editUser">Edit</button>
+  <button slot="actions" :onclick="handles.editUser" bind>Edit</button>
 </user-card>
 ```
 ### List Rendering
@@ -128,7 +129,7 @@ In components with `eachItems`, the following variables are available in props:
 
 ```html
 <template component="list-item">
-    <span bind :text="props.index + ': ' + props.item.name"></span>
+    <span :text="props.index + ': ' + props.item.name" bind></span>
 </template>
 
 <list-item 
