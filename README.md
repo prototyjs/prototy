@@ -151,12 +151,12 @@ Prototy includes a built-in screen system for emulating routing and managing dif
 <!-- Define screens with [screen] attribute -->
 <div screen="home">
   <h1>Home Screen</h1>
-  <button :onclick="screen.push('settings')">Go to Settings</button>
+  <button :onclick="screen.push('settings')" bind>Go to Settings</button>
 </div>
 
 <div screen="settings">
   <h1>Settings Screen</h1>
-  <button :onclick="screen.back()">Go Back</button>
+  <button :onclick="screen.back()" bind>Go Back</button>
 </div>
 ```
 
