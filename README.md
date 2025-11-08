@@ -174,7 +174,7 @@ console.log(screen.prev) // Previous screen name
 ```
 
 ## loaded Hook
-The loaded hook executes after DOM is fully initialized:
+The `loaded` hook executes after DOM is fully initialized:
 ```js
 const app = prototy({
   state: {
