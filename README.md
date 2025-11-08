@@ -9,7 +9,7 @@ A simple JS framework for rapid UI prototyping on the web. 💚
 
 Add this script to your HTML:
 ```html
-<script src="https://cdn.jsdelivr.net/gh/your-repo/prototy@latest/prototy.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/prototyjs/prototy@latest/prototy.js"></script>
 ```
 
 Or download and include locally:
