@@ -40,15 +40,15 @@ app.state.todos.push({ text: "New task" }); // Triggers re-render
 ```
 ## Directives
 
-Add bind attribute to any element that needs reactive updates from state changes
+Add `bind` attribute to any element that needs reactive updates from state changes
 
-Events don't need bind - they work automatically with :on directives
+Events don't need `bind` - they work automatically with `:on` directives
 
-All :-prefixed attributes are supported and evaluated as JavaScript expressions
+All `:`-prefixed attributes are supported and evaluated as JavaScript expressions
 
-Components automatically handle reactivity - no need for bind on component elements
+Components automatically handle reactivity - no need for `bind` on component elements
 
-Use bind for: text, html, show, class, style, value, and any custom attribute binding
+Use `bind` for: text, html, show, class, style, value, and any custom attribute binding
 
 
 ### Text Binding
@@ -92,7 +92,11 @@ All attributes starting with `:` are supported:
 ```
 
 ## Components
-### Defining Components
+
+Use the `component` attribute on `<template>` elements to define components.
+
+Prototy supports native-like slot functionality with both default and named slots.
+
 ```html
 <template component="user-card">
   <div class="user-card">
@@ -116,11 +120,11 @@ All attributes starting with `:` are supported:
 </user-card>
 ```
 ### List Rendering
-In components with eachItems, the following variables are available in props:
+In components with `eachItems`, the following variables are available in props:
 
-item - current array element
+`item` - current array element
 
-index - current element index (0, 1, 2...)
+`index` - current element index (0, 1, 2...)
 
 ```html
 <template component="list-item">
