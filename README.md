@@ -40,6 +40,17 @@ app.state.todos.push({ text: "New task" }); // Triggers re-render
 ```
 ## Directives
 
+Add bind attribute to any element that needs reactive updates from state changes
+
+Events don't need bind - they work automatically with :on directives
+
+All :-prefixed attributes are supported and evaluated as JavaScript expressions
+
+Components automatically handle reactivity - no need for bind on component elements
+
+Use bind for: text, html, show, class, style, value, and any custom attribute binding
+
+
 ### Text Binding
 ```html
 <h1 :text="state.user.name"></h1>
@@ -72,13 +83,24 @@ app.state.todos.push({ text: "New task" }); // Triggers re-render
 ```html
 <input :value="state.username">
 ```
+### Any Attribute Binding
+All attributes starting with `:` are supported:
+```html
+<img bind :src="state.imageUrl" :alt="state.altText">
+<a bind :href="state.linkUrl" :target="state.targetWindow"></a>
+<div bind :data-testid="state.testId" :aria-hidden="state.isHidden"></div>
+```
+
 ## Components
 ### Defining Components
 ```html
 <template component="user-card">
   <div class="user-card">
-    <h3 :text="props.user.name"></h3>
-    <p :text="props.user.email"></p>
+    <h3 bind :text="props.user.name"></h3>
+    <p bind :text="props.user.email"></p>
+    <!-- Default slot -->
+    <slot>Default content if no slot provided</slot>
+    <!-- Named slot -->
     <slot name="actions"></slot>
   </div>
 </template>
@@ -86,6 +108,10 @@ app.state.todos.push({ text: "New task" }); // Triggers re-render
 ### Using Components
 ```html
 <user-card props="{ user: state.currentUser }">
+  <!-- Default slot content -->
+  <p>This goes into the default slot</p>
+  
+  <!-- Named slot content -->
   <button slot="actions" :onclick="handles.editUser">Edit</button>
 </user-card>
 ```
