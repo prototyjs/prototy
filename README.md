@@ -1,4 +1,4 @@
-# prototy
+# Prototy
 A simple JS framework for rapid UI prototyping on the web. 💚
 
 ## Installation
