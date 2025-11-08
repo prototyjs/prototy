@@ -4,6 +4,9 @@
 <p align="center">
 A simple JS framework for rapid UI prototyping and hypothesis testing on the web. 💚
 </p>
+<p align="center">
+<i>Single-file prototyping for instant UI validation.</i>
+</p>
 
 ## Installation
 
@@ -193,4 +196,3 @@ const app = prototy({
 })
 ```
 
-_Single-file prototyping for instant UI validation..._
