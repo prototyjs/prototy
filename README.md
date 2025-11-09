@@ -47,8 +47,13 @@ app.state.todos.push({ text: "New task" }); // Triggers re-render
 ```
 ## Directives
 
-Use :text, :html, :show, :class, :style, :value, and any custom attribute binding.
+All attributes starting with `:` are reactive and automatically update when state changes.
 
+Use built-in directives `:text`, `:html`, `:show`, `:class`, `:style`, `:value` for common UI bindings.
+
+Any custom attribute starting with `:` also works reactively, including `:src`, `:href`, `:data-*`, and `:aria-*`.
+
+Handle events with `:on*` attributes like `:onclick`, `:oninput`, `:onchange` and etc.
 
 ### Text Binding
 ```html
@@ -84,7 +89,6 @@ Use :text, :html, :show, :class, :style, :value, and any custom attribute bindin
 <input :value="state.username">
 ```
 ### Any Attribute Binding
-All attributes starting with `:` are supported:
 ```html
 <img :src="state.imageUrl" :alt="state.altText">
 <a :href="state.linkUrl" :target="state.targetWindow"></a>
