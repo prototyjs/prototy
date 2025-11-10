@@ -12,7 +12,7 @@ A simple JS framework for rapid UI prototyping and hypothesis testing on the web
 
 Add this script to your HTML:
 ```html
-<script src="https://cdn.jsdelivr.net/gh/prototyjs/prototy@latest/prototy.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/prototyjs/prototy@latest/prototy.min.js"></script>
 ```
 
 Or download and include locally:
@@ -22,13 +22,19 @@ Or download and include locally:
 
 ```js
 const app = prototy({
+  static: {}, // non-reactive data
   state: {
     user: { name: "John", age: 30 },
     items: []
   },
   handles: {
     // Event handlers
-  }
+  },
+  components: {},
+  // hooks
+  created() {},
+  loaded() {},
+  pushed() {},
 })
 ```
 ## State Management
@@ -171,19 +177,21 @@ screen.back()
 console.log(screen.current.name) // Current screen name
 console.log(screen.prev) // Previous screen name
 ```
-
-## loaded Hook
+## Hooks
+### created
+The `created` hook executes before DOM is fully initialized:
+```js
+const app = prototy({
+  created() {
+    // 'this' refers to the Prototy instance
+  }
+})
+```
+### loaded
 The `loaded` hook executes after DOM is fully initialized:
 ```js
 const app = prototy({
-  state: {
-    user: { name: "John" },
-    items: []
-  },
-  handles: {
-    // Event handlers
-  },
-  loaded: function() {
+  loaded() {
     // 'this' refers to the Prototy instance
     console.log('App loaded!')
     this.screen.push('home') // Navigate to home screen
@@ -191,4 +199,13 @@ const app = prototy({
   }
 })
 ```
-
+### pushed
+The `pushed` hook is executed when the screen changes:
+```js
+const app = prototy({
+  pushed(name) {
+    // 'this' refers to the Prototy instance
+    console.log(name))
+  }
+})
+```
