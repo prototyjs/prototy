@@ -1,0 +1,26 @@
+{
+  "name": "prototy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "prototy.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint ./src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/prototyjs/prototy.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/prototyjs/prototy/issues"
+  },
+  "homepage": "https://github.com/prototyjs/prototy#readme",
+  "dependencies": {
+    "@eslint/js": "^9.39.2",
+    "eslint": "^9.39.2",
+    "eslint-plugin-jsdoc": "^62.0.0",
+    "globals": "^17.0.0"
+  }
+}
