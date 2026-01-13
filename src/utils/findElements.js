@@ -36,15 +36,12 @@ export function findElements(root = document) {
     /** @type {Object<string, string>} */
     const colonAttrs = {};
     
-    // Обходим все атрибуты элемента
-    // Используем прямой цикл for вместо forEach для производительности
-    const attributes = element.attributes;
-    for (let j = 0; j < attributes.length; j++) {
-      const attr = attributes[j];
+    // XPath гарантирует, что у элемента есть хотя бы один атрибут с ':'
+    Array.from(element.attributes).forEach(attr => {
       if (attr.name.startsWith(':')) {
         colonAttrs[attr.name] = attr.value;
       }
-    }
+    });
     
     // XPath гарантирует, что у элемента есть хотя бы один атрибут с ':'
     // Но для безопасности проверяем на всякий случай
