@@ -12,5 +12,5 @@ function add(a, b) {
     return a + b;
 }
 
-add('hgkhg', 4)
+add(2, 4)
 
