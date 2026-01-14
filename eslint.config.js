@@ -34,6 +34,11 @@ export default [
 			promise,
 			'no-unsanitized': noUnsanitized
 		},
+		settings: {
+			jsdoc: {
+				mode: 'typescript'
+			}
+		},
 		rules: {
 			...js.configs.recommended.rules,
 			...sonarjs.configs.recommended.rules,
