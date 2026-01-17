@@ -5,7 +5,8 @@
   "main": "prototy.js",
   "scripts": {
     "test": "node --test-reporter=spec jsdoc-tester.js",
-    "lint": "eslint ./src"
+    "lint": "eslint ./src",
+    "dev" : ""
   },
   "repository": {
     "type": "git",
