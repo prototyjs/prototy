@@ -5,6 +5,7 @@ import sonarjs from 'eslint-plugin-sonarjs'
 import security from 'eslint-plugin-security'
 import promise from 'eslint-plugin-promise'
 import noUnsanitized from 'eslint-plugin-no-unsanitized'
+import checkFile from 'eslint-plugin-check-file'
 
 export default [
 	{
@@ -15,6 +16,16 @@ export default [
 			'.git/**',
 			'coverage/**'
 		]
+	},
+	{
+		files: ['**/*'],
+		plugins: {
+			'check-file': checkFile
+		},
+		rules: {
+			'check-file/filename-naming-convention': ['error', { '**/*': 'CAMEL_CASE' }, { ignoreMiddleExtensions: true }],
+			'check-file/folder-naming-convention': ['error', { '**/*': 'CAMEL_CASE' }]
+		}
 	},
 	{
 		files: ['**/*.js'],
@@ -46,23 +57,24 @@ export default [
 			...promise.configs.recommended.rules,
 			...noUnsanitized.configs.recommended.rules,
 
-			// === Security (Локальный Snyk) ===
+			// === Security ===
 			'security/detect-object-injection': 'warn',
 			'security/detect-non-literal-fs-filename': 'warn',
 
-			// === No-Unsanitized (Защита от XSS) ===
+			// === No-Unsanitized ===
 			'no-unsanitized/method': 'error',
 			'no-unsanitized/property': 'error',
 
-			// === Promise (Стабильность асинхронного кода) ===
+			// === Promise ===
 			'promise/always-return': 'error',
 			'promise/no-return-wrap': 'error',
 			'promise/catch-or-return': 'error',
 
-			// === SonarJS (ваши настройки) ===
+			// === SonarJS ===
 			'sonarjs/no-duplicate-string': 'warn',
 			'sonarjs/cognitive-complexity': 'error',
 			'sonarjs/no-identical-expressions': 'error',
+
 			// === JSDoc ===
 			'jsdoc/require-jsdoc': ['error', {
 				require: {
@@ -87,7 +99,7 @@ export default [
 			'jsdoc/empty-tags': 'warn',
 			'jsdoc/no-undefined-types': 'warn',
 
-			// === Форматирование ===
+			// === ESLint ===
 			'indent': ['error', 'tab'],
 			'quotes': ['error', 'single'],
 			'semi': ['error', 'never'],
@@ -102,8 +114,6 @@ export default [
 			'no-multiple-empty-lines': ['error', { 'max': 1 }],
 			'eol-last': ['error', 'never'],
 			'linebreak-style': ['error', 'unix'],
-
-			// === Логика и чистота кода ===
 			'eqeqeq': ['error', 'always'],
 			'no-var': 'error',
 			'prefer-const': 'error',
