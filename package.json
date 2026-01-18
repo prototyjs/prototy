@@ -9,7 +9,8 @@
     "build:lib": "vite build --config vite.config.lib.js",
     "build:demo": "vite build --config vite.config.demo.js",
     "test": "node --test-reporter=spec jsdoc-tester.js",
-    "lint": "eslint ./src/utils"
+    "lint": "eslint ./src/utils",
+    "lint:fix": "npx eslint . --fix"
   },
   "repository": {
     "type": "git",

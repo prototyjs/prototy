@@ -1,12 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <script src="../src/prototy.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prototy Demo</title>
 </head>
 <body>
-    <div :class="test"></div>
-
+  <h1>Prototy Demo</h1>
+  <div id="app"></div>
+  
+  <script type="module">
+    // Простой тест для проверки сборки
+    document.getElementById('app').innerHTML = `
+      <h2>Prototy Library Demo</h2>
+      <p>If you see this, Vite is working!</p>
+      <button onclick="alert('Hello from Prototy!')">Click me</button>
+    `;
+  </script>
 </body>
 </html>
