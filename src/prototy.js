@@ -3,7 +3,7 @@ import { findElements } from './utils/findElements'
  * @typedef {object} PrototyOptions
  * @property {object} state - Реактивное состояние приложения
  * @property {object} static - Статические данные
- * @property {Object.<string, Function>} handles - Обработчики событий
+ * @property {Record<string, Function>} handles - Обработчики событий
  */
 class Prototy {
 	/**
@@ -16,7 +16,7 @@ class Prototy {
 		/** @type {object} Статические данные */
 		this.static = options.static
 
-		/** @type {Object.<string, Function>} Методы обработчики */
+		/** @type {Record<string, Function>} Методы обработчики */
 		this.handles = {}
 
 		// Привязка методов из handles к текущему контексту
