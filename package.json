@@ -6,7 +6,8 @@
   "scripts": {
     "test": "node --test-reporter=spec jsdoc-tester.js",
     "lint": "eslint ./src/utils",
-    "prepare": "husky"
+    "prepare": "husky",
+    "type-check": "tsc --p tsconfig.json --noEmit"
   },
   "repository": {
     "type": "git",
@@ -34,9 +35,10 @@
   },
   "type": "module",
   "lint-staged": {
-    "*": "eslint --fix",
+    "src/**/*": "eslint --no-fix --quiet",
     "src/utils/**/*.js": [
-      "bash -c 'tsc --noEmit --pretty'"
+      "eslint --fix",
+      "bash -c 'npm run type-check'"
     ]
   }
 }

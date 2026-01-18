@@ -22,3 +22,14 @@
 export function _isObject(value) {
 	return typeof value === 'object' && value !== null
 }
+
+// eslint-disable-next-line jsdoc/require-returns
+/**
+ * @param {number} a
+ * @param {number} b
+ */
+function add(a, b) {
+	return a + b
+}
+
+add(3,4)

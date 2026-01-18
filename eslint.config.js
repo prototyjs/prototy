@@ -113,7 +113,7 @@ export default [
 			'space-before-blocks': ['error', 'always'],
 			'no-multiple-empty-lines': ['error', { 'max': 1 }],
 			'eol-last': ['error', 'never'],
-			'linebreak-style': ['error', 'unix'],
+			'linebreak-style': 'off',
 			'eqeqeq': ['error', 'always'],
 			'no-var': 'error',
 			'prefer-const': 'error',
