@@ -1,9 +1,13 @@
 {
   "name": "prototy",
   "version": "1.0.0",
-  "description": "",
+  "description": "Vanilla JS utility library",
   "main": "prototy.js",
   "scripts": {
+    "dev": "vite --config vite.config.demo.js",
+    "build": "npm run lint && npm run build:lib",
+    "build:lib": "vite build --config vite.config.lib.js",
+    "build:demo": "vite build --config vite.config.demo.js",
     "test": "node --test-reporter=spec jsdoc-tester.js",
     "lint": "eslint ./src/utils"
   },
@@ -27,5 +31,8 @@
     "eslint-plugin-sonarjs": "^3.0.5",
     "globals": "^17.0.0"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "vite": "^7.3.1"
+  }
 }
