@@ -42,7 +42,6 @@
   "lint-staged": {
     "src/**/*": "eslint --no-fix --quiet",
     "src/**/*.js": [
-      "eslint --fix",
       "bash -c 'npm run type-check'"
     ]
   },

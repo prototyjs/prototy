@@ -47,7 +47,8 @@ export default [
 		},
 		settings: {
 			jsdoc: {
-				mode: 'typescript'
+				mode: 'typescript',
+				checkExampleIterable: true
 			}
 		},
 		rules: {
@@ -76,6 +77,17 @@ export default [
 			'sonarjs/no-identical-expressions': 'error',
 
 			// === JSDoc ===
+			'jsdoc/check-alignment': 'error',
+			'jsdoc/check-indentation': ['error', { excludeTags: ['example'] }],
+			'jsdoc/check-values': 'error',
+			'jsdoc/check-types': ['error', { unifyParentAndChildTypeChecks: true }],
+			'jsdoc/no-types': 'off',
+			'jsdoc/no-multi-asterisks': ['error', {
+				'allowWhitespace': true,
+				'preventAtMiddleLines': true,
+				'preventAtEnd': true
+			}],
+
 			'jsdoc/require-jsdoc': ['error', {
 				require: {
 					FunctionDeclaration: true,
@@ -89,7 +101,6 @@ export default [
 					'ClassDeclaration'
 				]
 			}],
-			'jsdoc/check-types': 'error',
 			'jsdoc/valid-types': 'error',
 			'jsdoc/require-param-type': 'error',
 			'jsdoc/require-returns-type': 'error',
