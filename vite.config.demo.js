@@ -3,7 +3,7 @@ import { resolve } from "path";
 
 export default defineConfig(({ command, mode }) => {
   const isProduction = mode === "production";
-  
+
   return {
     base: "./",
     build: {
@@ -11,21 +11,21 @@ export default defineConfig(({ command, mode }) => {
       emptyOutDir: true,
       rollupOptions: {
         input: {
-          main: resolve(__dirname, "demo/index.html")
-        }
+          main: resolve(__dirname, "demo/index.html"),
+        },
       },
       minify: isProduction ? "terser" : false,
-      sourcemap: !isProduction
+      sourcemap: !isProduction,
     },
     resolve: {
       alias: {
         "@": resolve(__dirname, "./src"),
-        "@demo": resolve(__dirname, "./demo")
-      }
+        "@demo": resolve(__dirname, "./demo"),
+      },
     },
     server: {
       port: 5173,
-      open: true
-    }
+      open: true,
+    },
   };
 });
