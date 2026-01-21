@@ -6,6 +6,7 @@ import security from 'eslint-plugin-security'
 import promise from 'eslint-plugin-promise'
 import noUnsanitized from 'eslint-plugin-no-unsanitized'
 import checkFile from 'eslint-plugin-check-file'
+import cspellPlugin from '@cspell/eslint-plugin'
 
 export default [
 	{
@@ -43,7 +44,8 @@ export default [
 			sonarjs,
 			security,
 			promise,
-			'no-unsanitized': noUnsanitized
+			'no-unsanitized': noUnsanitized,
+			'@cspell': cspellPlugin
 		},
 		settings: {
 			jsdoc: {
@@ -58,9 +60,20 @@ export default [
 			...promise.configs.recommended.rules,
 			...noUnsanitized.configs.recommended.rules,
 
+			// Lang
+			'@cspell/spellchecker': ['error', {
+				'checkComments': true,
+				'checkIdentifiers': false,
+				'checkStrings': false,
+				'cspell': {
+					'ignoreRegExpList': ['/[a-zA-Z]+/g'],
+					'flagWords': ['/[^\\x00-\\x7F]/g']
+				}
+			}],
+
 			// === Security ===
-			'security/detect-object-injection': 'warn',
-			'security/detect-non-literal-fs-filename': 'warn',
+			'security/detect-object-injection': 'off',
+			'security/detect-unsafe-regex': 'error',
 
 			// === No-Unsanitized ===
 			'no-unsanitized/method': 'error',

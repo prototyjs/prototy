@@ -7,15 +7,24 @@
 </head>
 <body>
   <h1>Prototy Demo</h1>
-  <div id="app"></div>
+  <div :textContent="state.value + state.product.count" :hidden="state.hidden"></div>
+
+  <div :textContent="state.product.count"></div>
+
+  <div :onclick="state.count++">add</div>
   
   <script type="module">
-    // Простой тест для проверки сборки
-    document.getElementById('app').innerHTML = `
-      <h2>Prototy Library Demo</h2>
-      <p>If you see this, Vite is working!</p>
-      <button onclick="alert('Hello from Prototy!')">Click me</button>
-    `;
+    import Prototy from '../src/prototy.js'
+    const prototy = new Prototy({
+        state: {
+	        hidden: true,
+			value: 1,
+			product: {
+				count: 1
+            }
+        }
+    })
+    // setInterval(() => prototy.state.product.count++, 1000)
   </script>
 </body>
 </html>

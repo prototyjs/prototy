@@ -5,20 +5,20 @@
  * @returns { boolean } true or false.
  *
  * @example
- * _isObject({ a: 1 }) // => true
+ * isObject({ a: 1 }) // => true
  *
  * @example
- * _isObject([1, 2, 3]) // => true
+ * isObject([1, 2, 3]) // => true
  *
  * @example
- * _isObject(null) // => false
+ * isObject(null) // => false
  *
  * @example
- * _isObject('hello') // => false
+ * isObject('hello') // => false
  *
  * @example
- * _isObject(42) // => false
+ * isObject(42) // => false
  */
-export function _isObject(value) {
+export function isObject(value) {
 	return typeof value === 'object' && value !== null
 }
