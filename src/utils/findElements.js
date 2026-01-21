@@ -1,14 +1,13 @@
 /**
- * @param {Document|Element|ShadowRoot} [root=document]
+ * @param {Document|Element|ShadowRoot} root
+ * @param {object} state
  * @returns {Array<{element: HTMLElement, attributes: Record<string, string>}>}
  */
-export function findElements(root = document) {
+export function findElements(root, state) {
 	/** @type {Array<{element: HTMLElement, attributes: Record<string, string>}>} */
 	const results = []
-
 	const xpath = './/*[@*[starts-with(name(), \':\')]]'
-  
-	// Выполняем XPath запрос
+
 	const nodes = document.evaluate(
 		xpath,
 		root,
@@ -30,6 +29,10 @@ export function findElements(root = document) {
 		Array.from(element.attributes).forEach(attr => {
 			if (attr.name.startsWith(':')) {
 				colonAttrs[attr.name] = attr.value
+				// eslint-disable-next-line sonarjs/code-eval
+				const func = new Function('state', `return ${attr.value}`)
+				const executed = func(state)
+				console.log(executed)
 			}
 		})
     
@@ -40,6 +43,5 @@ export function findElements(root = document) {
 			})
 		}
 	}
-  
 	return results
 }
