@@ -9,7 +9,7 @@
     "build:lib": "vite build --config vite.config.lib.js",
     "build:demo": "vite build --config vite.config.demo.js",
     "test": "node --test-reporter=spec jsdoc-tester.js",
-    "lint": "eslint ./src/utils",
+    "lint": "eslint ./src -f table",
     "lint:fix": "npx eslint . --fix",
     "prepare": "husky",
     "type-check": "tsc --p tsconfig.json --noEmit"
@@ -27,6 +27,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "eslint": "^9.39.2",
+    "eslint-formatter-table": "^7.32.1",
     "eslint-plugin-check-file": "^3.3.1",
     "eslint-plugin-jsdoc": "^62.0.0",
     "eslint-plugin-no-unsanitized": "^4.1.4",
