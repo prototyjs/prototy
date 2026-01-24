@@ -1,9 +1,9 @@
 /**
  * @param {Document|Element|ShadowRoot} root
- * @param {object} state
+ * @param {Function} fn
  * @returns {Array<{element: HTMLElement, attributes: Record<string, string>}>}
  */
-export function findElements(root, state) {
+export function findElements(root, fn) {
 	/** @type {Array<{element: HTMLElement, attributes: Record<string, string>}>} */
 	const results = []
 	const xpath = './/*[@*[starts-with(name(), \':\')]]'
@@ -28,11 +28,7 @@ export function findElements(root, state) {
 
 		Array.from(element.attributes).forEach(attr => {
 			if (attr.name.startsWith(':')) {
-				colonAttrs[attr.name] = attr.value
-				// eslint-disable-next-line sonarjs/code-eval
-				const func = new Function('state', `return ${attr.value}`)
-				const executed = func(state)
-				console.log(executed)
+				colonAttrs[attr.name.slice(1)] = fn(attr.value)
 			}
 		})
     
