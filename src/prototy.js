@@ -23,8 +23,8 @@ class Prototy {
 		/** @type {Record<string, Function>} */
 		this.handles = {}
 
-		/** @type {Record<string, Function>} */
-		this.currentReactive = {}
+		/** @type {Record<string, any>} */
+		this.reactivity = {}
 
 		if (options.handles) {
 			Object.keys(options.handles).forEach((key) => {
@@ -35,14 +35,12 @@ class Prototy {
 		}
 
 		document.addEventListener('DOMContentLoaded', () => {
-			this.elements = findElements(document, (/** @type {string} */ code) => {
+			this.elements = findElements(document, (/** @type {object} */ reactivity, /** @type {string} */ code) => {
 				// eslint-disable-next-line sonarjs/code-eval
 				const func = new Function('state', `return ${code}`)
-				this.currentReactive = {}
+				this.reactivity = reactivity
 				this.autorun(() => func(this.state))
-				return this.currentReactive
 			})
-			this.currentReactive = {}
 			console.log(this.elements)
 		})
 	}
@@ -69,8 +67,7 @@ class Prototy {
 				const fullPath = path ? `${path}.${property.toString()}` : property.toString()
 
 				if (self.activeEffect) {
-					// self.track(fullPath)
-					self.currentReactive[fullPath] = self.activeEffect
+					self.reactivity[fullPath] = self.activeEffect
 				}
 
 				const value = Reflect.get(t, property, receiver)

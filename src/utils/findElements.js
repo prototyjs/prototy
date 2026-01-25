@@ -1,10 +1,10 @@
 /**
  * @param {Document|Element|ShadowRoot} root
  * @param {Function} fn
- * @returns {Array<{element: HTMLElement, attributes: Record<string, string>}>}
+ * @returns {Array<HTMLElement>}
  */
 export function findElements(root, fn) {
-	/** @type {Array<{element: HTMLElement, attributes: Record<string, string>}>} */
+	/** @typedef {HTMLElement & { _reactivity: Record<string, any> }} ReactiveElement */
 	const results = []
 	const xpath = './/*[@*[starts-with(name(), \':\')]]'
 
@@ -17,27 +17,23 @@ export function findElements(root, fn) {
 	)
 
 	for (let i = 0; i < nodes.snapshotLength; i++) {
-		const element = nodes.snapshotItem(i)
 
-		if (!(element instanceof HTMLElement)) {
+		const rawNode = nodes.snapshotItem(i)
+
+		if (!(rawNode instanceof HTMLElement)) {
 			continue
 		}
-
-		/** @type {Record<string, string>} */
-		const colonAttrs = {}
+		const element = /** @type {any} */ (rawNode)
+		element._reactivity = {}
 
 		Array.from(element.attributes).forEach(attr => {
 			if (attr.name.startsWith(':')) {
-				colonAttrs[attr.name.slice(1)] = fn(attr.value)
+				const key = attr.name.slice(1)
+				const reactivity = element._reactivity[key] = {}
+				fn(reactivity, attr.value)
 			}
 		})
-    
-		if (Object.keys(colonAttrs).length > 0) {
-			results.push({
-				element,
-				attributes: colonAttrs
-			})
-		}
+		results.push(element)
 	}
 	return results
 }
