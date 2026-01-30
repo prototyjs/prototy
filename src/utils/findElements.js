@@ -1,39 +1,50 @@
 /**
  * @param {Document|Element|ShadowRoot} root
  * @param {Function} fn
- * @returns {Array<HTMLElement>}
+ * @returns {Array<{element: HTMLElement, _reactivity: Record<string, any>}>}
  */
 export function findElements(root, fn) {
-	/** @typedef {HTMLElement & { _reactivity: Record<string, any> }} ReactiveElement */
-	const results = []
-	const xpath = './/*[@*[starts-with(name(), \':\')]]'
+  /** @type {Array<{element: HTMLElement, _reactivity: Record<string, any>}>} */
+  const results = [];
+  const xpath = ".//*[@*[starts-with(name(), ':')]]";
 
-	const nodes = document.evaluate(
-		xpath,
-		root,
-		null,
-		XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
-		null
-	)
+  const nodes = document.evaluate(
+    xpath,
+    root,
+    null,
+    XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+    null
+  );
 
-	for (let i = 0; i < nodes.snapshotLength; i++) {
+  for (let i = 0; i < nodes.snapshotLength; i++) {
+    const rawNode = nodes.snapshotItem(i);
 
-		const rawNode = nodes.snapshotItem(i)
+    if (!(rawNode instanceof HTMLElement)) {
+      continue;
+    }
 
-		if (!(rawNode instanceof HTMLElement)) {
-			continue
-		}
-		const element = /** @type {any} */ (rawNode)
-		element._reactivity = {}
+    /** @type {HTMLElement} */
+    const element = rawNode;
 
-		Array.from(element.attributes).forEach(attr => {
-			if (attr.name.startsWith(':')) {
-				const key = attr.name.slice(1)
-				const reactivity = element._reactivity[key] = {}
-				fn(reactivity, attr.value)
-			}
-		})
-		results.push(element)
-	}
-	return results
+    /** @type {Record<string, any>} */
+    const _reactivity = {};
+
+    Array.from(element.attributes).forEach((attr) => {
+      if (attr.name.startsWith(":")) {
+        const key = attr.name.slice(1);
+        _reactivity[key] = {
+          expression: attr.value,
+          dependencies: new Map(),
+        };
+        // Передаем объект с элементом и реактивностью
+        fn({ element, _reactivity }, key, attr.value);
+      }
+    });
+
+    // Добавляем только если есть реактивные атрибуты
+    if (Object.keys(_reactivity).length > 0) {
+      results.push({ element, _reactivity });
+    }
+  }
+  return results;
 }
