@@ -40,6 +40,9 @@ class Prototy {
 				const func = new Function('state', `return ${code}`)
 				this.reactivity = reactivity
 				this.autorun(() => func(this.state))
+			}, (code) => {
+				const func = new Function('state', `${code}`)
+				func(this.state)
 			})
 			console.log(this.elements)
 		})
@@ -67,14 +70,15 @@ class Prototy {
 				const fullPath = path ? `${path}.${property.toString()}` : property.toString()
 
 				if (self.activeEffect) {
+					setInterval(() => self.trigger.bind(self)(fullPath), 0)
 					self.reactivity[fullPath] = self.activeEffect
 				}
 
 				const value = Reflect.get(t, property, receiver)
-
-				if (isObject(value)) {
-					return self.createProxy(value, fullPath)
-				}
+				//
+				// if (isObject(value)) {
+				// 	return self.createProxy(value, fullPath)
+				// }
 				return value
 			},
 			set(target, property, value) {
@@ -90,7 +94,7 @@ class Prototy {
 				const success = Reflect.set(t, property, newValue)
 
 				if (success && !isEqual(oldValue, newValue)) {
-					self.trigger(fullPath)
+					self.trigger.bind(self)(fullPath)
 				}
 				return success
 			}
@@ -108,8 +112,20 @@ class Prototy {
 	 * @param {string} path
 	 */
 	trigger(path) {
-		console.log(path)
-		// this.listeners.forEach(fn => fn(path))
+		this.elements?.forEach(el => {
+			const reactivity = el._reactivity
+			if (!reactivity) return
+
+			for (const attr in reactivity) {
+				const attrObj = reactivity[attr]
+				if (attrObj[path]) {
+					el[attr] = attrObj[path]()
+					break
+				}
+			}
+		})
+
 	}
+
 }
 export default Prototy

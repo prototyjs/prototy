@@ -1,9 +1,10 @@
 /**
  * @param {Document|Element|ShadowRoot} root
- * @param {Function} fn
+ * @param {Function} fnProperty
+ * @param {Function} fnListener
  * @returns {Array<HTMLElement>}
  */
-export function findElements(root, fn) {
+export function findElements(root, fnProperty, fnListener) {
 	/** @typedef {HTMLElement & { _reactivity: Record<string, any> }} ReactiveElement */
 	const results = []
 	const xpath = './/*[@*[starts-with(name(), \':\')]]'
@@ -16,6 +17,10 @@ export function findElements(root, fn) {
 		null
 	)
 
+	const _kebabToCamel = (str) => {
+		return str.replace(/-([a-z])/g, (_, letter) => letter.toUpperCase())
+	}
+
 	for (let i = 0; i < nodes.snapshotLength; i++) {
 
 		const rawNode = nodes.snapshotItem(i)
@@ -25,14 +30,21 @@ export function findElements(root, fn) {
 		}
 		const element = /** @type {any} */ (rawNode)
 		element._reactivity = {}
+		element._listeners = {}
 
 		Array.from(element.attributes).forEach(attr => {
+			console.log(attr)
 			if (attr.name.startsWith(':')) {
-				const key = attr.name.slice(1)
-				const reactivity = element._reactivity[key] = {}
-				fn(reactivity, attr.value)
+				const key = _kebabToCamel(attr.name.slice(1))
+				if (key.startsWith('on')) {
+					element[key] = () => fnListener(attr.value)
+				} else {
+					const reactivity = element._reactivity[key] = {}
+					fnProperty(reactivity, attr.value)
+				}
 			}
 		})
+
 		results.push(element)
 	}
 	return results

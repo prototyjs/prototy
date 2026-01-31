@@ -4,14 +4,19 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Prototy Demo</title>
+    <style>
+        .show {
+            color: red;
+        }
+    </style>
 </head>
 <body>
   <h1>Prototy Demo</h1>
-  <div :textContent="state.value + state.product.count" :hidden="state.hidden"></div>
+  <div :text-content="state.value">fdgh hdf</div>
 
-  <div :textContent="state.product.count"></div>
+  <div :text-content="state.product.count" class="container" :class-name="state.value === 3 ? 'show' : ''">yggyiytityi</div>
 
-  <div :onclick="state.count++">add</div>
+  <div :onclick="state.value++">add</div>
   
   <script type="module">
     import Prototy from '../src/prototy.js'
@@ -24,7 +29,7 @@
             }
         }
     })
-    // setInterval(() => prototy.state.product.count++, 1000)
+
   </script>
 </body>
 </html>
