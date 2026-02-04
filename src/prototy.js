@@ -1,7 +1,7 @@
 import { findElements } from './utils/findElements.js'
 import { isObject } from './utils/isObject.js'
 import { isEqual } from './utils/isEqual.js'
-
+import { updateValue } from './directives/directives.js'
 /**
  * @typedef {object} PrototyOptions
  * @property {object} state
@@ -35,14 +35,17 @@ class Prototy {
 		}
 
 		document.addEventListener('DOMContentLoaded', () => {
-			this.elements = findElements(document, (/** @type {object} */ reactivity, /** @type {string} */ code) => {
+			this.elements = findElements(document, (element, key,/** @type {object} */ reactivity, /** @type {string} */ code) => {
 				// eslint-disable-next-line sonarjs/code-eval
 				const func = new Function('state', `return ${code}`)
 				this.reactivity = reactivity
-				this.autorun(() => func(this.state))
-			}, (code) => {
-				const func = new Function('state', `${code}`)
-				func(this.state)
+				this.autorun(() => {
+					const value = func(this.state)
+					updateValue(element, key, value)
+				})
+			}, (code, event) => {
+				const func = new Function('state', 'event', `${code}`)
+				func(this.state, event)
 			})
 			console.log(this.elements)
 		})
@@ -70,7 +73,6 @@ class Prototy {
 				const fullPath = path ? `${path}.${property.toString()}` : property.toString()
 
 				if (self.activeEffect) {
-					setInterval(() => self.trigger.bind(self)(fullPath), 0)
 					self.reactivity[fullPath] = self.activeEffect
 				}
 
@@ -112,14 +114,14 @@ class Prototy {
 	 * @param {string} path
 	 */
 	trigger(path) {
-		this.elements?.forEach(el => {
-			const reactivity = el._reactivity
+		this.elements?.forEach(element => {
+			const reactivity = element._reactivity
 			if (!reactivity) return
 
-			for (const attr in reactivity) {
-				const attrObj = reactivity[attr]
-				if (attrObj[path]) {
-					el[attr] = attrObj[path]()
+			for (const key in reactivity) {
+				const reactive = reactivity[key]
+				if (reactive[path]) {
+					reactive[path]()
 					break
 				}
 			}

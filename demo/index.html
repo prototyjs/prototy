@@ -12,21 +12,41 @@
 </head>
 <body>
   <h1>Prototy Demo</h1>
-  <div :text-content="state.value">fdgh hdf</div>
 
-  <div :text-content="state.product.count" class="container" :class-name="state.value === 3 ? 'show' : ''">yggyiytityi</div>
+  <div :text.trim="state.test" myHidden="true">fdgh hdf</div>
+
+  <div :text.add.$="state.value"></div>
+
+  <div :text.fixed.2="state.test2">fdgh hdf</div>
+
+  <div :text="state.value">fdgh hdf</div>
+
+  <div :text="state.product.count" class="container" :class="{ show: state.value === 3 }">yggyiytityi</div>
 
   <div :onclick="state.value++">add</div>
   
   <script type="module">
     import Prototy from '../src/prototy.js'
     const prototy = new Prototy({
+        static: {
+
+        },
         state: {
 	        hidden: true,
-			value: 1,
+            test: 'text    ',
+            test2: 1.55555,
+			value: 2,
 			product: {
 				count: 1
             }
+        },
+	    directives: {
+            myHidden: (element, value) => {
+				if (typeof value === 'boolean') element.hidden = value
+            }
+        },
+	    modifiers: {
+		    add: (value, postFix) => value + postFix
         }
     })
 

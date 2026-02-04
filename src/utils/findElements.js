@@ -33,14 +33,13 @@ export function findElements(root, fnProperty, fnListener) {
 		element._listeners = {}
 
 		Array.from(element.attributes).forEach(attr => {
-			console.log(attr)
 			if (attr.name.startsWith(':')) {
 				const key = _kebabToCamel(attr.name.slice(1))
 				if (key.startsWith('on')) {
-					element[key] = () => fnListener(attr.value)
+					element[key] = (/** @type {any} */ event) => fnListener(attr.value, event)
 				} else {
 					const reactivity = element._reactivity[key] = {}
-					fnProperty(reactivity, attr.value)
+				    fnProperty(element, key, reactivity, attr.value)
 				}
 			}
 		})
