@@ -2,6 +2,7 @@ import { findElements } from './utils/findElements.js'
 import { isObject } from './utils/isObject.js'
 import { isEqual } from './utils/isEqual.js'
 import { updateValue } from './directives/directives.js'
+import { addEvent } from './utils/addEvent.js'
 /**
  * @typedef {object} PrototyOptions
  * @property {object} state
@@ -41,11 +42,17 @@ class Prototy {
 				this.reactivity = reactivity
 				this.autorun(() => {
 					const value = func(this.state)
-					updateValue(element, key, value)
+					const [directive, modifier, ...args] = key.split('.')
+					if (directive === 'each') { // .reverse, .sort, .first(n) / .last(n), .empty?
+
+					} else {
+						updateValue(element, key, value)
+					}
 				})
-			}, (code, event) => {
+			}, (element, key, code) => {
 				const func = new Function('state', 'event', `${code}`)
-				func(this.state, event)
+				const [name, ...mods] = key.split('.')
+				addEvent(element, name, (/** @type {any} */ event) => func(this.state, event), mods)
 			})
 			console.log(this.elements)
 		})

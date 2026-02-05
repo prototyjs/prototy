@@ -15,7 +15,7 @@
 
   <div :text.trim="state.test" myHidden="true">fdgh hdf</div>
 
-  <div :text.add.$="state.value"></div>
+  <div :text.unit.$="state.value"></div>
 
   <div :text.fixed.2="state.test2">fdgh hdf</div>
 
@@ -23,7 +23,7 @@
 
   <div :text="state.product.count" class="container" :class="{ show: state.value === 3 }">yggyiytityi</div>
 
-  <div :onclick="state.value++">add</div>
+  <div :onclick.once="state.value++">add</div>
   
   <script type="module">
     import Prototy from '../src/prototy.js'
