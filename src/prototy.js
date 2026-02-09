@@ -1,8 +1,9 @@
 import { findElements } from './utils/findElements.js'
 import { isObject } from './utils/isObject.js'
 import { isEqual } from './utils/isEqual.js'
-import { updateValue } from './directives/directives.js'
+//import { updateValue } from './directives/directives.js'
 import { addEvent } from './utils/addEvent.js'
+import Directives from './directives/directives.js'
 /**
  * @typedef {object} PrototyOptions
  * @property {object} state
@@ -46,7 +47,9 @@ class Prototy {
 					if (directive === 'each') { // .reverse, .sort, .first(n) / .last(n), .empty?
 
 					} else {
-						updateValue(element, key, value)
+
+						let directives = new Directives(this)
+						directives.updateValue(element, key, value)
 					}
 				})
 			}, (element, key, code) => {
@@ -55,6 +58,7 @@ class Prototy {
 				addEvent(element, name, (/** @type {any} */ event) => func(this.state, event), mods)
 			})
 			console.log(this.elements)
+			console.log(this)
 		})
 	}
 	/**
