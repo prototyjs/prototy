@@ -1,11 +1,15 @@
-import { findElements } from './utils/findElements.js'
-import { isObject } from './utils/isObject.js'
-import { isEqual } from './utils/isEqual.js'
-import { updateValue } from './directives/directives.js'
-import { addEvent } from './utils/addEvent.js'
+import { findElements } from './utils/findElements'
+import { isObject } from './utils/isObject'
+import { isEqual } from './utils/isEqual'
+import { updateValue } from './directives/directives'
+import { addEvent } from './utils/addEvent'
+import { trigger } from './reactivity/trigger'
+import { each } from './directives/each.js'
+
 /**
  * @typedef {object} PrototyOptions
  * @property {object} state
+ * @property {HTMLElement} root
  * @property {object} static
  * @property {Record<string, Function>} handles
  */
@@ -14,6 +18,8 @@ class Prototy {
 	 * @param {PrototyOptions} options
 	 */
 	constructor(options) {
+		this.root = options.root || document.body
+
 		/** @type {object} */
 		this._state = options.state
 
@@ -26,6 +32,7 @@ class Prototy {
 
 		/** @type {Record<string, any>} */
 		this.reactivity = {}
+		this.pendingPaths = new Set()
 
 		if (options.handles) {
 			Object.keys(options.handles).forEach((key) => {
@@ -35,26 +42,30 @@ class Prototy {
 			})
 		}
 
-		document.addEventListener('DOMContentLoaded', () => {
-			this.elements = findElements(document, (element, key,/** @type {object} */ reactivity, /** @type {string} */ code) => {
-				// eslint-disable-next-line sonarjs/code-eval
-				const func = new Function('state', `return ${code}`)
-				this.reactivity = reactivity
-				this.autorun(() => {
-					const value = func(this.state)
-					const [directive, modifier, ...args] = key.split('.')
-					if (directive === 'each') { // .reverse, .sort, .first(n) / .last(n), .empty?
+		document.addEventListener('DOMContentLoaded', () => this.setup(this.root))
+	}
+	/**
+	 * @param {HTMLElement} node
+	 * @param {Object} item
+	 */
+	setup(node, item) {
+		node._elements = findElements(node, (/** @type {any} */  element, /** @type {string} */ key,/** @type {object} */ reactivity, /** @type {string} */ code) => {
+			// eslint-disable-next-line sonarjs/code-eval
+			const func = new Function('state', 'item', `return ${code}`)
+			this.reactivity = reactivity
 
-					} else {
-						updateValue(element, key, value)
-					}
-				})
-			}, (element, key, code) => {
-				const func = new Function('state', 'event', `${code}`)
-				const [name, ...mods] = key.split('.')
-				addEvent(element, name, (/** @type {any} */ event) => func(this.state, event), mods)
+			this.autorun(() => {
+				const value = func(this.state, item)
+				if (key === 'each') { // .reverse, .sort, .first(n) / .last(n), .empty?
+					each(value, element, this.setup.bind(this))
+				} else {
+					updateValue(element, key, value)
+				}
 			})
-			console.log(this.elements)
+		}, (/** @type {any} */ element, /** @type {string} */ key, /** @type {string} */ code) => {
+			// eslint-disable-next-line sonarjs/code-eval
+			const func = new Function('state', 'event', `${code}`)
+			addEvent(element, key, (/** @type {any} */ event) => func(this.state, event))
 		})
 	}
 	/**
@@ -72,6 +83,7 @@ class Prototy {
 				}
 			})
 		}
+
 		return new Proxy(state, {
 			get(target, property, receiver) {
 				/** @type {Record<string | symbol, any>} */
@@ -84,10 +96,7 @@ class Prototy {
 				}
 
 				const value = Reflect.get(t, property, receiver)
-				//
-				// if (isObject(value)) {
-				// 	return self.createProxy(value, fullPath)
-				// }
+
 				return value
 			},
 			set(target, property, value) {
@@ -103,7 +112,25 @@ class Prototy {
 				const success = Reflect.set(t, property, newValue)
 
 				if (success && !isEqual(oldValue, newValue)) {
-					self.trigger.bind(self)(fullPath)
+					const parts = fullPath.split('.')
+					if (Array.isArray(target) && (/^\d+$/.test(property) || property === 'length')) { // check symbol
+
+						if (!self.pendingPaths.has(path)) {
+							self.pendingPaths.add(path)
+							queueMicrotask(() => {
+								console.log(path)
+								trigger(self.root._elements, path)
+								self.pendingPaths.delete(path)
+							})
+						}
+					} else if (parts.length >= 3 && (/^\d+$/.test(parts[parts.length - 2]))) {
+						// upd item prop
+						console.log(fullPath)
+						trigger(self.root._elements, fullPath, parts)
+					} else {
+						console.log(fullPath)
+						trigger(self.root._elements, fullPath)
+					}
 				}
 				return success
 			}
@@ -117,24 +144,5 @@ class Prototy {
 		fn()
 		this.activeEffect = null
 	}
-	/**
-	 * @param {string} path
-	 */
-	trigger(path) {
-		this.elements?.forEach(element => {
-			const reactivity = element._reactivity
-			if (!reactivity) return
-
-			for (const key in reactivity) {
-				const reactive = reactivity[key]
-				if (reactive[path]) {
-					reactive[path]()
-					break
-				}
-			}
-		})
-
-	}
-
 }
 export default Prototy

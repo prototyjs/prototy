@@ -11,23 +11,37 @@
     </style>
 </head>
 <body>
-  <h1>Prototy Demo</h1>
+  <h1 :class="{ show: true }">Prototy Demo</h1>
 
-  <div :text.trim="state.test" myHidden="true">fdgh hdf</div>
+  <div :text.trim="state.test" myHidden="true"></div>
 
   <div :text.unit.$="state.value"></div>
 
-  <div :text.fixed.2="state.test2">fdgh hdf</div>
+  <div :text.fixed.2="state.test2"></div>
 
-  <div :text="state.value">fdgh hdf</div>
+  <div :text.json="state.arr"></div>
 
-  <div :text="state.product.count" class="container" :class="{ show: state.value === 3 }">yggyiytityi</div>
+  <div :text="state.product.count" class="container" :class="{ show: state.value === 3 }"></div>
 
-  <div :onclick.once="state.value++">add</div>
+  <div :onclick="state.value++">add</div>
+
+  <div :onclick="state.arr.splice(1, 0, { color: 'black' })">slice</div>
+  <div :onclick="state.arr.push({ color: 'black' })">push</div>
+  <div :onclick="state.arr.shift()">shift</div>
+  <div :onclick="state.arr.unshift({ color: 'black' })">unshift</div>
+  <div :onclick="state.arr[2].color = 'pink'">change</div>
+  <hr>
+  <div :each="state.arr">
+      <div :text="item.color" class="color" template></div>
+  </div>
   
   <script type="module">
     import Prototy from '../src/prototy.js'
     const prototy = new Prototy({
+	    root: document.body,
+        const: {
+
+        },
         static: {
 
         },
@@ -38,8 +52,17 @@
 			value: 2,
 			product: {
 				count: 1
-            }
+            },
+            arr: [{ color: 'red' }, { color: 'green' }, { color: 'blue' }, { color: 'green' }]
+
         },
+	    setters: {
+		    count: {
+			    pre: (v) => v > 0 ? v : 0,
+			    post: (v) => console.log('Updated!')
+		    },
+		    name: (v) => console.log('Updated!') // short for post
+	    },
 	    directives: {
             myHidden: (element, value) => {
 				if (typeof value === 'boolean') element.hidden = value
