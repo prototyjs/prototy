@@ -23,9 +23,9 @@ export function each(array, container, setup){
 		if (!node) {
 			// @ts-ignore
 			node = container._template.cloneNode(true)
-			node.removeAttribute('template')
+
 			nodeMap.set(item, node)
-			setup(node, item)
+			setup(this, node, item)
 		}
 
 		if (children[i] !== node) {

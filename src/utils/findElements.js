@@ -1,19 +1,19 @@
 import { kebabToCamel } from './kebabToCamel'
 
 /**
- * @param {HTMLElement} root
+ * @param {HTMLElement} node
  * @param {Function} fnProperty
  * @param {Function} fnListener
  * @returns {Array<HTMLElement>}
  */
-export function findElements(root, fnProperty, fnListener) {
+export function findElements(node, fnProperty, fnListener) {
 	/** @typedef {HTMLElement & { _reactivity: Record<string, any> }} ReactiveElement */
 	const results = []
 	const xpath = 'descendant-or-self::*[@*[starts-with(name(), ":")]]' // './/*[@*[starts-with(name(), \':\')]]'
 
 	const nodes = document.evaluate(
 		xpath,
-		root,
+		node,
 		null,
 		XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
 		null
@@ -30,6 +30,7 @@ export function findElements(root, fnProperty, fnListener) {
 		Array.from(element.attributes).forEach(attr => {
 			if (attr.name.startsWith(':each')) {
 				element._template = element.firstElementChild.cloneNode(true)
+				element._template.removeAttribute('template')
 				element.firstElementChild.remove()
 			}
 			if (attr.name.startsWith(':')) {

@@ -26,12 +26,14 @@ class Prototy {
 		/** @type {object} */
 		this.static = options.static
 		this.state = this.createProxy(options.state)
-
+		this.bus = {
+			state: this.state
+		}
 		/** @type {Record<string, Function>} */
 		this.handles = {}
 
 		/** @type {Record<string, any>} */
-		this.reactivity = {}
+		this.buf = {}
 		this.pendingPaths = new Set()
 
 		if (options.handles) {
@@ -42,30 +44,30 @@ class Prototy {
 			})
 		}
 
-		document.addEventListener('DOMContentLoaded', () => this.setup(this.root))
+		document.addEventListener('DOMContentLoaded', () => this.setup(this.bus, this.root))
 	}
 	/**
 	 * @param {HTMLElement} node
 	 * @param {Object} item
 	 */
-	setup(node, item) {
+	setup(bus, node, item) {
 		node._elements = findElements(node, (/** @type {any} */  element, /** @type {string} */ key,/** @type {object} */ reactivity, /** @type {string} */ code) => {
 			// eslint-disable-next-line sonarjs/code-eval
 			const func = new Function('state', 'item', `return ${code}`)
-			this.reactivity = reactivity
+			this.buf = reactivity
 
 			this.autorun(() => {
-				const value = func(this.state, item)
+				const res = func(bus.state, item)
 				if (key === 'each') { // .reverse, .sort, .first(n) / .last(n), .empty?
-					each(value, element, this.setup.bind(this))
+					each.bind(bus)(res, element, this.setup.bind(this))
 				} else {
-					updateValue(element, key, value)
+					updateValue(element, key, res)
 				}
 			})
 		}, (/** @type {any} */ element, /** @type {string} */ key, /** @type {string} */ code) => {
 			// eslint-disable-next-line sonarjs/code-eval
 			const func = new Function('state', 'event', `${code}`)
-			addEvent(element, key, (/** @type {any} */ event) => func(this.state, event))
+			addEvent(element, key, (/** @type {any} */ event) => func(bus.state, event))
 		})
 	}
 	/**
@@ -92,7 +94,7 @@ class Prototy {
 				const fullPath = path ? `${path}.${property.toString()}` : property.toString()
 
 				if (self.activeEffect) {
-					self.reactivity[fullPath] = self.activeEffect
+					self.buf[fullPath] = self.activeEffect
 				}
 
 				const value = Reflect.get(t, property, receiver)
