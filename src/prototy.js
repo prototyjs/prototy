@@ -1,7 +1,8 @@
 import { findElements } from './utils/findElements'
 import { isObject } from './utils/isObject'
 import { isEqual } from './utils/isEqual'
-import { updateValue } from './directives/directives'
+//import { updateValue } from './directives/directives'
+import Directives from './directives/directives'
 import { addEvent } from './utils/addEvent'
 import { trigger } from './reactivity/trigger'
 import { each } from './directives/each.js'
@@ -19,6 +20,7 @@ class Prototy {
 	 */
 	constructor(options) {
 		this.root = options.root || document.body
+		this.directive = new Directives(this);
 
 		/** @type {object} */
 		this._state = options.state
@@ -61,7 +63,9 @@ class Prototy {
 				if (key === 'each') { // .reverse, .sort, .first(n) / .last(n), .empty?
 					each.bind(bus)(res, element, this.setup.bind(this))
 				} else {
-					updateValue(element, key, res)
+					// updateValue(element, key, res)
+					
+					this.directive.updateValue(element, key, res);
 				}
 			})
 		}, (/** @type {any} */ element, /** @type {string} */ key, /** @type {string} */ code) => {
@@ -102,6 +106,10 @@ class Prototy {
 				return value
 			},
 			set(target, property, value) {
+
+				if (typeof property === 'symbol') {
+      				 return Reflect.set(target, property, value);
+    			}
 				/** @type {Record<string | symbol, any>} */
 				const t = target
 				const oldValue = Reflect.get(t, property)
