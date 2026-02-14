@@ -2,10 +2,11 @@ import { findElements } from './utils/findElements'
 import { isObject } from './utils/isObject'
 import { isEqual } from './utils/isEqual'
 //import { updateValue } from './directives/directives'
-import Directives from './directives/directives'
+import Directives from './directives/Directives.js'
 import { addEvent } from './utils/addEvent'
 import { trigger } from './reactivity/trigger'
 import { each } from './directives/each.js'
+import {applyModifier} from "./directives/modifiers.js";
 
 /**
  * @typedef {object} PrototyOptions
@@ -18,9 +19,9 @@ class Prototy {
 	/**
 	 * @param {PrototyOptions} options
 	 */
-	constructor(options) {
+	constructor(options = {}) {
 		this.root = options.root || document.body
-		this.directive = new Directives(this);
+		this.directive = new Directives(options.directives);
 
 		/** @type {object} */
 		this._state = options.state
@@ -61,11 +62,11 @@ class Prototy {
 			this.autorun(() => {
 				const res = func(bus.state, item)
 				if (key === 'each') { // .reverse, .sort, .first(n) / .last(n), .empty?
-					each.bind(bus)(res, element, this.setup.bind(this))
+					each(res, element, (node, item) => this.setup(bus, node, item))
 				} else {
 					// updateValue(element, key, res)
 					
-					this.directive.updateValue(element, key, res);
+					this.directive.apply(element, key, res);
 				}
 			})
 		}, (/** @type {any} */ element, /** @type {string} */ key, /** @type {string} */ code) => {

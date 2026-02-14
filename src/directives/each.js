@@ -34,7 +34,7 @@ export function each(array, container, setup){
 			node.removeAttribute('template');
 
 			nodeMap.set(item, node)
-			setup(this, node, item)
+			setup(node, item)
 		}
 
 		if (children[i] !== node) {
