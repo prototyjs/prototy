@@ -1,5 +1,8 @@
 /**
  *
+ * @param {string} modifier
+ * @param {any} value
+ * @param {string | number} args
  */
 export function applyModifier(value, modifier, args) {
 	if (!modifier) return value

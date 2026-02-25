@@ -1,4 +1,4 @@
-import { isObject } from "../utils/isObject";
+import { isObject } from "../utils/isObject"
 /**
  *
  * @param {HTMLElement} element
@@ -6,6 +6,6 @@ import { isObject } from "../utils/isObject";
  * @returns
  */
 export function _style(element, value) {
-  if (!isObject(value)) return console.error("error style");
-  Object.assign(element.style, value);
+  if (!isObject(value)) return console.error("error style")
+  Object.assign(element.style, value)
 }

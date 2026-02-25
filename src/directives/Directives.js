@@ -9,7 +9,8 @@ class Directives {
     this.directives = {
       ...innerDirectives,
       ...clientDirectives,
-    };
+      
+    }
   }
 /**
  * 
@@ -22,15 +23,15 @@ class Directives {
 
     if (this.directives.hasOwnProperty(directive)) {
       // @ts-ignore
-      this.directives[directive](element, value, modifier, args);
+      this.directives[directive](element, value, modifier, args)
     } else if (key in element) {
       // @ts-ignore
-      element[directive] = value;
+      element[directive] = value
     } else {
       // for Attributes
       // @ts-ignore
-      _attr(element, value, modifier, args);
+      //_attr(element, value, modifier, args)
     }
   }
 }
-export default Directives;
+export default Directives

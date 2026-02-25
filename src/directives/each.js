@@ -14,7 +14,7 @@ export function each(array, container, setup){
 	const arrLength = array?.length || 0
 
 	if (!arrLength) {
-		console.log(`📭 [EACH] Массив пуст, очистка ${container.tagName}`);
+		console.log(`📭 [EACH] Массив пуст, очистка ${container.tagName}`)
 		// Очищаем слушатели у всех детей перед удалением
     Array.from(children).forEach(child => {
       cleanupNodeListeners(child);
@@ -28,10 +28,10 @@ export function each(array, container, setup){
 		let node = nodeMap.get(item)
 
 		if (!node) {
-			 console.log(`🆕 [EACH] Создаем элемент для`, item.color || item.id || i);
+			 console.log(`🆕 [EACH] Создаем элемент для`, item.color || item.id || i)
 			// @ts-ignore
 			node = container._template.cloneNode(true)
-			node.removeAttribute('template');
+			node.removeAttribute('template')
 
 			nodeMap.set(item, node)
 			setup(node, item)
@@ -44,10 +44,10 @@ export function each(array, container, setup){
 
 	const diff = children.length - arrLength
 	if (diff > 0) {
-		 console.log(`🗑️ [EACH] Удаляем ${diff} элементов из ${container.tagName}`);
+		 console.log(`🗑️ [EACH] Удаляем ${diff} элементов из ${container.tagName}`)
 		for (let i = children.length - 1; i >= arrLength; i--) {
-			const node = children[i];
-      		cleanupNodeListeners(node); // Очищаем слушатели!
+			const node = children[i]
+      		cleanupNodeListeners(node) // Очищаем слушатели!
       		node.remove();
 			}
 	}

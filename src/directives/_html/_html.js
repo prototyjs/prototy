@@ -1,4 +1,4 @@
-import { applyModifier } from "./modifiers";
+import { applyModifier } from "../modifiers"
 
 /**
  *
@@ -8,5 +8,5 @@ import { applyModifier } from "./modifiers";
  * @param {string | number} args
  */
 export function _html(element, value, modifier, args) {
-  element.innerHTML = applyModifier(value, modifier, args) ?? "";
+  element.innerHTML = applyModifier(value, modifier, args) ?? ""
 }

@@ -1,4 +1,4 @@
-import { isObject } from "../utils/isObject";
+import { isObject } from "../utils/isObject"
 /**
  *
  * @param {HTMLElement} element
@@ -6,8 +6,8 @@ import { isObject } from "../utils/isObject";
  * @returns {void}
  */
 export function _class(element, value) {
-  if (!isObject(value)) return console.error("error class");
+  if (!isObject(value)) return console.error("error class")
   Object.entries(value).forEach(([className, condition]) => {
-    element.classList.toggle(className, !!condition);
-  });
+    element.classList.toggle(className, !!condition)
+  })
 }

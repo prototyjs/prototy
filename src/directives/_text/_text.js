@@ -1,4 +1,4 @@
-import { applyModifier } from "./modifiers";
+import { applyModifier } from "../modifiers";
 /**
  *
  * @param {HTMLElement} element
@@ -7,5 +7,5 @@ import { applyModifier } from "./modifiers";
  * @param {string | number} args
  */
 export function _text(element, value, modifier, args) {
-  element.textContent = applyModifier(value, modifier, args) ?? "";
+  element.textContent = applyModifier(value, modifier, args) ?? ""
 }
