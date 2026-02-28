@@ -1,36 +1,37 @@
-import innerDirectives from "./index.js";
+import innerDirectives from "./index.js"
+import { _attr } from "./_attr.js"
 
 class Directives {
   /**
-   * 
-   * @param {Object} clientDirectives 
+   *
+   * @param {Object} clientDirectives
    */
-  constructor(clientDirectives = {}) {
+  constructor(clientDirectives = {}, setup) {
+    this.setup = setup
+    console.log("innerDirectives:", innerDirectives)
+    console.log("clientDirectives:", clientDirectives)
     this.directives = {
       ...innerDirectives,
       ...clientDirectives,
-      
     }
   }
-/**
- * 
- * @param {HTMLElement} element 
- * @param {string} key 
- * @param {string} value 
- */
+  /**
+   *
+   * @param {HTMLElement} element
+   * @param {string} key
+   * @param {string} value
+   */
   apply(element, key, value) {
-    const [directive, modifier, ...args] = key.split("."); // ['text', 'fixed', '2', ...] // text.fixed.2
+    const [directive, modifier, ...args] = key.split(".") // ['text', 'fixed', '2', ...] // text.fixed.2
 
-    if (this.directives.hasOwnProperty(directive)) {
+    if (this.directives.hasOwnProperty(directive) || directive==='text') {
       // @ts-ignore
-      this.directives[directive](element, value, modifier, args)
-    } else if (key in element) {
-      // @ts-ignore
-      element[directive] = value
+      console.log(directive)
+      this.directives['_' + directive](element, value, modifier, args)
     } else {
       // for Attributes
       // @ts-ignore
-      //_attr(element, value, modifier, args)
+      _attr(element, value, modifier, args, directive)
     }
   }
 }

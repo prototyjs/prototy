@@ -1,12 +1,12 @@
-import { findElements } from './utils/findElements'
-import { isObject } from './utils/isObject'
-import { isEqual } from './utils/isEqual'
+import { findElements } from "./utils/findElements"
+import { isObject } from "./utils/isObject"
+import { isEqual } from "./utils/isEqual"
 //import { updateValue } from './directives/directives'
-import Directives from './directives/Directives.js'
-import { addEvent } from './utils/addEvent'
-import { trigger } from './reactivity/trigger'
-import { each } from './directives/each.js'
-import {applyModifier} from "./directives/modifiers.js";
+import Directives from "./directives/Directives.js"
+import { addEvent } from "./utils/addEvent"
+import { trigger } from "./reactivity/trigger"
+import { each } from "./directives/each.js"
+import { applyModifier } from "./directives/modifiers.js"
 
 /**
  * @typedef {object} PrototyOptions
@@ -16,144 +16,183 @@ import {applyModifier} from "./directives/modifiers.js";
  * @property {Record<string, Function>} handles
  */
 class Prototy {
-	/**
-	 * @param {PrototyOptions} options
-	 */
-	constructor(options = {}) {
-		this.root = options.root || document.body
-		this.directive = new Directives(options.directives);
+  /**
+   * @param {PrototyOptions} options
+   */
+  constructor(options = {}) {
+    this.root = options.root || document.body
+    this.directive = new Directives(options.directives, this.setup.bind(this))
 
-		/** @type {object} */
-		this._state = options.state
+    /** @type {object} */
+    this._state = options.state
 
-		/** @type {object} */
-		this.static = options.static
-		this.state = this.createProxy(options.state)
-		this.bus = {
-			state: this.state
-		}
-		/** @type {Record<string, Function>} */
-		this.handles = {}
+    /** @type {object} */
+    this.static = options.static
+    this.state = this.createProxy(options.state)
+    this.bus = {
+      state: this.state,
+    }
+    /** @type {Record<string, Function>} */
+    this.handles = {}
 
-		/** @type {Record<string, any>} */
-		this.buf = {}
-		this.pendingPaths = new Set()
+    /** @type {Record<string, any>} */
+    this.buf = {}
+    this.pendingPaths = new Set()
 
-		if (options.handles) {
-			Object.keys(options.handles).forEach((key) => {
-				if (typeof options.handles[key] === 'function') {
-					this.handles[key] = options.handles[key].bind(this)
-				}
-			})
-		}
+    if (options.handles) {
+      Object.keys(options.handles).forEach((key) => {
+        if (typeof options.handles[key] === "function") {
+          this.handles[key] = options.handles[key].bind(this)
+        }
+      })
+    }
 
-		document.addEventListener('DOMContentLoaded', () => this.setup(this.bus, this.root))
-	}
-	/**
-	 * @param {HTMLElement} node
-	 * @param {Object} item
-	 */
-	setup(bus, node, item) {
-		node._elements = findElements(node, (/** @type {any} */  element, /** @type {string} */ key,/** @type {object} */ reactivity, /** @type {string} */ code) => {
-			// eslint-disable-next-line sonarjs/code-eval
-			const func = new Function('state', 'item', `return ${code}`)
-			this.buf = reactivity
+    document.addEventListener("DOMContentLoaded", () =>
+      this.setup(this.root),
+    )
+  }
+  /**
+   * @param {HTMLElement} node
+   * @param {Object} item
+   */
+  setup(node, item) {
+   
+    node._elements = findElements(
+      node,
+      (
+        /** @type {any} */ element,
+        /** @type {string} */ key,
+        /** @type {object} */ reactivity,
+        /** @type {string} */ code,
+      ) => {
+		console.log('найдены директивы:', { 
+        element, 
+        key, 
+        code,
+        elementContent: element.innerHTML 
+    });
+        // eslint-disable-next-line sonarjs/code-eval
+        const func = new Function("state", "item", `return ${code}`)
+        this.buf = reactivity
 
-			this.autorun(() => {
-				const res = func(bus.state, item)
-				if (key === 'each') { // .reverse, .sort, .first(n) / .last(n), .empty?
-					each(res, element, (node, item) => this.setup(bus, node, item))
-				} else {
-					// updateValue(element, key, res)
-					
-					this.directive.apply(element, key, res);
-				}
-			})
-		}, (/** @type {any} */ element, /** @type {string} */ key, /** @type {string} */ code) => {
-			// eslint-disable-next-line sonarjs/code-eval
-			const func = new Function('state', 'event', `${code}`)
-			addEvent(element, key, (/** @type {any} */ event) => func(bus.state, event))
-		})
-	}
-	/**
-	 * @param {any} state
-	 * @param {string} path
-	 * @returns {object}
-	 */
-	createProxy(state, path = '') {
-		const self = this
+        this.autorun(() => {
+          const res = func(this.bus.state, item)
+          if (key === "each") {
+            // .reverse, .sort, .first(n) / .last(n), .empty?
+            each(res, element, this.setup.bind(this))
+          } else {
+            // updateValue(element, key, res)
 
-		if (isObject(state)) {
-			Object.keys(state).forEach(key => {
-				if (isObject(state[key])) {
-					state[key] = this.createProxy(state[key], path ? `${path}.${key}` : key)
-				}
-			})
-		}
+            this.directive.apply(element, key, res)
+            console.log(element, key, res)
+          }
+        })
+      },
+      (
+        /** @type {any} */ element,
+        /** @type {string} */ key,
+        /** @type {string} */ code,
+      ) => {
+        // eslint-disable-next-line sonarjs/code-eval
+        const func = new Function("state", "event", `${code}`)
+        addEvent(element, key, (/** @type {any} */ event) =>
+          func(this.bus.state, event),
+        )
+      },
+    )
+  }
+  /**
+   * @param {any} state
+   * @param {string} path
+   * @returns {object}
+   */
+  createProxy(state, path = "") {
+    const self = this
 
-		return new Proxy(state, {
-			get(target, property, receiver) {
-				/** @type {Record<string | symbol, any>} */
-				const t = target
+    if (isObject(state)) {
+      Object.keys(state).forEach((key) => {
+        if (isObject(state[key])) {
+          state[key] = this.createProxy(
+            state[key],
+            path ? `${path}.${key}` : key,
+          )
+        }
+      })
+    }
 
-				const fullPath = path ? `${path}.${property.toString()}` : property.toString()
+    return new Proxy(state, {
+      get(target, property, receiver) {
+        /** @type {Record<string | symbol, any>} */
+        const t = target
 
-				if (self.activeEffect) {
-					self.buf[fullPath] = self.activeEffect
-				}
+        const fullPath = path
+          ? `${path}.${property.toString()}`
+          : property.toString()
 
-				const value = Reflect.get(t, property, receiver)
+        if (self.activeEffect) {
+          self.buf[fullPath] = self.activeEffect
+        }
 
-				return value
-			},
-			set(target, property, value) {
+        const value = Reflect.get(t, property, receiver)
 
-				if (typeof property === 'symbol') {
-      				 return Reflect.set(target, property, value);
-    			}
-				/** @type {Record<string | symbol, any>} */
-				const t = target
-				const oldValue = Reflect.get(t, property)
-				const fullPath = path ? `${path}.${property.toString()}` : property.toString()
+        return value
+      },
+      set(target, property, value) {
+        if (typeof property === "symbol") {
+          return Reflect.set(target, property, value)
+        }
+        /** @type {Record<string | symbol, any>} */
+        const t = target
+        const oldValue = Reflect.get(t, property)
+        const fullPath = path
+          ? `${path}.${property.toString()}`
+          : property.toString()
 
-				let newValue = value
-				if (isObject(value)) {
-					newValue = self.createProxy(value, fullPath)
-				}
-				const success = Reflect.set(t, property, newValue)
+        let newValue = value
+        if (isObject(value)) {
+          newValue = self.createProxy(value, fullPath)
+        }
+        const success = Reflect.set(t, property, newValue)
 
-				if (success && !isEqual(oldValue, newValue)) {
-					const parts = fullPath.split('.')
-					if (Array.isArray(target) && (/^\d+$/.test(property) || property === 'length')) { // check symbol
+        if (success && !isEqual(oldValue, newValue)) {
+          const parts = fullPath.split(".")
+          if (
+            Array.isArray(target) &&
+            (/^\d+$/.test(property) || property === "length")
+          ) {
+            // check symbol
 
-						if (!self.pendingPaths.has(path)) {
-							self.pendingPaths.add(path)
-							queueMicrotask(() => {
-								console.log(path)
-								trigger(self.root._elements, path)
-								self.pendingPaths.delete(path)
-							})
-						}
-					} else if (parts.length >= 3 && (/^\d+$/.test(parts[parts.length - 2]))) {
-						// upd item prop
-						console.log(fullPath)
-						trigger(self.root._elements, fullPath, parts)
-					} else {
-						console.log(fullPath)
-						trigger(self.root._elements, fullPath)
-					}
-				}
-				return success
-			}
-		})
-	}
-	/**
-	 * @param {Function} fn
-	 */
-	autorun(fn) {
-		this.activeEffect = fn
-		fn()
-		this.activeEffect = null
-	}
+            if (!self.pendingPaths.has(path)) {
+              self.pendingPaths.add(path)
+              queueMicrotask(() => {
+                console.log(path)
+                trigger(self.root._elements, path)
+                self.pendingPaths.delete(path)
+              })
+            }
+          } else if (
+            parts.length >= 3 &&
+            /^\d+$/.test(parts[parts.length - 2])
+          ) {
+            // upd item prop
+            console.log(fullPath)
+            trigger(self.root._elements, fullPath, parts)
+          } else {
+            console.log(fullPath)
+            trigger(self.root._elements, fullPath)
+          }
+        }
+        return success
+      },
+    })
+  }
+  /**
+   * @param {Function} fn
+   */
+  autorun(fn) {
+    this.activeEffect = fn
+    fn()
+    this.activeEffect = null
+  }
 }
 export default Prototy
