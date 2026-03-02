@@ -1,5 +1,5 @@
-import innerDirectives from "./index.js"
-import { _attr } from "./_attr.js"
+import innerDirectives from "./methods/index.js"
+import { _attr } from "./methods/_attr.js"
 
 class Directives {
   /**

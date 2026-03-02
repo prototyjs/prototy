@@ -1,11 +1,11 @@
-import { cleanupNodeListeners } from "../utils/addEvent"
+import { cleanupNodeListeners } from "../../utils/addEvent.js"
 
 /**
  * @param {Array<Object>} array
  * @param {HTMLElement} container
  * @param {Function} setup
  */
-export function each(array, container, setup) {
+export function _each(array, container, setup) {
   if (!container) return
 
   // @ts-ignore

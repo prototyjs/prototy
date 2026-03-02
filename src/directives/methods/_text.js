@@ -1,4 +1,4 @@
-import { applyModifier } from "../modifiers";
+import { applyModifier } from "../modifiers/applyModifier";
 /**
  *
  * @param {HTMLElement} element

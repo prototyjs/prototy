@@ -5,8 +5,8 @@ import { isEqual } from "./utils/isEqual"
 import Directives from "./directives/Directives.js"
 import { addEvent } from "./utils/addEvent"
 import { trigger } from "./reactivity/trigger"
-import { each } from "./directives/each.js"
-import { applyModifier } from "./directives/modifiers.js"
+import { _each } from "./directives/methods/_each.js"
+import { applyModifier } from "./directives/modifiers/applyModifier.js"
 
 /**
  * @typedef {object} PrototyOptions
@@ -79,7 +79,7 @@ class Prototy {
           const res = func(this.bus.state, item)
           if (key === "each") {
             // .reverse, .sort, .first(n) / .last(n), .empty?
-            each(res, element, this.setup.bind(this))
+            _each(res, element, this.setup.bind(this))
           } else {
             // updateValue(element, key, res)
 

@@ -1,7 +1,4 @@
-import { textModifiers } from "../_text/modifiers"
-import { htmlModifiers } from "../_html/modifiers"
-
-export const commonModifiers = {
+export const modifiers = {
   // @ts-ignore
   fixed: (value, n = 2) => Number(value).toFixed(n),
   // @ts-ignore
@@ -28,9 +25,4 @@ export const commonModifiers = {
   default: (value, def = "-") => (value || value === 0 ? value : def),
   // @ts-ignore
   json: (value) => JSON.stringify(value),
-}
-
-export const modifiers = {
-  text: textModifiers,
-  html: htmlModifiers,
 }
