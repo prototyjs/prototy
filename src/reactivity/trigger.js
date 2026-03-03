@@ -1,4 +1,3 @@
-import {updateValue} from "../directives/directives.js";
 
 /**
  * @param {any} cache
@@ -16,8 +15,7 @@ export function trigger(cache, path, parts) {
 			// } else {
 			// 	e
 			// }
-
-			this.directives.apply(item.element, item.attr, this.compute(item.value))
+			item.update()
 		})
 	}
 	dive(cache, path)

@@ -34,14 +34,11 @@ export function findElements(node, fnProperty, fnListener) {
 				element.firstElementChild.remove()
 			}
 			if (attr.name.startsWith(':')) {
-				if (!element.hasOwnProperty('_reactivity')) element._reactivity = {}
-				if (!element.hasOwnProperty('_listeners')) element._listeners = {}
 				const key = kebabToCamel(attr.name.slice(1))
 				if (key.startsWith('on')) {
 					fnListener(element, key.slice(2), attr.value)
 				} else {
-					const reactivity = element._reactivity[key] = {}
-				    fnProperty(element, key, reactivity, attr.value)
+				    fnProperty(element, key, attr.value)
 				}
 			}
 		})

@@ -1,11 +1,11 @@
 export class AttributeCache {
 	/**
-	 * @param {object} root
+	 * @param {HTMLElement} node
 	 */
-	constructor(root) {
+	constructor(node) {
 		this.#storage = new Map()
 
-		Object.defineProperty(root, '_cache', {
+		Object.defineProperty(node, '_cache', {
 			value: this,
 			enumerable: false,
 			configurable: true
@@ -16,25 +16,25 @@ export class AttributeCache {
 
 	/**
 	 * @param {HTMLElement} element
-	 * @param {string} attrName
+	 * @param {string} attr
 	 * @param {string|number} key
-	 * @param {*} value
+	 * @param {Function} update
 	 */
-	add(element, attrName, key, value) {
+	add(element, attr, key, update) {
 		if (!this.#storage.has(key)) {
 			this.#storage.set(key, new Set())
 		}
 
 		this.#storage.get(key).add({
 			element,
-			attr: attrName,
-			val: String(value)
+			attr,
+			update
 		})
 	}
 
 	/**
 	 * @param {string|number} key
-	 * @returns {Array<{el: HTMLElement, attr: string, val: string}>}
+	 * @returns {Array<{el: HTMLElement, attr: string, update: Function}>}
 	 */
 	find(key) {
 		const records = this.#storage.get(key)
