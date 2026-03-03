@@ -15,15 +15,15 @@
 
   <div :text.trim="state.test" myHidden="true"></div>
 
-  <div :text.unit.$="state.value"></div>
+  <div :text.unit="state.value"></div>
 
-  <div :text.fixed.2="state.test2"></div>
+  <div :text.fixed.0="state.test2"></div>
 
   <div :text.json="state.arr"></div>
 
-  <div :text="state.product.count" class="container" :class="{ show: state.value === 3 }"></div>тзь
+  <div :text="state.product.count" class="container" :class="{ show: state.value === 3 }"></div>
 
-  <div :onclick="state.value++">add</div>
+  <div :onclick="state.test2++">add</div>
 
   <div :onclick="state.arr.splice(1, 0, { color: 'black' })">slice</div>
   <div :onclick="state.arr.push({ color: 'black' })">push</div>

@@ -28,7 +28,6 @@ export function _each(array, container, setup) {
     let node = nodeMap.get(item)
 
     if (!node) {
-      console.log(`🆕 [EACH] Создаем элемент для`, item.color || item.id || i)
       // @ts-ignore
       node = container._template.cloneNode(true)
       node.removeAttribute("template")
@@ -44,7 +43,6 @@ export function _each(array, container, setup) {
 
   const diff = children.length - arrLength
   if (diff > 0) {
-    console.log(`🗑️ [EACH] Удаляем ${diff} элементов из ${container.tagName}`)
     for (let i = children.length - 1; i >= arrLength; i--) {
       const node = children[i]
       cleanupNodeListeners(node) // Очищаем слушатели!

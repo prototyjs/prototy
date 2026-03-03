@@ -65,12 +65,7 @@ class Prototy {
         /** @type {object} */ reactivity,
         /** @type {string} */ code,
       ) => {
-		console.log('найдены директивы:', { 
-        element, 
-        key, 
-        code,
-        elementContent: element.innerHTML 
-    });
+		
         // eslint-disable-next-line sonarjs/code-eval
         const func = new Function("state", "item", `return ${code}`)
         this.buf = reactivity
@@ -84,7 +79,7 @@ class Prototy {
             // updateValue(element, key, res)
 
             this.directive.apply(element, key, res)
-            console.log(element, key, res)
+           
           }
         })
       },
@@ -175,10 +170,10 @@ class Prototy {
             /^\d+$/.test(parts[parts.length - 2])
           ) {
             // upd item prop
-            console.log(fullPath)
+            //console.log(fullPath)
             trigger(self.root._elements, fullPath, parts)
           } else {
-            console.log(fullPath)
+            //console.log(fullPath)
             trigger(self.root._elements, fullPath)
           }
         }

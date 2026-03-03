@@ -8,8 +8,6 @@ class Directives {
    */
   constructor(clientDirectives = {}, setup) {
     this.setup = setup
-    console.log("innerDirectives:", innerDirectives)
-    console.log("clientDirectives:", clientDirectives)
     this.directives = {
       ...innerDirectives,
       ...clientDirectives,
@@ -24,10 +22,11 @@ class Directives {
   apply(element, key, value) {
     const [directive, modifier, ...args] = key.split(".") // ['text', 'fixed', '2', ...] // text.fixed.2
 
-    if (this.directives.hasOwnProperty(directive) || directive==='text') {
+    if (this.directives.hasOwnProperty(directive) || directive === "text") {
       // @ts-ignore
-      console.log(directive)
-      this.directives['_' + directive](element, value, modifier, args)
+      //console.log(directive)
+      console.log(modifier)
+      this.directives["_" + directive](element, value, modifier, args)
     } else {
       // for Attributes
       // @ts-ignore
