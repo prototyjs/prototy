@@ -9,7 +9,7 @@ export function applyModifier(value, modifier, args) {
   if (!modifier) return value
 
   if (modifiers.hasOwnProperty(modifier)) {
-    return modifiers[modifier](...args)
+    return modifiers[modifier](value, ...args)
   } else {
     console.error("error modifier")
     return value
