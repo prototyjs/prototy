@@ -5,6 +5,7 @@ import { updateValue } from './directives/directives'
 import { addEvent } from './utils/addEvent'
 import { trigger } from './reactivity/trigger'
 import { each } from './directives/each.js'
+import { AttributeCache } from './reactivity/AttributeCache.js'
 
 /**
  * @typedef {object} PrototyOptions
@@ -46,28 +47,47 @@ class Prototy {
 
 		document.addEventListener('DOMContentLoaded', () => this.setup(this.bus, this.root))
 	}
+
+	/**
+     * @param {any} code
+     * @param {any} props
+     */
+	async compute(code, props) {
+		try {
+			const context = { ...this.bus, ...props }
+			const keys = Object.keys(context)
+			const values = Object.values(context)
+
+			const f = new Function(...keys, `return (async () => { ${code} })()`)
+			return await f(...values)
+		} catch (error) {
+			console.error('Error in compute function:', error)
+			return null
+		}
+	}
 	/**
 	 * @param {HTMLElement} node
 	 * @param {Object} item
 	 */
-	setup(bus, node, item) {
+	setup(node, item) {
+
+		new AttributeCache(node)
+
 		node._elements = findElements(node, (/** @type {any} */  element, /** @type {string} */ key,/** @type {object} */ reactivity, /** @type {string} */ code) => {
 			// eslint-disable-next-line sonarjs/code-eval
 			const func = new Function('state', 'item', `return ${code}`)
 			this.buf = reactivity
 
 			this.autorun(() => {
-				const res = func(bus.state, item)
+				const res = func(this.bus.state, item)
 				if (key === 'each') { // .reverse, .sort, .first(n) / .last(n), .empty?
-					each.bind(bus)(res, element, this.setup.bind(this))
+					each(res, element, this.setup.bind(this))
 				} else {
 					updateValue(element, key, res)
 				}
 			})
 		}, (/** @type {any} */ element, /** @type {string} */ key, /** @type {string} */ code) => {
-			// eslint-disable-next-line sonarjs/code-eval
-			const func = new Function('state', 'event', `${code}`)
-			addEvent(element, key, (/** @type {any} */ event) => func(bus.state, event))
+			addEvent(element, key, (/** @type {any} */ event) => this.compute(code, { event }))
 		})
 	}
 	/**
@@ -121,17 +141,17 @@ class Prototy {
 							self.pendingPaths.add(path)
 							queueMicrotask(() => {
 								console.log(path)
-								trigger(self.root._elements, path)
+								trigger(self.root._cache, path)
 								self.pendingPaths.delete(path)
 							})
 						}
 					} else if (parts.length >= 3 && (/^\d+$/.test(parts[parts.length - 2]))) {
 						// upd item prop
 						console.log(fullPath)
-						trigger(self.root._elements, fullPath, parts)
+						trigger(self.root._cache, fullPath, parts)
 					} else {
 						console.log(fullPath)
-						trigger(self.root._elements, fullPath)
+						trigger(self.root._cache, fullPath)
 					}
 				}
 				return success

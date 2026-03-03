@@ -25,7 +25,7 @@ export function each(array, container, setup){
 			node = container._template.cloneNode(true)
 
 			nodeMap.set(item, node)
-			setup(this, node, item)
+			setup(node, item)
 		}
 
 		if (children[i] !== node) {
