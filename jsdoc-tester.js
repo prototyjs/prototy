@@ -7,7 +7,6 @@ import { fileURLToPath } from 'node:url'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const utilsDir = path.join(__dirname, './src/utils')
 
-// Рекурсивный поиск файлов
 const getFiles = (dir) => {
 	const entries = fs.readdirSync(dir, { withFileTypes: true })
 	const files = entries
@@ -27,11 +26,9 @@ const runTests = async () => {
 		const content = fs.readFileSync(filepath, 'utf8')
 		const relativePath = path.relative(process.cwd(), filepath)
 
-		// Динамический импорт модуля
 		const module = await import(`file://${filepath}`)
 
-		await test(`Файл: ${relativePath}`, async (t) => {
-			// Регулярка ищет блоки @example и содержимое до конца комментария или следующего тега
+		await test(`File: ${relativePath}`, async (t) => {
 			const exampleRegex = /@example\s+([\s\S]*?)(?=\s+\* @|\s+\*\/)/g
 			let match
 
@@ -42,14 +39,12 @@ const runTests = async () => {
 					.filter(Boolean)
 					.join(' ')
 
-				// Парсим конструкцию: вызов // => результат
 				if (exampleBody.includes('// =>')) {
 					const [code, expectedStr] = exampleBody.split('// =>').map(s => s.trim())
 
-					await t.test(`Пример: ${code}`, () => {
+					await t.test(`Example: ${code}`, () => {
 						try {
-							// Создаем контекст для выполнения примера
-							// Добавляем функции модуля в область видимости eval
+					
 							const context = { ...module }
 							const execute = new Function(...Object.keys(context), `return ${code}`)
 
@@ -58,7 +53,7 @@ const runTests = async () => {
 
 							assert.deepStrictEqual(actual, expected)
 						} catch (err) {
-							assert.fail(`Ошибка в "${code}": ${err.message}`)
+							assert.fail(`Error: "${code}": ${err.message}`)
 						}
 					})
 				}
