@@ -145,17 +145,16 @@ class Prototy {
 						if (!self.pendingPaths.has(path)) {
 							self.pendingPaths.add(path)
 							queueMicrotask(() => {
-								console.log(path)
 								trigger(self.root._cache, path)
 								self.pendingPaths.delete(path)
 							})
 						}
 					} else if (parts.length >= 3 && (/^\d+$/.test(parts[parts.length - 2]))) {
 						// upd item prop
-						console.log(fullPath)
+						
 						trigger(self.root._cache, fullPath, parts)
 					} else {
-						console.log(fullPath)
+						
 						trigger(self.root._cache, fullPath)
 					}
 				}
