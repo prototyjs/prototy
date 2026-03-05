@@ -41,7 +41,7 @@
   },
   "type": "module",
   "lint-staged": {
-    "src/**/*":  "eslint --only-rules 'check-file/*' --no-fix --quiet",
+    "src/**/*": "eslint --only-rules 'check-file/*' --no-fix --quiet",
     "src/**/*.js": [
       "bash -c 'npm run type-check'"
     ]
