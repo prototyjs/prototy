@@ -10,9 +10,8 @@
     "build:demo": "vite build --config vite.config.demo.js",
     "test": "node --test-reporter=spec jsdoc-tester.js",
     "lint": "eslint ./src -f table",
-    "lint:fix": "npx eslint . --fix",
     "prepare": "husky",
-    "type-check": "tsc --p tsconfig.json --noEmit"
+    "type-check": "tsc --p jsconfig.json --noEmit"
   },
   "repository": {
     "type": "git",
