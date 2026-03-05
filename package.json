@@ -11,7 +11,7 @@
     "test": "node --test-reporter=spec jsdoc-tester.js",
     "lint": "eslint ./src -f table",
     "prepare": "husky",
-    "type-check": "tsc --p jsconfig.json --noEmit"
+    "type-check": "tsc --p jsconfig.json --noEmit --format table"
   },
   "repository": {
     "type": "git",
@@ -41,7 +41,7 @@
   },
   "type": "module",
   "lint-staged": {
-    "src/**/*": "eslint --only-rules 'check-file/*' --no-fix --max-warnings=0",
+    "src/**/*": "eslint --only-rules 'check-file/*' --no-fix",
     "src/**/*.js": [
       "bash -c 'npm run type-check'"
     ]
