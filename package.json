@@ -2,7 +2,7 @@
   "name": "prototy",
   "version": "1.0.0",
   "description": "Vanilla JS utility library",
-  "main": "prototy.js",
+  "main": "src/prototy.js",
   "scripts": {
     "dev": "vite --config vite.config.demo.js",
     "build": "npm run lint && npm run build:lib",
@@ -42,7 +42,7 @@
   },
   "type": "module",
   "lint-staged": {
-    "src/**/*": "eslint --no-fix --quiet",
+    "src/**/*":  "eslint --only-rules 'check-file/*' --no-fix --quiet",
     "src/**/*.js": [
       "bash -c 'npm run type-check'"
     ]

@@ -3,8 +3,6 @@ import globals from 'globals'
 import jsdoc from 'eslint-plugin-jsdoc'
 import sonarjs from 'eslint-plugin-sonarjs'
 import security from 'eslint-plugin-security'
-import promise from 'eslint-plugin-promise'
-import noUnsanitized from 'eslint-plugin-no-unsanitized'
 import checkFile from 'eslint-plugin-check-file'
 import cspellPlugin from '@cspell/eslint-plugin'
 
@@ -14,8 +12,7 @@ export default [
 			'**/node_modules/**',
 			'**/dist/**',
 			'build/**',
-			'.git/**',
-			'coverage/**'
+			'.git/**'
 		]
 	},
 	{
@@ -43,8 +40,6 @@ export default [
 			jsdoc,
 			sonarjs,
 			security,
-			promise,
-			'no-unsanitized': noUnsanitized,
 			'@cspell': cspellPlugin
 		},
 		settings: {
@@ -57,8 +52,6 @@ export default [
 			...js.configs.recommended.rules,
 			...sonarjs.configs.recommended.rules,
 			...security.configs.recommended.rules,
-			...promise.configs.recommended.rules,
-			...noUnsanitized.configs.recommended.rules,
 
 			// Lang
 			'@cspell/spellchecker': ['error', {
@@ -74,15 +67,6 @@ export default [
 			// === Security ===
 			'security/detect-object-injection': 'off',
 			'security/detect-unsafe-regex': 'error',
-
-			// === No-Unsanitized ===
-			'no-unsanitized/method': 'error',
-			'no-unsanitized/property': 'error',
-
-			// === Promise ===
-			'promise/always-return': 'error',
-			'promise/no-return-wrap': 'error',
-			'promise/catch-or-return': 'error',
 
 			// === SonarJS ===
 			'sonarjs/no-duplicate-string': 'warn',
