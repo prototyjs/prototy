@@ -41,10 +41,11 @@
   },
   "type": "module",
   "lint-staged": {
-    "src/**/*": "eslint --only-rules 'check-file/*' --no-fix",
     "src/**/*.js": [
-      "bash -c 'npm run type-check'"
-    ]
+      "eslint --no-fix --format table",
+      "npm run type-check"
+    ],
+    "src/**/*": "eslint --no-fix --format table"
   },
   "dependencies": {
     "vite": "^7.3.1"
