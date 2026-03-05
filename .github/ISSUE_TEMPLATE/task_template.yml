@@ -10,4 +10,3 @@ body:
     id: out-of-scope
     attributes:
       label: "Out of Scope"
-      value: " "
