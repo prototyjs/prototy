@@ -5,9 +5,9 @@ body:
     id: acceptance-criteria
     attributes:
       label: "Acceptance Criteria"
-      value: "- [ ]"
+      value: "- [ ] "
   - type: textarea
     id: out-of-scope
     attributes:
       label: "Out of Scope"
-      value: "- [ ]"
+      value: ""
