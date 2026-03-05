@@ -2,7 +2,7 @@
   "name": "prototy",
   "version": "1.0.0",
   "description": "Vanilla JS utility library",
-  "main": "prototy.js",
+  "main": "src/prototy.js",
   "scripts": {
     "dev": "vite --config vite.config.demo.js",
     "build": "npm run lint && npm run build:lib",
@@ -10,9 +10,8 @@
     "build:demo": "vite build --config vite.config.demo.js",
     "test": "node --test-reporter=spec jsdoc-tester.js",
     "lint": "eslint ./src -f table",
-    "lint:fix": "npx eslint . --fix",
     "prepare": "husky",
-    "type-check": "tsc --p tsconfig.json --noEmit"
+    "type-check": "tsc --p jsconfig.json --noEmit"
   },
   "repository": {
     "type": "git",
@@ -31,8 +30,6 @@
     "eslint-formatter-table": "^7.32.1",
     "eslint-plugin-check-file": "^3.3.1",
     "eslint-plugin-jsdoc": "^62.0.0",
-    "eslint-plugin-no-unsanitized": "^4.1.4",
-    "eslint-plugin-promise": "^7.2.1",
     "eslint-plugin-security": "^3.0.1",
     "eslint-plugin-sonarjs": "^3.0.5",
     "globals": "^17.0.0",
@@ -42,10 +39,11 @@
   },
   "type": "module",
   "lint-staged": {
-    "src/**/*": "eslint --no-fix --quiet",
     "src/**/*.js": [
-      "bash -c 'npm run type-check'"
-    ]
+      "eslint --no-fix --format table",
+      "npm run type-check"
+    ],
+    "src/**/*": "eslint --no-fix --format table"
   },
   "dependencies": {
     "vite": "^7.3.1"
