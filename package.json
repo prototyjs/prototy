@@ -11,7 +11,7 @@
     "test": "node --test-reporter=spec jsdoc-tester.js",
     "lint": "eslint ./src -f table",
     "prepare": "husky",
-    "type-check": "tsc --p jsconfig.json --noEmit --format table"
+    "type-check": "tsc --p jsconfig.json --noEmit"
   },
   "repository": {
     "type": "git",
