@@ -1,8 +1,8 @@
 <p align="center">
-<img src="https://github.com/user-attachments/assets/f65cf3b0-c0a2-4184-9d93-89a5c0de6419" width="300px" alt="prototy">
+<img src="https://github.com/user-attachments/assets/8c7c8fac-cfe5-4134-89fa-0896971fc227" width="180px" alt="prototy">
 </p>
 <p align="center">
-A simple JS framework for rapid UI prototyping and hypothesis testing on the web. 💚
+A simple JS framework for rapid UI prototyping and hypothesis testing on the web. 💙
 </p>
 <p align="center">
 <i>Single-file prototyping for instant UI validation.</i>
