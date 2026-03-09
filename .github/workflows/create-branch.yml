@@ -1,0 +1,11 @@
+name: Create Issue Branch
+on:
+  issues:
+    types: [assigned]
+jobs:
+  create_branch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: robvanderleek/create-issue-branch@main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
