@@ -1,3 +1,6 @@
+/**
+ *
+ */
 export class AttributeCache {
 	/**
 	 * @param {HTMLElement} node
@@ -57,7 +60,9 @@ export class AttributeCache {
 			}
 		}
 	}
-
+	/**
+	 *
+	 */
 	clear() {
 		this.#storage.clear()
 	}

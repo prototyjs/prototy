@@ -10,8 +10,7 @@
     "build:demo": "vite build --config vite.config.demo.js",
     "test": "node --test-reporter=spec jsdoc-tester.js",
     "lint": "eslint ./src -f table",
-    "prepare": "husky",
-    "type-check": "tsc --p jsconfig.json --noEmit"
+    "prepare": "husky"
   },
   "repository": {
     "type": "git",
@@ -35,15 +34,16 @@
     "globals": "^17.0.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
+    "tsc-files": "^1.1.4",
     "typescript": "^5.9.3"
   },
   "type": "module",
   "lint-staged": {
     "src/**/*.js": [
       "eslint --no-fix --format table",
-      "npm run type-check"
+      "tsc-files --p jsconfig.json --noEmit"
     ],
-    "src/**/*": "eslint --no-fix --format table"
+    "src/**/!(*.js)": "eslint --no-fix --format table"
   },
   "dependencies": {
     "vite": "^7.3.1"
