@@ -9,4 +9,7 @@ branches:
     prefix: "task/"
 
 base: develop
+
 branchName: "${prefix}${issue.number}-${issue.title}"
+
+lowercaseBranchName: true
