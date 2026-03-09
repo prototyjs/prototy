@@ -2,6 +2,12 @@ name: Create Issue Branch
 on:
   issues:
     types: [assigned]
+    
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
 jobs:
   create_branch:
     runs-on: ubuntu-latest
