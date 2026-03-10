@@ -35,7 +35,7 @@ class Directives {
 		}
 
 		if (Object.prototype.hasOwnProperty.call(this.directives, directive) || directive==='text') {
-			this.directives['_' + directive](element, value, modifier, args)
+			this.directives[directive](element, value, modifier, args)
 		} else {
 			attr(element, value, modifier, args, directive)
 		}
