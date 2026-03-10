@@ -1,0 +1,15 @@
+branches:
+  - label: "enhancement"
+    prefix: "feature/"
+  - label: "bug"
+    prefix: "bugfix/"
+  - label: "documentation"
+    prefix: "docs/"
+  - label: "*"
+    prefix: "task/"
+
+base: develop
+
+branchName: "${prefix}${issue.number}-${issue.title}"
+
+lowercaseBranchName: true
