@@ -3,7 +3,7 @@ import { findElements } from './utils/findElements'
 import { isObject } from './utils/isObject'
 import { isEqual } from './utils/isEqual'
 import { createDynamicFunction } from './utils/createDynamicFunction'
-import Directives from './directives/Directives'
+import Directives from './directives/directives'
 import { AttributeCache } from './reactivity/AttributeCache'
 // import { addEvent } from './utils/addEvent'
 import { trigger } from './reactivity/trigger'
@@ -62,6 +62,7 @@ class Prototy {
 	 */
 	setup(node, item) {
 
+		// eslint-disable-next-line sonarjs/constructor-for-side-effects
 		new AttributeCache(node)
 
 		findElements(node, (/** @type {HTMLElement} */  element, /** @type {string} */ key, /** @type {string} */ code) => {
@@ -145,16 +146,19 @@ class Prototy {
 						if (!self.pendingPaths.has(path)) {
 							self.pendingPaths.add(path)
 							queueMicrotask(() => {
+								// eslint-disable-next-line no-console
 								console.log(path)
 								trigger(self.root._cache, path)
 								self.pendingPaths.delete(path)
 							})
 						}
 					} else if (parts.length >= 3 && (/^\d+$/.test(parts[parts.length - 2]))) {
-						// upd item prop
+						
+						// eslint-disable-next-line no-console
 						console.log(fullPath)
 						trigger(self.root._cache, fullPath, parts)
 					} else {
+						// eslint-disable-next-line no-console
 						console.log(fullPath)
 						trigger(self.root._cache, fullPath)
 					}

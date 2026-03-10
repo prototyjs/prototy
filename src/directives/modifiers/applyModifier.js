@@ -1,17 +1,22 @@
-import { modifiers } from "./base.js"
+import { modifiers } from './base.js'
 /**
  *
- * @param {string} modifier
  * @param {any} value
+ * @param {string} modifier
  * @param {string | number} args
+ * @returns {any}
  */
 export function applyModifier(value, modifier, args) {
-  if (!modifier) return value
+	if (!modifier) {
+		return value
+	}
 
-  if (modifiers.hasOwnProperty(modifier)) {
-    return modifiers[modifier](value, ...args)
-  } else {
-    console.error("error modifier")
-    return value
-  }
+	if (Object.prototype.hasOwnProperty.call(modifiers, modifier)) {
+		return modifiers[modifier](value, ...args)
+	}
+	
+	// eslint-disable-next-line no-console
+	console.error('error modifier')
+	return value
+  
 }
