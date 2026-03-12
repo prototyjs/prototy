@@ -100,10 +100,7 @@ class Prototy {
 	        if (self.activeEffect) {
 		        self.delayedAddToCache(fullPath)
 	        }
-
-	        const value = Reflect.get(t, property, receiver)
-
-	        return value
+	        return Reflect.get(t, property, receiver)
 	      },
 		    set(target, property, value) {
 			    if (typeof property === 'symbol') {
