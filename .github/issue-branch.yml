@@ -1,15 +1,15 @@
+base: develop
+mode: auto
+silent: false
+branchName: "${issue.number}-${issue.title}"
+autoCloseIssue: true
+convertTitleToKebabCase: true
 branches:
   - label: "enhancement"
-    prefix: "feature/"
+    name: "feature/${branchName}"
   - label: "bug"
-    prefix: "bugfix/"
+    name: "bugfix/${branchName}"
   - label: "documentation"
-    prefix: "docs/"
+    name: "docs/${branchName}"
   - label: "*"
-    prefix: "task/"
-
-base: develop
-
-branchName: "${prefix}${issue.number}-${issue.title}"
-
-lowercaseBranchName: true
+    name: "task/${branchName}"
