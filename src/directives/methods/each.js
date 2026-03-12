@@ -25,7 +25,7 @@ export function each(array, container, setup) {
 		let node = nodeMap.get(item)
 
 		if (!node) {
-      
+
 			// @ts-ignore
 			node = container._template.cloneNode(true)
 			node.removeAttribute('template')
@@ -41,7 +41,7 @@ export function each(array, container, setup) {
 
 	const diff = children.length - arrLength
 	if (diff > 0) {
-    
+
 		for (let i = children.length - 1; i >= arrLength; i--) {
 			const node = children[i]
 			node.remove()
