@@ -108,7 +108,7 @@ export default [
 			'jsdoc/no-undefined-types': 'warn',
 
 			// === ESLint ===
-			'indent': ['error', 'tab'],
+			'indent': ['error', 'tab', { 'SwitchCase': 1 }],
 			'quotes': ['error', 'single'],
 			'semi': ['error', 'never'],
 			'comma-dangle': ['error', 'never'],

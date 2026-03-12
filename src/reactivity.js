@@ -1,18 +1,12 @@
 /**
  *
  */
-export class AttributeCache {
+export class Reactivity {
 	/**
-	 * @param {HTMLElement} node
+	 *
 	 */
-	constructor(node) {
+	constructor() {
 		this.#storage = new Map()
-
-		Object.defineProperty(node, '_cache', {
-			value: this,
-			enumerable: false,
-			configurable: true
-		})
 	}
 
 	#storage
