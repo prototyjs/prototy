@@ -15,8 +15,3 @@ jobs:
       - uses: robvanderleek/create-issue-branch@main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          config-file: .github/issue-branch.yml
-          branch-name: "${issue.number}-${issue.title}"
-          auto-close: true
-          kebab-case: true
