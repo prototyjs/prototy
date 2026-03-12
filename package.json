@@ -43,7 +43,9 @@
       "eslint --no-fix --format table",
       "tsc-files --p jsconfig.json --noEmit"
     ],
-    "src/**/!(*.js)": "eslint --no-fix --format table"
+    "src/**/!(*.js)": [
+      "eslint --no-fix --format table"
+    ]
   },
   "dependencies": {
     "vite": "^7.3.1"
