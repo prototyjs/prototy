@@ -2,7 +2,7 @@ name: Create Issue Branch
 on:
   issues:
     types: [opened]
-    
+
 permissions:
   contents: write
   issues: write
@@ -12,11 +12,44 @@ jobs:
   create_branch:
     runs-on: ubuntu-latest
     steps:
-      - uses: robvanderleek/create-issue-branch@main
+      - uses: actions/checkout@v3
+      
+      - name: Create branch from issue
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          config-file: .github/issue-branch.yml
-          branch-name: "${issue.number}-${issue.title}"
-          auto-close: true
-          kebab-case: true
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+        run: |
+          # Convert title to kebab-case (e.g., "Reactivity of each directive" -> "reactivity-of-each-directive")
+          KEBAB_TITLE=$(echo "$ISSUE_TITLE" \
+            | tr '[:upper:]' '[:lower:]' \
+            | sed 's/[^a-z0-9]/-/g' \
+            | sed 's/--*/-/g' \
+            | sed 's/^-//;s/-$//')
+          
+          # Get labels (if any)
+          LABELS='${{ toJson(github.event.issue.labels) }}'
+          
+          # Determine branch prefix based on labels
+          if [[ "$LABELS" == *"enhancement"* ]]; then
+            PREFIX="feature"
+          elif [[ "$LABELS" == *"bug"* ]]; then
+            PREFIX="bugfix"
+          elif [[ "$LABELS" == *"documentation"* ]]; then
+            PREFIX="docs"
+          else
+            PREFIX="task"
+          fi
+          
+          # Build branch name: feature/123-issue-title
+          BRANCH_NAME="${PREFIX}/${ISSUE_NUMBER}-${KEBAB_TITLE}"
+          
+          echo "Creating branch: $BRANCH_NAME"
+          
+          # Create and push branch
+          git checkout -b "$BRANCH_NAME"
+          git push origin "$BRANCH_NAME"
+          
+          # Post comment to issue
+          gh issue comment $ISSUE_NUMBER \
+            --body "✅ Branch created: \`$BRANCH_NAME\`"
