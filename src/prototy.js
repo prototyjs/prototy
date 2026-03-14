@@ -3,8 +3,8 @@ import { isObject } from './utils/isObject'
 import { isEqual } from './utils/isEqual'
 import { createDynamicFunction } from './utils/createDynamicFunction'
 import Directives from './directives/Directives'
-import { Reactivity } from './reactivity.js'
-import { addEvent } from './utils/addEvent'
+import { Reactivity } from '@/reactivity.js'
+import { Listeners } from '@/listeners.js'
 
 /**
  * @typedef {object} PrototyOptions
@@ -24,7 +24,7 @@ class Prototy {
 		this.state = this.createProxy(options.state)
 		this.directive = new Directives(options.directives, this.setup.bind(this))
 		this.reactivity = new Reactivity()
-
+		this.listeners = new Listeners()
 		/** @type {Record<string, Function>} */
 		this.handles = {}
 		this.pendingPaths = new Set()
@@ -66,7 +66,7 @@ class Prototy {
 
 		}, (/** @type {HTMLElement} */ element, /** @type {string} */ key, /** @type {string} */ code) => {
 			const func = createDynamicFunction(code, this.bus, 'event')
-			addEvent(element, key, (/** @type {any} */ event) => func(event))
+			this.listeners.add(element, key, func)
 		})
 	}
 	/**
