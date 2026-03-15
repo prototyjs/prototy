@@ -15,15 +15,19 @@
 
   <div :text.trim="state.test" myHidden="true"></div>
 
+  <div :context="{ p: state.product }" :onclick="p.params.count++">
+    <span>Product Count: </span><span :text="p.params.count"></span> <span :context.scope="{ p: p.params }" :text="p.count"></span>
+  </div>
   <div :text="state.value"></div>
-  
+
   <div :text.unit.$="state.value"></div>
+
 
   <div :text.fixed.2="state.test2"></div>
 
   <div :text.json="state.arr"></div>
 
-  <div :text="state.product.count" class="container" :class="{ show: state.value === 3 }"></div>
+  <div class="container" :class="{ show: state.value === 3 }">class</div>
 
   <div :onclick="state.value++">add</div>
 
@@ -36,7 +40,7 @@
 <div :each="state.arr">
 <div :text="item.color" class="color" template></div>
 </div>
-  
+
   <script type="module">
 
     import Prototy from '../src/prototy.js'
@@ -54,7 +58,10 @@
             test2: 1.55555,
 			value: 2,
 			product: {
-				count: 1
+				price: 10,
+				params: {
+					count: 1
+                }
             },
             arr: [{ color: 'red' }, { color: 'green' }, { color: 'blue' }, { color: 'green' }]
 

@@ -1,6 +1,8 @@
 import innerDirectives from './methods/index.js'
 import { attr } from './methods/attr.js'
 import { each } from './methods/each.js'
+import { context } from './methods/context.js'
+
 /**
  * @class Directives
  */
@@ -12,6 +14,7 @@ class Directives {
 	 */
 	constructor(clientDirectives = {}, setup) {
 		this.setup = setup
+		this.#contextStorage = new WeakMap()
 		/**
 		 * @type {{[key: string]: Function}}
 		 */
@@ -20,25 +23,46 @@ class Directives {
 			...clientDirectives
 		}
 	}
+	#contextStorage
 	/**
 	 *
 	 * @param {HTMLElement} element
 	 * @param {string} key
-	 * @param {*} value
+	 * @param {any} value
 	 */
 	apply(element, key, value) {
 		const [directive, modifier, ...args] = key.split('.') // ['text', 'fixed', '2', ...] // text.fixed.2
-    
+
 		if (directive === 'each') {
-			each(value, element, this.setup)
+			each(element, value, this.setup)
 			return
 		}
 
-		if (Object.prototype.hasOwnProperty.call(this.directives, directive) || directive==='text') {
+		if (directive === 'context') {
+			context(element, value, this.#contextStorage, modifier)
+			return
+		}
+
+		if (Object.prototype.hasOwnProperty.call(this.directives, directive)) {
 			this.directives[directive](element, value, modifier, args)
 		} else {
 			attr(element, value, modifier, args, directive)
 		}
+	}
+	/**
+	 * @param {HTMLElement} element
+	 * @returns {object}
+	 */
+	getContext(element) {
+		let current = element
+		while (current) {
+			const ctx = this.#contextStorage.get(current)
+			if (ctx) {
+				return ctx
+			}
+			current = current.parentElement
+		}
+		return null
 	}
 }
 export default Directives
