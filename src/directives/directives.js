@@ -39,7 +39,7 @@ class Directives {
 		}
 
 		if (directive === 'context') {
-			context(element, value, this.#contextStorage)
+			context(element, value, this.#contextStorage, modifier)
 			return
 		}
 

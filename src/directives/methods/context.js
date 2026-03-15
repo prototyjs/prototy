@@ -2,8 +2,9 @@
  * @param {HTMLElement} element
  * @param {boolean} value
  * @param {object} storage
+ * @param {string} modifier
  */
-export function context(element, value, storage) {
+export function context(element, value, storage, modifier) {
 	let parentContext = null
 	let parent = element.parentElement
 	while (parent) {
@@ -14,7 +15,13 @@ export function context(element, value, storage) {
 		parent = parent.parentElement
 	}
 
-	const mergedContext = { ...parentContext, ...value }
+	let newContext
 
-	storage.set(element, mergedContext)
+	if (modifier ==='scope') {
+		newContext = { ...value }
+	} else {
+		newContext = { ...parentContext, ...value }
+	}
+
+	storage.set(element, newContext)
 }
