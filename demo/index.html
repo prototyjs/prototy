@@ -15,9 +15,13 @@
 
   <div :text.trim="state.test" myHidden="true"></div>
 
+  <div :context="{ product: state.product }" :onclick="product.count++">
+    <span>Product Count: </span><span :text="product.count"></span>
+  </div>
   <div :text="state.value"></div>
-  
+
   <div :text.unit.$="state.value"></div>
+
 
   <div :text.fixed.2="state.test2"></div>
 
@@ -36,7 +40,7 @@
 <div :each="state.arr">
 <div :text="item.color" class="color" template></div>
 </div>
-  
+
   <script type="module">
 
     import Prototy from '../src/prototy.js'

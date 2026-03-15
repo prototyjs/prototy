@@ -22,13 +22,14 @@ class Prototy {
 		this.root = options.root
 		this.static = options.static
 		this.state = this.createProxy(options.state)
-		this.directive = new Directives(options.directives, this.setup.bind(this))
-		this.reactivity = new Reactivity()
-		this.listeners = new Listeners()
+
 		/** @type {Record<string, Function>} */
 		this.handles = {}
 		this.pendingPaths = new Set()
-	  this.delayedAddToCache = () => {}
+
+		this.directive = new Directives(options.directives, this.setup.bind(this))
+		this.reactivity = new Reactivity()
+		this.listeners = new Listeners()
 
 		if (options.handles) {
 		  Object.keys(options.handles).forEach((key) => {
@@ -45,14 +46,14 @@ class Prototy {
 	  }
 	  document.addEventListener('DOMContentLoaded', () => this.setup(this.root))
 	}
-
 	/**
 	 * @param {HTMLElement} node
 	 * @param {object} item
 	 */
 	setup(node, item) {
 		findElements(node, (/** @type {HTMLElement} */  element, /** @type {string} */ key, /** @type {string} */ code) => {
-			const func = createDynamicFunction(code, this.bus, 'item')
+			const context = this.directive.getContext(element)
+			const func = createDynamicFunction(code, this.bus, context, 'item')
 
 			const update = () => {
 				const res = func(item)
@@ -65,7 +66,8 @@ class Prototy {
 			this.activeEffect = null
 
 		}, (/** @type {HTMLElement} */ element, /** @type {string} */ key, /** @type {string} */ code) => {
-			const func = createDynamicFunction(code, this.bus, 'event')
+			const context = this.directive.getContext(element)
+			const func = createDynamicFunction(code, this.bus, context, 'event')
 			this.listeners.add(element, key, func)
 		})
 	}
