@@ -3,26 +3,19 @@ const PLACEHOLDER = Symbol('dynamic-value-placeholder')
 /**
  * @param {string} code
  * @param {object} bus
+ * @param {object} context
  * @param {string} [key='']
  * @returns {Function}
- *
- * @example
- * const fn = createDynamicFunction('console.log(user)', { user: 'John' })
- * await fn() // 'John'
- *
- * @example
- * const fn = createDynamicFunction('console.log(user, count)', { user: 'John' }, 'count')
- * await fn(42) // 'John', 42
  */
-export function createDynamicFunction(code, bus, key = '') {
-	const context = { ...bus }
+export function createDynamicFunction(code, bus, context= {}, key = '') {
+	const mergedContext = { ...bus, ...context }
 	if (key) {
 		// @ts-ignore
-		context[key] = PLACEHOLDER
+		mergedContext[key] = PLACEHOLDER
 	}
 
-	const keys = Object.keys(context)
-	const values = Object.values(context)
+	const keys = Object.keys(mergedContext)
+	const values = Object.values(mergedContext)
 
 	// eslint-disable-next-line sonarjs/code-eval
 	const fn = new Function(...keys, `return ${code}`)

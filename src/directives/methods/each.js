@@ -1,11 +1,9 @@
-//import { cleanupNodeListeners } from '../../utils/addEvent.js'
-
 /**
- * @param {Array<Record<string, any>>} array
  * @param {HTMLElement} container
+ * @param {Array<Record<string, any>>} array
  * @param {Function} setup
  */
-export function each(array, container, setup) {
+export function each(container, array, setup) {
 	if (!container) {
 		return
 	}
