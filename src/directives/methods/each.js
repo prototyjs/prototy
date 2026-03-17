@@ -1,5 +1,5 @@
 /**
- * @param {HTMLElement} container
+ * @param {HTMLElement & { _nodeMap?: WeakMap<object, Node>; _template?: HTMLElement }} container
  * @param {Array<Record<string, any>>} array
  * @param {Function} setup
  */
@@ -8,7 +8,6 @@ export function each(container, array, setup) {
 		return
 	}
 
-	// @ts-ignore
 	const nodeMap = container._nodeMap || (container._nodeMap = new WeakMap())
 	const children = container.children
 	const arrLength = array?.length || 0
@@ -24,9 +23,10 @@ export function each(container, array, setup) {
 
 		if (!node) {
 
-			// @ts-ignore
 			node = container._template.cloneNode(true)
-			node.removeAttribute('template')
+			if (node instanceof Element) {
+				node.removeAttribute('template')
+			}
 
 			nodeMap.set(item, node)
 			setup(node, item)

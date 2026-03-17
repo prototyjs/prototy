@@ -3,7 +3,7 @@ import { modifiers } from './base.js'
  *
  * @param {any} value
  * @param {string} modifier
- * @param {string | number} args
+ * @param {Array<string>} args
  * @returns {any}
  */
 export function applyModifier(value, modifier, args) {
