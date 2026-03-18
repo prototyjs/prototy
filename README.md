@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://github.com/user-attachments/assets/de69c580-bd8b-4812-966f-bb6823f94499" width="220px" alt="prototy">
+<img src="https://github.com/user-attachments/assets/0f424573-860f-4b46-8ca5-903579593028" width="220px" alt="prototy">
 </p>
 <p align="center">
 A simple JS framework for rapid UI prototyping and hypothesis testing on the web. 💙
