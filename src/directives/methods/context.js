@@ -1,10 +1,10 @@
 /**
- * @param { HTMLElement } element
- * @param { boolean } value
- * @param { object } storage
- * @param { string } modifier
+ * @param {HTMLElement} element
+ * @param {boolean} value
+ * @param {string} modifier
+ * @param {object} storage
  */
-export function context(element, value, storage, modifier) {
+export function context(element, value, modifier, storage) {
 	let parentContext = null
 	let parent = element.parentElement
 	while (parent) {
