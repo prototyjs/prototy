@@ -3,21 +3,20 @@ import { attr } from './methods/attr.js'
 import { each } from './methods/each.js'
 import { context } from './methods/context.js'
 import { component } from './methods/component.js'
-import {applyModifier} from "@/directives/modifiers/applyModifier.js";
 
 /**
  * @class Directives
  */
-class Directives {
+export class Directives {
 	/**
 	 * @constructor
-	 * @param {object} clientDirectives
-	 * @param {Function} setup
+	 * @param { object } clientDirectives
+	 * @param { Function } setup
 	 */
 	constructor(clientDirectives = {}, setup) {
 		this.#contextStorage = new WeakMap()
 		/**
-		 * @type {{[key: string]: Function}}
+		 * @type {{ [key: string]: Function }}
 		 */
 		this.directives = {
 			...innerDirectives,
@@ -32,21 +31,21 @@ class Directives {
 	#contextStorage
 	/**
 	 *
-	 * @param {HTMLElement} element
-	 * @param {string} key
-	 * @param {any} value
+	 * @param { HTMLElement } element
+	 * @param { string } key
+	 * @param { any } value
 	 */
 	apply(element, key, value) {
 		const [directive, modifier, ...args] = key.split('.') // ['text', 'fixed', '2', ...] // text.fixed.2
 
-		if (this.specialDirectives.hasOwnProperty(directive)) {
+		if (Object.hasOwn(this.specialDirectives, directive)) {
 			this.specialDirectives[directive](element, value, modifier)
 			return
 		}
 
-		if (this.directives.hasOwnProperty(directive)) {
+		if (Object.hasOwn(this.directives,directive)) {
 			this.directives[directive](element, value, modifier, args)
-		} else if (element.hasOwnProperty(directive)) {
+		} else if (Object.hasOwn(element, directive)) {
 			// const v = applyModifier(value, modifier, args, directive)
 			// element[directive] = v
 		} else {
@@ -54,8 +53,8 @@ class Directives {
 		}
 	}
 	/**
-	 * @param {HTMLElement} element
-	 * @returns {object}
+	 * @param { HTMLElement } element
+	 * @returns { object }
 	 */
 	getContext(element) {
 		let current = element
@@ -69,4 +68,3 @@ class Directives {
 		return null
 	}
 }
-export default Directives

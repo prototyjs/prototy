@@ -12,9 +12,9 @@ export class Listeners {
 	#storage
 
 	/**
-	 * @param {HTMLElement} element
-	 * @param {string} attr
-	 * @param {Function} fn
+	 * @param { HTMLElement } element
+	 * @param { string } attr
+	 * @param { Function } fn
 	 */
 	add(element, attr, fn) {
 		if (!this.#storage.has(element)) {
@@ -52,7 +52,7 @@ export class Listeners {
 	}
 
 	/**
-	 * @param {HTMLElement} element
+	 * @param { HTMLElement } element
 	 */
 	remove(element) {
 		const listeners = this.#storage.get(element)

@@ -1,7 +1,7 @@
 /**
- * @param {HTMLElement} container
- * @param {Array<Record<string, any>>} array
- * @param {Function} setup
+ * @param { HTMLElement } container
+ * @param { Array<Record<string, any>> } array
+ * @param { Function } setup
  */
 export function each(container, array, setup) {
 	if (!container) {
@@ -24,7 +24,6 @@ export function each(container, array, setup) {
 
 		if (!node) {
 
-			// @ts-ignore
 			node = container._template.cloneNode(true)
 
 			nodeMap.set(item, node)

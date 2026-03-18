@@ -1,18 +1,18 @@
 import { isObject } from './utils/isObject'
 import { isEqual } from './utils/isEqual'
 import { createDynamicFunction } from './utils/createDynamicFunction'
-import Directives from './directives/Directives'
+import { Directives } from './directives/directives.js'
 import { Reactivity } from '@/reactivity.js'
 import { Listeners } from '@/listeners.js'
 import { Nodes } from '@/nodes.js'
 
 /**
- * @typedef {object} PrototyOptions
- * @property {object} state
- * @property {HTMLElement} root
- * @property {object} static
- * @property {Record<string, Function>} handles
- * @property {object} directives
+ * @typedef { object } PrototyOptions
+ * @property { object } state
+ * @property { HTMLElement } root
+ * @property { object } static
+ * @property { Record<string, Function> } handles
+ * @property { object } directives
  */
 class Prototy {
 	/**
@@ -60,8 +60,8 @@ class Prototy {
 	  this.setup(this.root)
 	}
 	/**
-	 * @param {HTMLElement} node
-	 * @param {object} item
+	 * @param { HTMLElement } node
+	 * @param { object } item
 	 */
 	setup(node, item) {
 		this.nodes.process(node, (/** @type {HTMLElement} */  element, /** @type {string} */ key, /** @type {string} */ code) => {
@@ -80,9 +80,9 @@ class Prototy {
 		})
 	}
 	/**
-	 * @param {any} state
-	 * @param {string} path
-	 * @returns {object}
+	 * @param { any } state
+	 * @param { string } path
+	 * @returns { object }
 	 */
 	createProxy(state, path = '') {
 		const self = this
@@ -158,7 +158,7 @@ class Prototy {
 		})
 	}
 	/**
-	 * @param {string|number} path
+	 * @param { string|number } path
 	 */
 	trigger(path) {
 		const arr = this.reactivity.find(path)
