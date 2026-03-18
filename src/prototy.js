@@ -1,10 +1,10 @@
-import { findElements } from './utils/findElements'
 import { isObject } from './utils/isObject'
 import { isEqual } from './utils/isEqual'
 import { createDynamicFunction } from './utils/createDynamicFunction'
 import Directives from './directives/Directives'
 import { Reactivity } from '@/reactivity.js'
 import { Listeners } from '@/listeners.js'
+import { Nodes } from '@/nodes.js'
 
 /**
  * @typedef {object} PrototyOptions
@@ -18,9 +18,8 @@ class Prototy {
 	/**
 	 * @param {PrototyOptions} options
 	 */
-	constructor(options = { state: {}, root: document.body, static: {}, handles: {}, directives: {} }) {
+	constructor(options = { state: {}, root: document.body, static: {}, handles: {}, directives: {}, components: {} }) {
 		this.root = options.root
-		this.static = options.static
 		this.state = this.createProxy(options.state)
 
 		/** @type {Record<string, Function>} */
@@ -30,6 +29,19 @@ class Prototy {
 		this.directive = new Directives(options.directives, this.setup.bind(this))
 		this.reactivity = new Reactivity()
 		this.listeners = new Listeners()
+		this.nodes = new Nodes({
+			root: this.root,
+			fnListener: (/** @type { HTMLElement } */ node, /** @type { string } */ key, /** @type { string } */ code) => {
+				const context = this.directive.getContext(node)
+				const func = createDynamicFunction(code, this.bus, context, 'event')
+				this.listeners.add(node, key, func)
+			},
+			fnRemove: (/** @type { HTMLElement } */ node) => {
+				this.listeners.remove(node)
+				this.reactivity.remove(node)
+				// event remove node
+			}
+		})
 
 		if (options.handles) {
 		  Object.keys(options.handles).forEach((key) => {
@@ -41,17 +53,18 @@ class Prototy {
 
 	  this.bus = {
 		  state: this.state,
-		  static: this.static,
-		  handles: this.handles
+		  handles: this.handles,
+		  static: options.static,
+		  components: options.components
 	  }
-	  document.addEventListener('DOMContentLoaded', () => this.setup(this.root))
+	  this.setup(this.root)
 	}
 	/**
 	 * @param {HTMLElement} node
 	 * @param {object} item
 	 */
 	setup(node, item) {
-		findElements(node, (/** @type {HTMLElement} */  element, /** @type {string} */ key, /** @type {string} */ code) => {
+		this.nodes.process(node, (/** @type {HTMLElement} */  element, /** @type {string} */ key, /** @type {string} */ code) => {
 			const context = this.directive.getContext(element)
 			const func = createDynamicFunction(code, this.bus, context, 'item')
 
@@ -64,11 +77,6 @@ class Prototy {
 			this.activeEffect = update
 			update()
 			this.activeEffect = null
-
-		}, (/** @type {HTMLElement} */ element, /** @type {string} */ key, /** @type {string} */ code) => {
-			const context = this.directive.getContext(element)
-			const func = createDynamicFunction(code, this.bus, context, 'event')
-			this.listeners.add(element, key, func)
 		})
 	}
 	/**
@@ -91,48 +99,58 @@ class Prototy {
 	    }
 
 	    return new Proxy(state, {
+		    getPrototypeOf(target) {
+			    return { target, instance: 'Proxy' }
+		    },
 	      get(target, property, receiver) {
-	        /** @type {Record<string | symbol, any>} */
-	        const t = target
+	        const value = Reflect.get(target, property, receiver)
+		      const isObservable = typeof property !== 'symbol' &&
+			      (property in target) &&
+			      typeof value !== 'function'
 
-	        const fullPath = path
-	          ? `${path}.${property.toString()}`
-	          : property.toString()
-
-	        if (self.activeEffect) {
-		        self.delayedAddToCache(fullPath)
-	        }
-	        return Reflect.get(t, property, receiver)
+		      if (isObservable && self.activeEffect) {
+			      const fullPath = path
+				      ? `${path}.${property.toString()}`
+				      : property.toString()
+			      self.delayedAddToCache(fullPath)
+		      }
+	        return value
 	      },
-		    set(target, property, value) {
+		    set(target, property, value, receiver) {
 			    if (typeof property === 'symbol') {
-				    return Reflect.set(target, property, value)
+				    return Reflect.set(target, property, value, receiver)
 			    }
-
 			    const t = target
 			    const oldValue = Reflect.get(t, property)
+
 			    const fullPath = path
 				    ? `${path}.${property.toString()}`
 				    : property.toString()
-
+			    console.log(fullPath)
 			    let newValue = value
-			    if (isObject(value)) {
+
+			    if (isObject(value) && value.instance !== 'Proxy') {
 				    newValue = self.createProxy(value, fullPath)
 			    }
 
-			    const success = Reflect.set(t, property, newValue)
+			    const success = Reflect.set(t, property, newValue, receiver)
 
-			    if (success && !isEqual(oldValue, newValue)) {
-				    const isArrayIndex = Array.isArray(target) && (/^\d+$/.test(property) || property === 'length')
+			    if (success) {
+				    const isLength = property === 'length' && Array.isArray(target)
+				    const hasChanged = !isEqual(oldValue, newValue)
 
-				    if (isArrayIndex && !self.pendingPaths.has(path)) {
-					    self.pendingPaths.add(path)
-					    queueMicrotask(() => {
+				    if (isLength || hasChanged) {
+					    const isArrayIndex = Array.isArray(target) && /^\d+$/.test(property)
+
+					    if ((isArrayIndex || isLength) && !self.pendingPaths.has(path)) {
+						    self.pendingPaths.add(path)
+						    queueMicrotask(() => {
+							    self.trigger(path)
+							    self.pendingPaths.delete(path)
+						    })
+					    } else if (!isLength && !isArrayIndex) {
 						    self.trigger(fullPath)
-						    self.pendingPaths.delete(path)
-					    })
-				    } else {
-					    self.trigger(fullPath)
+					    }
 				    }
 			    }
 			    return success
@@ -144,6 +162,7 @@ class Prototy {
 	 */
 	trigger(path) {
 		const arr = this.reactivity.find(path)
+		console.log(path)
 		arr.forEach(item => item.update())
 	}
 }

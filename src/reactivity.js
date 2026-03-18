@@ -21,7 +21,7 @@ export class Reactivity {
 		if (!this.#storage.has(key)) {
 			this.#storage.set(key, new Set())
 		}
-
+		// const weakRef = new WeakRef(element)
 		this.#storage.get(key).add({
 			element,
 			attr,

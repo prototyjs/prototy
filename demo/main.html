@@ -1,0 +1,27 @@
+<h1 :class="{ show: true }">Prototy Demo</h1>
+
+<div :context="{ p: state.product }" :onclick="state.product.params.count++">
+    <span>Product Count: </span><span :text="p.params.count"></span> <span :context.scope="{ p1: p.params }"><span :text="p1.count"></span></span>
+</div>
+<div :text="state.value"></div>
+
+<div :text.unit.$="state.value"></div>
+
+
+<div :text="state.test" id="test" :onclick="test.remove()" :onremove="console.log('remove')"></div>
+
+<div :text.json="state.arr"></div>
+
+<div class="container" :class="{ show: state.value === 3 }">class</div>
+
+<div :onclick="state.value++">add</div>
+
+<div :onclick="state.arr.splice(1, 0, { color: 'black' })">slice</div>
+<div :onclick="state.arr.push({ color: 'black' })">push</div>
+<div :onclick="state.arr.shift()">shift</div>
+<div :onclick="state.arr.unshift({ color: 'black' })">unshift</div>
+<div :onclick="state.arr[2].color = 'pink'">change</div>
+<hr>
+<div :each="state.arr" :component="components.color">
+
+</div>

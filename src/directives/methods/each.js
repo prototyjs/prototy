@@ -26,7 +26,6 @@ export function each(container, array, setup) {
 
 			// @ts-ignore
 			node = container._template.cloneNode(true)
-			node.removeAttribute('template')
 
 			nodeMap.set(item, node)
 			setup(node, item)
