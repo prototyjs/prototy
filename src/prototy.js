@@ -2,28 +2,28 @@ import { findElements } from './utils/findElements'
 import { isObject } from './utils/isObject'
 import { isEqual } from './utils/isEqual'
 import { createDynamicFunction } from './utils/createDynamicFunction'
-import Directives from './directives/Directives'
+import Directives from '@/directives/directives'
 import { Reactivity } from '@/reactivity.js'
 import { Listeners } from '@/listeners.js'
 
 /**
- * @typedef {object} PrototyOptions
- * @property {object} state
- * @property {HTMLElement} root
- * @property {object} static
- * @property {Record<string, Function>} handles
- * @property {object} directives
+ * @typedef { object } PrototyOptions
+ * @property { object } state
+ * @property { HTMLElement } root
+ * @property { object } static
+ * @property { Record<string, Function> } handles
+ * @property { object } directives
  */
 class Prototy {
 	/**
-	 * @param {PrototyOptions} options
+	 * @param { PrototyOptions } options
 	 */
 	constructor(options = { state: {}, root: document.body, static: {}, handles: {}, directives: {} }) {
 		this.root = options.root
 		this.static = options.static
 		this.state = this.createProxy(options.state)
 
-		/** @type {Record<string, Function>} */
+		/** @type { Record<string, Function> } */
 		this.handles = {}
 		this.pendingPaths = new Set()
 
@@ -47,11 +47,11 @@ class Prototy {
 	  document.addEventListener('DOMContentLoaded', () => this.setup(this.root))
 	}
 	/**
-	 * @param {HTMLElement} node
-	 * @param {object} item
+	 * @param { HTMLElement } node
+	 * @param { object } item
 	 */
 	setup(node, item) {
-		findElements(node, (/** @type {HTMLElement} */  element, /** @type {string} */ key, /** @type {string} */ code) => {
+		findElements(node, (/** @type { HTMLElement } */  element, /** @type { string } */ key, /** @type { string } */ code) => {
 			const context = this.directive.getContext(element)
 			const func = createDynamicFunction(code, this.bus, context, 'item')
 
@@ -65,16 +65,16 @@ class Prototy {
 			update()
 			this.activeEffect = null
 
-		}, (/** @type {HTMLElement} */ element, /** @type {string} */ key, /** @type {string} */ code) => {
+		}, (/** @type { HTMLElement } */ element, /** @type { string } */ key, /** @type { string } */ code) => {
 			const context = this.directive.getContext(element)
 			const func = createDynamicFunction(code, this.bus, context, 'event')
 			this.listeners.add(element, key, func)
 		})
 	}
 	/**
-	 * @param {any} state
-	 * @param {string} path
-	 * @returns {object}
+	 * @param { any } state
+	 * @param { string } path
+	 * @returns { object }
 	 */
 	createProxy(state, path = '') {
 		const self = this
@@ -92,7 +92,7 @@ class Prototy {
 
 	    return new Proxy(state, {
 	      get(target, property, receiver) {
-	        /** @type {Record<string | symbol, any>} */
+	        /** @type { Record<string | symbol, any> } */
 	        const t = target
 
 	        const fullPath = path
@@ -140,7 +140,7 @@ class Prototy {
 		})
 	}
 	/**
-	 * @param {string|number} path
+	 * @param { string|number } path
 	 */
 	trigger(path) {
 		const arr = this.reactivity.find(path)
