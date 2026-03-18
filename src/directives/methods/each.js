@@ -1,7 +1,7 @@
 /**
- * @param {HTMLElement & { _nodeMap?: WeakMap<object, Node>; _template?: HTMLElement }} container
- * @param {Array<Record<string, any>>} array
- * @param {Function} setup
+ * @param { HTMLElement & { _nodeMap?: WeakMap<object, Node>; _template?: HTMLElement }} container
+ * @param { Array<Record<string, any>> } array
+ * @param { Function } setup
  */
 export function each(container, array, setup) {
 	if (!container) {

@@ -9,14 +9,14 @@ import { context } from './methods/context.js'
 class Directives {
 	/**
 	 * @constructor
-	 * @param {object} clientDirectives
-	 * @param {Function} setup
+	 * @param { object } clientDirectives
+	 * @param { Function } setup
 	 */
 	constructor(clientDirectives = {}, setup) {
 		this.setup = setup
 		this.#contextStorage = new WeakMap()
 		/**
-		 * @type {{[key: string]: Function}}
+		 * @type {{ [key: string]: Function }}
 		 */
 		this.directives = {
 			...innerDirectives,
@@ -26,9 +26,9 @@ class Directives {
 	#contextStorage
 	/**
 	 *
-	 * @param {HTMLElement} element
-	 * @param {string} key
-	 * @param {any} value
+	 * @param { HTMLElement } element
+	 * @param { string } key
+	 * @param { any } value
 	 */
 	apply(element, key, value) {
 		const [directive, modifier, ...args] = key.split('.') // ['text', 'fixed', '2', ...] // text.fixed.2
@@ -50,8 +50,8 @@ class Directives {
 		}
 	}
 	/**
-	 * @param {HTMLElement} element
-	 * @returns {object}
+	 * @param { HTMLElement } element
+	 * @returns { object }
 	 */
 	getContext(element) {
 		let current = element

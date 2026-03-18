@@ -12,10 +12,10 @@ export class Reactivity {
 	#storage
 
 	/**
-	 * @param {HTMLElement} element
-	 * @param {string} attr
-	 * @param {string|number} key
-	 * @param {Function} update
+	 * @param { HTMLElement } element
+	 * @param { string } attr
+	 * @param { string|number } key
+	 * @param { Function } update
 	 */
 	add(element, attr, key, update) {
 		if (!this.#storage.has(key)) {
@@ -30,8 +30,8 @@ export class Reactivity {
 	}
 
 	/**
-	 * @param {string|number} key
-	 * @returns {Array<{el: HTMLElement, attr: string, update: Function}>}
+	 * @param { string|number } key
+	 * @returns { Array<{el: HTMLElement, attr: string, update: Function}> }
 	 */
 	find(key) {
 		const records = this.#storage.get(key)
@@ -39,7 +39,7 @@ export class Reactivity {
 	}
 
 	/**
-	 * @param {HTMLElement} element
+	 * @param { HTMLElement } element
 	 */
 	remove(element) {
 		for (const [key, records] of this.#storage.entries()) {
@@ -61,7 +61,7 @@ export class Reactivity {
 		this.#storage.clear()
 	}
 
-	/** @returns {number} */
+	/** @returns { number } */
 	get size() {
 		return this.#storage.size
 	}

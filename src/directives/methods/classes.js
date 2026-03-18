@@ -1,9 +1,9 @@
 import { isObject } from '../../utils/isObject.js'
 /**
  *
- * @param {HTMLElement} element
- * @param {object} value
- * @returns {void}
+ * @param { HTMLElement } element
+ * @param { object } value
+ * @returns { void }
  */
 export function classes(element, value) {
 	if (!isObject(value)) {

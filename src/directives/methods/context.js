@@ -1,8 +1,8 @@
 /**
- * @param {HTMLElement} element
- * @param {boolean} value
- * @param {object} storage
- * @param {string} modifier
+ * @param { HTMLElement } element
+ * @param { boolean } value
+ * @param { object } storage
+ * @param { string } modifier
  */
 export function context(element, value, storage, modifier) {
 	let parentContext = null

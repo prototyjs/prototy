@@ -1,13 +1,13 @@
 import { kebabToCamel } from './kebabToCamel'
 
 /**
- * @param {HTMLElement} node
- * @param {Function} fnProperty
- * @param {Function} fnListener
- * @returns {Array<HTMLElement>}
+ * @param { HTMLElement } node
+ * @param { Function } fnProperty
+ * @param { Function } fnListener
+ * @returns { Array<HTMLElement> }
  */
 export function findElements(node, fnProperty, fnListener) {
-	/** @typedef {HTMLElement & { _reactivity: Record<string, any> }} ReactiveElement */
+	/** @typedef { HTMLElement & { _reactivity: Record<string, any> }} ReactiveElement */
 	const results = []
 	const xpath = 'descendant-or-self::*[@*[starts-with(name(), ":")]]' // './/*[@*[starts-with(name(), \':\')]]'
 
@@ -25,7 +25,7 @@ export function findElements(node, fnProperty, fnListener) {
 
 		if (!(rawNode instanceof HTMLElement) || rawNode.hasAttribute('template')) continue
 
-		const element = /** @type {any} */ (rawNode)
+		const element = /** @type { any } */ (rawNode)
 
 		Array.from(element.attributes).forEach(attr => {
 			if (attr.name.startsWith(':each')) {
