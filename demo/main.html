@@ -14,7 +14,7 @@
 
 <div class="container" :class="{ show: state.value === 3 }">class</div>
 
-<div :onclick="state.value++">add</div>
+<button :onclick="state.value++" :disabled="true" :data-color="'red'">add</button>
 
 <div :onclick="state.arr.splice(1, 0, { color: 'black' })">slice</div>
 <div :onclick="state.arr.push({ color: 'black' })">push</div>

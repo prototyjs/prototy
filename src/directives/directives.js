@@ -3,6 +3,7 @@ import { attr } from './methods/attr.js'
 import { each } from './methods/each.js'
 import { context } from './methods/context.js'
 import { component } from './methods/component.js'
+import { applyModifier } from '@/directives/modifiers/applyModifier.js'
 
 /**
  * @class Directives
@@ -36,21 +37,24 @@ export class Directives {
 	 * @param { any } value
 	 */
 	apply(element, key, value) {
-		const [directive, modifier, ...args] = key.split('.') // ['text', 'fixed', '2', ...] // text.fixed.2
+		const [directive, modifier, ...args] = key.split('.')
 
 		if (Object.hasOwn(this.specialDirectives, directive)) {
 			this.specialDirectives[directive](element, value, modifier)
 			return
 		}
 
-		if (Object.hasOwn(this.directives,directive)) {
+		if (Object.hasOwn(this.directives, directive)) {
 			this.directives[directive](element, value, modifier, args)
-		} else if (Object.hasOwn(element, directive)) {
-			// const v = applyModifier(value, modifier, args, directive)
-			// element[directive] = v
-		} else {
-			attr(element, value, modifier, args, directive)
+			return
 		}
+
+		if (directive in element) {
+			this.property(element, value, modifier, args, directive)
+			return
+		}
+
+		attr(element, value, modifier, args, directive)
 	}
 	/**
 	 * @param { HTMLElement } element
@@ -66,5 +70,22 @@ export class Directives {
 			current = current.parentElement
 		}
 		return null
+	}
+
+	/**
+	 * @param { HTMLElement } element
+	 * @param { any } value
+	 * @param { string } modifier
+	 * @param { Array<string> } args
+	 * @param { string } directive
+	 */
+	property(element, value, modifier, args, directive) {
+		const v = applyModifier(value, modifier, args)
+
+		if (typeof element[directive] === 'boolean') {
+			element[directive] = Boolean(v)
+		} else {
+			element[directive] = v ?? ''
+		}
 	}
 }
