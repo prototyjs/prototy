@@ -2,67 +2,70 @@
  *
  */
 export class Reactivity {
+	#storage = new WeakMap()
+	// #effectElement = new WeakMap()
 	/**
-	 *
+	 * @param { object } target
+	 * @param { string } key
+	 * @param { Function } effect
 	 */
-	constructor() {
-		this.#storage = new Map()
-	}
-
-	#storage
-
-	/**
-	 * @param { HTMLElement } element
-	 * @param { string } attr
-	 * @param { string|number } key
-	 * @param { Function } update
-	 */
-	add(element, attr, key, update) {
-		if (!this.#storage.has(key)) {
-			this.#storage.set(key, new Set())
+	add(target, key, effect) {
+		if (!this.#storage.has(target)) {
+			this.#storage.set(target, new Map())
 		}
-		// const weakRef = new WeakRef(element)
-		this.#storage.get(key).add({
-			element,
-			attr,
-			update
-		})
+		const keysMap = this.#storage.get(target)
+		if (!keysMap.has(key)) {
+			keysMap.set(key, new Set())
+		}
+		keysMap.get(key).add(effect)
 	}
-
 	/**
-	 * @param { string|number } key
+	 * @param { object } target
+	 * @param { string } key
 	 * @returns { Array<{el: HTMLElement, attr: string, update: Function}> }
 	 */
-	find(key) {
-		const records = this.#storage.get(key)
-		return records ? Array.from(records) : []
+	find(target, key) {
+		const keysMap = this.#storage.get(target)
+		const effects = keysMap?.get(key)
+		return effects ? Array.from(effects) : []
 	}
-
 	/**
-	 * @param { HTMLElement } element
+	 * @param {Function} effect
+	 * @param {object} deps
 	 */
-	remove(element) {
-		for (const [key, records] of this.#storage.entries()) {
-			for (const record of records) {
-				if (record.element === element) {
-					records.delete(record)
+	removeEffect(effect, deps) {
+		console.log('[Reactivity] Removing effect, deps count:', deps?.size)
+		if (!deps) {
+			return
+		}
+		for (const dep of deps) {
+			const { target, property } = dep
+			const keysMap = this.#storage.get(target)
+			if (keysMap) {
+				const effects = keysMap.get(property)
+				if (effects) {
+					effects.delete(effect)
+					if (effects.size === 0) {
+						keysMap.delete(property)
+					}
+				}
+				if (keysMap.size === 0) {
+					this.#storage.delete(target)
 				}
 			}
-
-			if (records.size === 0) {
-				this.#storage.delete(key)
-			}
 		}
+		deps.clear()
 	}
 	/**
-	 *
+	 * @param {HTMLElement} element
 	 */
-	clear() {
-		this.#storage.clear()
-	}
-
-	/** @returns { number } */
-	get size() {
-		return this.#storage.size
+	removeElementEffects(element) {
+		if (!element._effects) {
+			return
+		}
+		for (const effect of element._effects) {
+			this.removeEffect(effect, effect.deps)
+		}
+		element._effects.clear()
 	}
 }

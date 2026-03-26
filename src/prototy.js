@@ -16,7 +16,7 @@ import { Nodes } from '@/nodes.js'
  */
 class Prototy {
 	/**
-	 * @param {PrototyOptions} options
+	 * @param { PrototyOptions } options
 	 */
 	constructor(options = { state: {}, root: document.body, static: {}, handles: {}, directives: {}, components: {} }) {
 		this.root = options.root
@@ -24,7 +24,7 @@ class Prototy {
 
 		/** @type {Record<string, Function>} */
 		this.handles = {}
-		this.pendingPaths = new Set()
+		this.pendingTargets = new Map()
 
 		this.directive = new Directives(options.directives, this.setup.bind(this))
 		this.reactivity = new Reactivity()
@@ -38,7 +38,7 @@ class Prototy {
 			},
 			fnRemove: (/** @type { HTMLElement } */ node) => {
 				this.listeners.remove(node)
-				this.reactivity.remove(node)
+				this.reactivity.removeElementEffects(node)
 				// event remove node
 			}
 		})
@@ -64,19 +64,27 @@ class Prototy {
 	 * @param { object } item
 	 */
 	setup(node, item) {
+
 		this.nodes.process(node, (/** @type {HTMLElement} */  element, /** @type {string} */ key, /** @type {string} */ code) => {
 			const context = this.directive.getContext(element)
 			const func = createDynamicFunction(code, this.bus, context, 'item')
-
 			const update = () => {
-				const res = func(item)
-				this.directive.apply(element, key, res)
+				this.reactivity.removeEffect(update, update.deps)
+				this.activeEffect = update
+				try {
+					const res = func(item)
+					this.directive.apply(element, key, res)
+				} finally {
+					this.activeEffect = null
+				}
 			}
-			this.delayedAddToCache = (path) => this.reactivity.add(element, key, path, update.bind(this))
+			if (!element._effects) {
+				element._effects = new Set()
+			}
+			element._effects.add(update)
 
-			this.activeEffect = update
+			update.deps = new Set()
 			update()
-			this.activeEffect = null
 		})
 	}
 	/**
@@ -109,10 +117,8 @@ class Prototy {
 			      typeof value !== 'function'
 
 		      if (isObservable && self.activeEffect) {
-			      const fullPath = path
-				      ? `${path}.${property.toString()}`
-				      : property.toString()
-			      self.delayedAddToCache(fullPath)
+			      self.reactivity.add(target, property, self.activeEffect)
+			      self.activeEffect.deps.add({ target, property })
 		      }
 	        return value
 	      },
@@ -120,37 +126,42 @@ class Prototy {
 			    if (typeof property === 'symbol') {
 				    return Reflect.set(target, property, value, receiver)
 			    }
-			    const t = target
-			    const oldValue = Reflect.get(t, property)
 
-			    const fullPath = path
-				    ? `${path}.${property.toString()}`
-				    : property.toString()
-			    console.log(fullPath)
+			    const oldValue = Reflect.get(target, property)
+			    const fullPath = path ? `${path}.${property.toString()}` : property.toString()
 			    let newValue = value
 
 			    if (isObject(value) && value.instance !== 'Proxy') {
 				    newValue = self.createProxy(value, fullPath)
 			    }
 
-			    const success = Reflect.set(t, property, newValue, receiver)
+			    const success = Reflect.set(target, property, newValue, receiver)
 
 			    if (success) {
-				    const isLength = property === 'length' && Array.isArray(target)
 				    const hasChanged = !isEqual(oldValue, newValue)
+				    const isArray = Array.isArray(target)
 
-				    if (isLength || hasChanged) {
-					    const isArrayIndex = Array.isArray(target) && /^\d+$/.test(property)
+				    const isIndex = isArray && !isNaN(Number(property))
+				    const isLength = isArray && property === 'length'
 
-					    if ((isArrayIndex || isLength) && !self.pendingPaths.has(path)) {
-						    self.pendingPaths.add(path)
-						    queueMicrotask(() => {
-							    self.trigger(path)
-							    self.pendingPaths.delete(path)
-						    })
-					    } else if (!isLength && !isArrayIndex) {
-						    self.trigger(fullPath)
+				    if (hasChanged || isLength) {
+					    if (isIndex) {
+						    return success
 					    }
+
+					    if (!self.pendingTargets.has(target)) {
+						    self.pendingTargets.set(target, new Set())
+
+						    queueMicrotask(() => {
+							    const changedKeys = self.pendingTargets.get(target)
+							    self.pendingTargets.delete(target)
+
+							    changedKeys.forEach(key => {
+								    self.trigger(target, key)
+							    })
+						    })
+					    }
+					    self.pendingTargets.get(target).add(property)
 				    }
 			    }
 			    return success
@@ -158,12 +169,17 @@ class Prototy {
 		})
 	}
 	/**
-	 * @param { string|number } path
+	 * @param { object } target
+	 * @param { string } key
 	 */
-	trigger(path) {
-		const arr = this.reactivity.find(path)
-		console.log(path)
-		arr.forEach(item => item.update())
+	trigger(target, key) {
+		const effects = this.reactivity.find(target, key)
+		console.log('[Trigger] Target:', target, `Key: ${key}, Found effects: ${effects.length}`)
+		effects.forEach(update => {
+			if (update !== this.activeEffect) {
+				update()
+			}
+		})
 	}
 }
 export default Prototy
