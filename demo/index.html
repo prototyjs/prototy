@@ -16,13 +16,11 @@
 
 		const prototy = new Prototy({
 			root: root,
-			const: {
-
-			},
 			static: {
 
 			},
 			state: {
+				show: false,
 				hidden: true,
 				test: 'remove',
 				value: 2,
@@ -52,7 +50,9 @@
 			},
             components: {
 	            main,
-                color: `<div :text="item.color" class="color"></div>`
+                color: `<div :text="item.color" class="color"></div>`,
+                first: '<h2>first</h2>',
+                second: '<h2>second</h2>',
             }
 		})
 

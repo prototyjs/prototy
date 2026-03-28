@@ -1,14 +1,9 @@
 /**
  * @param { string } content
- * @param { HTMLElement } [node]
  * @returns { DocumentFragment }
  */
-export function render(content, node) {
+export function render(content) {
 	const template = document.createElement('template')
 	template.innerHTML = content
-	if (node) {
-		node.appendChild(template.content)
-	} else {
-		return template.content.firstElementChild
-	}
+	return template.content
 }

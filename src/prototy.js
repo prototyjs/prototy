@@ -1,6 +1,7 @@
-import { isObject } from './utils/isObject'
-import { isEqual } from './utils/isEqual'
-import { createDynamicFunction } from './utils/createDynamicFunction'
+import { isObject } from '@/utils/isObject'
+import { isEqual } from '@/utils/isEqual'
+import { createDynamicFunction } from '@/utils/createDynamicFunction'
+import { mapComponents } from '@/utils/mapComponents'
 import { Directives } from './directives/directives.js'
 import { Reactivity } from '@/reactivity.js'
 import { Listeners } from '@/listeners.js'
@@ -55,7 +56,7 @@ class Prototy {
 		  state: this.state,
 		  handles: this.handles,
 		  static: options.static,
-		  components: options.components
+		  components: mapComponents(options.components)
 	  }
 	  this.setup(this.root)
 	}
