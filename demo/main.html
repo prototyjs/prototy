@@ -3,16 +3,16 @@
 <div :context="{ p: state.product }" :onclick="state.product.params.count++">
     <span>Product Count: </span><span :text="p.params.count"></span> <span :context.scope="{ p1: p.params }"><span :text="p1.count"></span></span>
 </div>
+
 <div :text.json="state.product" id="foo"></div>
+
 <div :text="state.product.params.count"></div>
 
 <div :onclick="state.product.params.count++">add</div>
+<div :component="state.show ? components.first : components.second" :oncreate="console.log(event)" :ondestroy="console.log(event)"></div>
+<div :component="state.show && components.first" :oncreate="console.log(event)" :ondestroy="console.log(event)"></div>
 
-<div :onclick="foo.remove()">remove</div>
-
-<div :text.unit.$="state.value"></div>
-
-
+<button :onclick="state.show = !state.show">show</button>
 
 
 <div :text.json="state.arr"></div>
