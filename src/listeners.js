@@ -51,7 +51,7 @@ export class Listeners {
 			handler = async ( event ) => {
 				const { detail, timestamp, done } = event
 				const h = handle({ name: detail.name, target: element, timestamp  })
-				mods.includes('async') ? await h : h
+				element._async ? await h : h
 				done()
 			}
 		}

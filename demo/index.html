@@ -33,15 +33,15 @@
 				arr: [{ color: 'red' }, { color: 'green' }, { color: 'blue' }, { color: 'green' }]
 
 			},
-            handles: {
+			methods: {
 				my: () => {}
             },
 			setters: {
-				count: {
-					pre: (v) => v > 0 ? v : 0,
-					post: (v) => console.log('Updated!')
+				'arr.1.color'(newValue, oldValue) {
+					console.log(newValue, oldValue, this)
+					this.state.arr[1].color = 'oooo' // protected
+                    return newValue
 				},
-				name: (v) => console.log('Updated!') // short for post
 			},
 			directives: {
 				myHidden: (element, value) => {
