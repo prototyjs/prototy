@@ -4,8 +4,9 @@ import { dispatchEvent } from '@/utils/dispatchEvent'
 /**
  * @param { HTMLElement } element
  * @param { string } value
+ * @param { Function } setup
  */
-export function component(element, value= {}) {
+export function component(element, value= {}, setup) {
 	if (element._component) {
 		dispatchEvent(element, 'destroy', { name: element._component })
 		element._component = null
@@ -16,14 +17,22 @@ export function component(element, value= {}) {
 		return
 	}
 
-	const template = render(value.template)
+	const node = render(value.template)
 	element._component = value.name
 
 	if (element.hasAttribute(':each')) {
-		element._template = template.firstElementChild
+		element._template = node.firstElementChild
 	} else {
 		element.innerHTML = ''
-		element.appendChild(template)
-		dispatchEvent(element, 'create', { name: value.name })
+
+		if (element._async) {
+			dispatchEvent(element, 'create', { name: value.name }, () => {
+				setup(node)
+				element.appendChild(node)
+			})
+		} else {
+			element.appendChild(node)
+		}
+
 	}
 }
