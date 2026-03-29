@@ -1,35 +1,36 @@
 import { isObject } from '@/utils/isObject'
-import { isEqual } from '@/utils/isEqual'
+import { shouldTrigger } from '@/utils/shouldTrigger'
 import { createDynamicFunction } from '@/utils/createDynamicFunction'
 import { mapComponents } from '@/utils/mapComponents'
-import { Directives } from './directives/directives.js'
-import { Reactivity } from '@/reactivity.js'
-import { Listeners } from '@/listeners.js'
-import { Nodes } from '@/nodes.js'
+import { Directives } from './directives/directives'
+import { Reactivity } from '@/reactivity'
+import { Listeners } from '@/listeners'
+import { Nodes } from '@/nodes'
+import { bindMethods } from '@/utils/bindMethods'
 
+const IS_PROXY = Symbol('is_proxy')
 /**
  * @typedef { object } PrototyOptions
  * @property { object } state
  * @property { HTMLElement } root
  * @property { object } static
- * @property { Record<string, Function> } handles
+ * @property { Record<string, Function> } methods
+ * @property { Record<string, Function> } setters
  * @property { object } directives
  */
 class Prototy {
 	/**
 	 * @param { PrototyOptions } options
 	 */
-	constructor(options = { state: {}, root: document.body, static: {}, handles: {}, directives: {}, components: {} }) {
+	constructor(options = { state: {}, root: document.body, static: {}, methods: {}, directives: {}, components: {}, setters: {} }) {
 		this.root = options.root
-		this.state = this.createProxy(options.state)
-
-		/** @type {Record<string, Function>} */
-		this.handles = {}
 		this.pendingTargets = new Map()
-
 		this.directive = new Directives(options.directives, this.setup.bind(this))
 		this.reactivity = new Reactivity()
 		this.listeners = new Listeners()
+
+		this.state = this.createProxy(options.state)
+
 		this.nodes = new Nodes({
 			root: this.root,
 			fnListener: (/** @type { HTMLElement } */ node, /** @type { string } */ key, /** @type { string } */ code) => {
@@ -44,20 +45,20 @@ class Prototy {
 			}
 		})
 
-		if (options.handles) {
-		  Object.keys(options.handles).forEach((key) => {
-		    if (typeof options.handles[key] === 'function') {
-		      this.handles[key] = options.handles[key].bind(this)
-		    }
-		  })
+		this.methods = {}
+		this.setters = {}
+		this.activeSetters = new Set()
+
+		this.bus = {
+			state: this.state,
+			methods: this.methods,
+			static: options.static,
+			components: mapComponents(options.components)
 		}
 
-	  this.bus = {
-		  state: this.state,
-		  handles: this.handles,
-		  static: options.static,
-		  components: mapComponents(options.components)
-	  }
+		bindMethods(this.methods, options.methods, this.bus)
+		bindMethods(this.setters, options.setters, this.bus)
+
 	  this.setup(this.root)
 	}
 	/**
@@ -112,6 +113,9 @@ class Prototy {
 			    return { target, instance: 'Proxy' }
 		    },
 	      get(target, property, receiver) {
+		      if (property === IS_PROXY) {
+			      return true
+		      }
 	        const value = Reflect.get(target, property, receiver)
 		      const isObservable = typeof property !== 'symbol' &&
 			      (property in target) &&
@@ -132,42 +136,47 @@ class Prototy {
 			    const fullPath = path ? `${path}.${property.toString()}` : property.toString()
 			    let newValue = value
 
-			    if (isObject(value) && value.instance !== 'Proxy') {
+			    if (isObject(value) && !value[IS_PROXY]) {
 				    newValue = self.createProxy(value, fullPath)
+			    }
+
+			    if (self.activeSetters.has(fullPath)) {
+				    return Reflect.set(target, property, newValue, receiver)
+			    }
+
+			    if (typeof self.setters?.[fullPath] === 'function') {
+				    self.activeSetters.add(fullPath)
+				    try {
+					    newValue = self.setters[fullPath](newValue, oldValue)
+				    } finally {
+					    self.activeSetters.delete(fullPath)
+				    }
 			    }
 
 			    const success = Reflect.set(target, property, newValue, receiver)
 
-			    if (success) {
-				    const hasChanged = !isEqual(oldValue, newValue)
-				    const isArray = Array.isArray(target)
-
-				    const isIndex = isArray && !isNaN(Number(property))
-				    const isLength = isArray && property === 'length'
-
-				    if (hasChanged || isLength) {
-					    if (isIndex) {
-						    return success
-					    }
-
-					    if (!self.pendingTargets.has(target)) {
-						    self.pendingTargets.set(target, new Set())
-
-						    queueMicrotask(() => {
-							    const changedKeys = self.pendingTargets.get(target)
-							    self.pendingTargets.delete(target)
-
-							    changedKeys.forEach(key => {
-								    self.trigger(target, key)
-							    })
-						    })
-					    }
-					    self.pendingTargets.get(target).add(property)
-				    }
+			    if (success && shouldTrigger(target, property, oldValue, newValue)) {
+				    self.schedule(target, property)
 			    }
 			    return success
 		    }
 		})
+	}
+	/**
+	 * @param { object } target
+	 * @param { string } property
+	 */
+	schedule(target, property) {
+		if (!this.pendingTargets.has(target)) {
+			this.pendingTargets.set(target, new Set())
+
+			queueMicrotask(() => {
+				const changedKeys = this.pendingTargets.get(target)
+				this.pendingTargets.delete(target)
+				changedKeys.forEach(key => this.trigger(target, key))
+			})
+		}
+		this.pendingTargets.get(target).add(property)
 	}
 	/**
 	 * @param { object } target
