@@ -50,9 +50,17 @@ export class Listeners {
 			}
 			handler = async ( event ) => {
 				const { detail, timestamp, done } = event
-				const h = handle({ name: detail.name, target: element, timestamp  })
-				element._async ? await h : h
-				done()
+				const h = handle({ name: detail.name, target: element, timestamp, signal: detail.signal })
+				try {
+					element._async ? await h : h
+				} catch (e) {
+					if (detail.signal?.aborted) {
+						return
+					}
+					console.error(`Error in component [${detail.name}]:`, e)
+				} finally {
+					done()
+				}
 			}
 		}
 		const listener = { name, handler, options }
