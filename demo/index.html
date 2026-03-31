@@ -34,7 +34,10 @@
 
 			},
 			methods: {
-				my: () => {}
+				query: ({ signal }) => new Promise(res => {
+					const t = setTimeout(res, 2000)
+					signal?.addEventListener('abort', () => clearTimeout(t), { once: true })
+				})
             },
 			setters: {
 				'arr.1.color'(newValue, oldValue) {

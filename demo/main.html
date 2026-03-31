@@ -9,7 +9,7 @@
 <div :text="state.product.params.count"></div>
 
 <div :onclick="state.product.params.count++">add</div>
-<div :component="state.show ? components.first : components.second" :oncreate.async="new Promise(resolve => setTimeout(resolve, 2000))" :ondestroy="console.log(event)"></div>
+<div :component="state.show ? components.first : components.second" :oncreate.async="methods.query(event)" :ondestroy="console.log(event)"></div>
 <!--<div :component="state.show && components.first" :oncreate="console.log(event)" :ondestroy="console.log(event)"></div>-->
 
 <button :onclick="state.show = !state.show">show</button>

@@ -7,12 +7,19 @@ import { dispatchEvent } from '@/utils/dispatchEvent'
  * @param { Function } setup
  */
 export function component(element, value= {}, setup) {
+	if (element._abortController) {
+		element._abortController.abort()
+	}
+	const controller = new AbortController()
+	element._abortController = controller
+	const { signal } = controller
+
 	if (element._component) {
 		dispatchEvent(element, 'destroy', { name: element._component })
 		element._component = null
 	}
 
-	if (!value.template) {
+	if (!value || !value.template) {
 		element.innerHTML = ''
 		return
 	}
@@ -26,12 +33,17 @@ export function component(element, value= {}, setup) {
 		element.innerHTML = ''
 
 		if (element._async) {
-			dispatchEvent(element, 'create', { name: value.name }, () => {
+			dispatchEvent(element, 'create', { name: value.name, signal }, () => {
+				if (signal.aborted) {
+					return
+				}
 				setup(node)
 				element.appendChild(node)
 			})
 		} else {
+			setup(node)
 			element.appendChild(node)
+			dispatchEvent(element, 'create', { name: value.name })
 		}
 
 	}
