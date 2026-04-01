@@ -1,3 +1,4 @@
+import { log } from '@/utils/log'
 /**
  *
  */
@@ -53,11 +54,12 @@ export class Listeners {
 				const h = handle({ name: detail.name, target: element, timestamp, signal: detail.signal })
 				try {
 					element._async ? await h : h
-				} catch (e) {
+				} catch (error) {
 					if (detail.signal?.aborted) {
 						return
 					}
-					console.error(`Error in component [${detail.name}]:`, e)
+					log.error('Failed to execute "{0}" listener in component <{1}>', ':oncreate', detail.name)
+					throw error
 				} finally {
 					done()
 				}
