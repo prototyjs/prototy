@@ -1,3 +1,4 @@
+import { nextTick } from '@/utils/nextTick'
 import { isObject } from '@/utils/isObject'
 import { shouldTrigger } from '@/utils/shouldTrigger'
 import { createDynamicFunction } from '@/utils/createDynamicFunction'
@@ -192,4 +193,4 @@ class Prototy {
 		})
 	}
 }
-export default Prototy
+export { Prototy, nextTick }
