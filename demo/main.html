@@ -6,9 +6,9 @@
 
 <div :text.json="state.product" id="foo"></div>
 
-<div :text="state.product.params.count"></div>
+<div :text="state.product.params.count + static.params.x"></div>
 
-<div :onclick="state.product.params.count++">add</div>
+<div :onclick="methods.add()">add</div>
 <div :component="state.show ? components.first : components.second" :oncreate.async="methods.query(event)" :ondestroy="console.log(event)"></div>
 <!--<div :component="state.show && components.first" :oncreate="console.log(event)" :ondestroy="console.log(event)"></div>-->
 

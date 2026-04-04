@@ -11,13 +11,16 @@
     </style>
     <script type="module">
 
-		import Prototy from '../src/prototy.js'
+		import { Prototy } from '../src/prototy.js'
         import main from './main.html?raw'
 
 		const prototy = new Prototy({
-			root: root,
+			root: document.getElementById('root'),
 			static: {
-
+                params: {
+					x: 0,
+                    y: 0
+                }
 			},
 			state: {
 				show: false,
@@ -34,6 +37,9 @@
 
 			},
 			methods: {
+				add() {
+					this.state.product.params.count++
+                },
 				query: ({ signal }) => new Promise(res => {
 					const t = setTimeout(res, 2000)
 					signal?.addEventListener('abort', () => clearTimeout(t), { once: true })

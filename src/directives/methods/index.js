@@ -7,7 +7,7 @@ import { show } from './show.js'
 import { style } from './style.js'
 
 export default {
-	classes,
+	class: classes,
 	text,
 	each,
 	html,
