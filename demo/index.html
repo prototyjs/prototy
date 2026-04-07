@@ -9,66 +9,7 @@
             color: red;
         }
     </style>
-    <script type="module">
-
-		import { Prototy } from '../src/prototy.js'
-        import main from './main.html?raw'
-
-		const prototy = new Prototy({
-			root: document.getElementById('root'),
-			static: {
-                params: {
-					x: 0,
-                    y: 0
-                }
-			},
-			state: {
-				show: false,
-				hidden: true,
-				test: 'remove',
-				value: 2,
-				product: {
-					price: 10,
-					params: {
-						count: 1
-					}
-				},
-				arr: [{ color: 'red' }, { color: 'green' }, { color: 'blue' }, { color: 'green' }]
-
-			},
-			methods: {
-				add() {
-					this.state.product.params.count++
-                },
-				query: ({ signal }) => new Promise(res => {
-					const t = setTimeout(res, 2000)
-					signal?.addEventListener('abort', () => clearTimeout(t), { once: true })
-				})
-            },
-			setters: {
-				'arr.1.color'(newValue, oldValue) {
-					console.log(newValue, oldValue, this)
-					this.state.arr[1].color = 'oooo' // protected
-                    return newValue
-				},
-			},
-			directives: {
-				myHidden: (element, value) => {
-					if (typeof value === 'boolean') element.hidden = value
-				}
-			},
-			modifiers: {
-				add: (value, postFix) => value + postFix
-			},
-            components: {
-	            main,
-                color: `<div :text="item.color" class="color"></div>`,
-                first: '<h2>first</h2>',
-                second: '<h2>second</h2>',
-            }
-		})
-
-    </script>
+    <script src="app.js" type="module"></script>
 </head>
 <body>
     <div id="root" :component="components.main"></div>

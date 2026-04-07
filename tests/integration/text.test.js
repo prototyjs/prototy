@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { Prototy, nextTick } from '@/prototy.js'
+import { prototy, nextTick } from '@/index.js'
 
-let prototy
+let app
 
 describe('Text Directive', () => {
 	beforeEach(() => {
 		document.body.innerHTML = '<div :text="state.value"></div>'
-		prototy = new Prototy({
+		app = prototy({
 			root: document.body,
 			state: { value: 1 }
 		})
@@ -14,7 +14,7 @@ describe('Text Directive', () => {
 
 	it('should update text after state change', async () => {
 		expect(document.body.firstElementChild.textContent).toBe('1')
-		prototy.state.value++
+		app.state.value++
 		await nextTick()
 		expect(document.body.firstElementChild.textContent).toBe('2')
 	})
