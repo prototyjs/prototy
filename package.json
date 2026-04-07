@@ -1,8 +1,8 @@
 {
   "name": "prototy",
   "version": "1.0.0",
-  "description": "Vanilla JS utility library",
-  "main": "src/prototy.js",
+  "description": "A simple JS framework for rapid UI prototyping on the web.",
+  "main": "src/index.js",
   "scripts": {
     "dev": "vite --config vite.config.demo.js",
     "build": "npm run lint && npm run build:lib",
@@ -13,7 +13,6 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:ui": "vitest --ui",
     "test:ci": "vitest run --coverage --reporter=json --outputFile=test-results.json"
   },
   "repository": {
