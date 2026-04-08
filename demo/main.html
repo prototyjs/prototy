@@ -6,7 +6,7 @@
 
 <div :text.json="state.product" id="foo"></div>
 
-<div :text="state.product.params.count + static.params.x"></div>
+<div :text="state.product.params.count + params.x"></div>
 
 <div :onclick="methods.add()">add</div>
 <div :component="state.show ? components.first : components.second" :oncreate.async="methods.query(event)" :ondestroy="console.log(event)"></div>
@@ -14,7 +14,7 @@
 
 <button :onclick="state.show = !state.show">show</button>
 
-
+<div :el="'myEl'">Element</div>
 <div :text.json="state.arr"></div>
 
 <div :onclick="state.arr.splice(1, 0, { color: 'black' })">slice</div>

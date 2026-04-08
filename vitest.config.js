@@ -11,7 +11,8 @@ export default defineConfig({
 			reporter: ['text', 'json', 'html'],
 			include: ['src/**/*.js'],
 			exclude: ['tests/**', '**/*.test.js']
-		}
+		},
+		silent: true
 	},
 	resolve: {
 		alias: {

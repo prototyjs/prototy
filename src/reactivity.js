@@ -34,7 +34,6 @@ export class Reactivity {
 	 * @param {object} deps
 	 */
 	removeEffect(effect, deps) {
-		console.log('[Reactivity] Removing effect, deps count:', deps?.size)
 		if (!deps) {
 			return
 		}
@@ -59,7 +58,7 @@ export class Reactivity {
 	/**
 	 * @param {HTMLElement} element
 	 */
-	removeElementEffects(element) {
+	removeEffects(element) {
 		if (!element._effects) {
 			return
 		}
