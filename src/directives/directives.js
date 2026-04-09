@@ -50,7 +50,7 @@ export class Directives {
 		}
 
 		if (directive in element) {
-			this.property(element, value, modifier, args, directive)
+			this.primitive(element, value, modifier, args, directive)
 			return
 		}
 
@@ -79,7 +79,7 @@ export class Directives {
 	 * @param { Array<string> } args
 	 * @param { string } directive
 	 */
-	property(element, value, modifier, args, directive) {
+	primitive(element, value, modifier, args, directive) {
 		const v = applyModifier(value, modifier, args)
 
 		if (typeof element[directive] === 'boolean') {
