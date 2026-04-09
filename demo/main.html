@@ -1,4 +1,4 @@
-<h1 :class="{ show: true }" :dataset="{index: 2}">Prototy Demo</h1>
+<h1 :class="{ show: true }">Prototy Demo</h1>
 
 <div :context="{ p: state.product }" :onclick="state.product.params.count++">
     <span>Product Count: </span><span :text="p.params.count"></span> <span :context.scope="{ p1: p.params }"><span :text="p1.count"></span></span>

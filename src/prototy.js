@@ -1,5 +1,4 @@
 import { isObject } from '@/utils/isObject'
-import { shouldTrigger } from '@/utils/shouldTrigger'
 import { dynamicFunction } from '@/utils/dynamicFunction'
 import { mapComponents } from '@/utils/mapComponents'
 import { Directives } from '@/directives/directives'
@@ -123,6 +122,7 @@ class Prototy {
 			      return true
 		      }
 	        const value = Reflect.get(target, property, receiver)
+
 		      const isObservable = typeof property !== 'symbol' &&
 			      (property in target) &&
 			      typeof value !== 'function'
@@ -138,7 +138,15 @@ class Prototy {
 				    return Reflect.set(target, property, value, receiver)
 			    }
 
+			    const isArray = Array.isArray(target)
 			    const oldValue = Reflect.get(target, property)
+
+			    const isLength = isArray && property === 'length'
+
+			    if (!isLength && Object.is(oldValue, value)) {
+				    return true
+			    }
+
 			    const fullPath = path ? `${path}.${property.toString()}` : property.toString()
 			    let newValue = value
 
@@ -146,24 +154,30 @@ class Prototy {
 				    newValue = self.createProxy(value, fullPath)
 			    }
 
-			    if (self.activeSetters.has(fullPath)) {
-				    return Reflect.set(target, property, newValue, receiver)
-			    }
-
-			    if (typeof self.setters?.[fullPath] === 'function') {
+			    if (typeof self.setters?.[fullPath] === 'function' && !self.activeSetters.has(fullPath)) {
 				    self.activeSetters.add(fullPath)
 				    try {
 					    newValue = self.setters[fullPath](newValue, oldValue)
+					    if (Object.is(oldValue, newValue)) {
+								return true
+					    }
 				    } finally {
 					    self.activeSetters.delete(fullPath)
 				    }
 			    }
 
+
 			    const success = Reflect.set(target, property, newValue, receiver)
 
-			    if (success && shouldTrigger(target, property, oldValue, newValue)) {
+			    if (success) {
+
 				    self.schedule(target, property)
+
+				    if (isArray && !isLength) {
+					    self.schedule(target, 'length')
+				    }
 			    }
+
 			    return success
 		    }
 		})

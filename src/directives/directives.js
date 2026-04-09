@@ -48,9 +48,8 @@ export class Directives {
 
 		if (Object.hasOwn(this.directives,directive)) {
 			this.directives[directive](element, value, modifier, args)
-		} else if (Object.hasOwn(element, directive)) {
-			// const v = applyModifier(value, modifier, args, directive)
-			// element[directive] = v
+		} else if (directive in element) {
+			element[directive] = value
 		} else {
 			attr(element, value, modifier, args, directive)
 		}
