@@ -44,6 +44,17 @@ export class Directives {
 			return
 		}
 
+		if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
+			if (directive === 'style') {
+				this.directives.style(element, value, modifier, args)
+			} else if (directive === 'attr') {
+				this.directives.attr(element, value, modifier, args, directive)
+			} else {
+				console.warn(`Directive "${directive}" cannot handle object value`)
+			}
+			return
+		}
+
 		if (Object.hasOwn(this.directives, directive)) {
 			this.directives[directive](element, value, modifier, args)
 			return
