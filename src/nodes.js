@@ -7,22 +7,22 @@ export class Nodes {
 	/**
 	 * @param { object } options
 	 * @param { HTMLElement } options.root
-	 * @param { Function } options.fnListener
-	 * @param { Function } options.fnRemove
+	 * @param { Function } options.listeners
+	 * @param { Function } options.removed
 	 */
-	constructor({ root, fnListener, fnRemove }) {
-		this.fnListener = fnListener
-		this.fnRemove = fnRemove
+	constructor({ root, listeners, removed }) {
+		this.listeners = listeners
+		this.removed = removed
 		this.nodes = new WeakSet()
 		this.observer = null
 		this.#observer(root)
 	}
-
 	/**
 	 * @param { HTMLElement } node
-	 * @param { Function } fnProperty
+	 * @param { Function } handler
 	 */
-	process(node, fnProperty) {
+	// eslint-disable-next-line sonarjs/cognitive-complexity
+	process(node, handler) {
 		const stack = [node]
 
 		while (stack.length) {
@@ -36,15 +36,7 @@ export class Nodes {
 					const attr = attrs[i]
 					if (attr.name.charCodeAt(0) === 58) {
 						hasDirectives = true
-						const name = attr.name.slice(1)
-						const key = kebabToCamel(name)
-
-						if (key.charCodeAt(0) === 111 && key.charCodeAt(1) === 110) {
-							this.fnListener(current, key.slice(2).toLowerCase(), attr.value)
-						} else {
-							fnProperty(current, key, attr.value)
-						}
-						current.removeAttribute(attr.name)
+						this.directive(attr, current, handler)
 					}
 				}
 
@@ -60,7 +52,22 @@ export class Nodes {
 			}
 		}
 	}
+	/**
+	 * @param { string } attr
+	 * @param { HTMLElement } node
+	 * @param { Function } handler
+	 */
+	directive(attr, node, handler) {
+		const name = attr.name.slice(1)
+		const key = kebabToCamel(name)
 
+		if (key.charCodeAt(0) === 111 && key.charCodeAt(1) === 110) {
+			this.listeners(node, key.slice(2).toLowerCase(), attr.value)
+		} else {
+			handler(node, key, attr.value)
+		}
+		node.removeAttribute(attr.name)
+	}
 	/**
 	 * @param { HTMLElement } root
 	 */
@@ -86,7 +93,7 @@ export class Nodes {
 	 */
 	#check(node) {
 		if (this.nodes.has(node)) {
-			this.fnRemove(node)
+			this.removed(node)
 		}
 		const stack = [node]
 		while (stack.length) {
@@ -94,7 +101,7 @@ export class Nodes {
 			let child = current.firstElementChild
 			while (child) {
 				if (this.nodes.has(child)) {
-					this.fnRemove(child)
+					this.removed(child)
 				}
 				stack.push(child)
 				child = child.nextElementSibling

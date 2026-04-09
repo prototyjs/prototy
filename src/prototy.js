@@ -1,6 +1,6 @@
 import { isObject } from '@/utils/isObject'
 import { shouldTrigger } from '@/utils/shouldTrigger'
-import { createDynamicFunction } from '@/utils/createDynamicFunction'
+import { dynamicFunction } from '@/utils/dynamicFunction'
 import { mapComponents } from '@/utils/mapComponents'
 import { Directives } from '@/directives/directives'
 import { Reactivity } from '@/reactivity'
@@ -13,7 +13,7 @@ const IS_PROXY = Symbol('is_proxy')
  * @typedef { object } PrototyOptions
  * @property { object } state
  * @property { HTMLElement } root
- * @property { object } static
+ * @property { object } params
  * @property { Record<string, Function> } methods
  * @property { Record<string, Function> } setters
  * @property { object } directives
@@ -22,59 +22,65 @@ class Prototy {
 	/**
 	 * @param { PrototyOptions } options
 	 */
-	constructor(options = { state: {}, root: document.body, static: {}, methods: {}, directives: {}, components: {}, setters: {} }) {
-		this.root = options.root
+	constructor({
+		state = {},
+		root = document.body,
+		params = {},
+		methods = {},
+		directives= {},
+		components= {},
+		setters= {}
+	}) {
 		this.pendingTargets = new Map()
-		this.directive = new Directives(options.directives, this.setup.bind(this))
-		this.reactivity = new Reactivity()
-		this.listeners = new Listeners()
-
-		this.state = this.createProxy(options.state)
-
-		this.nodes = new Nodes({
-			root: this.root,
-			fnListener: (/** @type { HTMLElement } */ node, /** @type { string } */ key, /** @type { string } */ code) => {
-				const context = this.directive.getContext(node)
-				const func = createDynamicFunction(code, this.bus, context, 'event')
-				this.listeners.add(node, key, func)
-			},
-			fnRemove: (/** @type { HTMLElement } */ node) => {
-				this.listeners.remove(node)
-				this.reactivity.removeElementEffects(node)
-				// event remove node
-			}
-		})
+		this.state = this.createProxy(state)
 
 		this.methods = {}
 		this.setters = {}
 		this.activeSetters = new Set()
 
 		this.bus = {
+			root,
 			state: this.state,
 			methods: this.methods,
-			static: options.static,
-			components: mapComponents(options.components)
+			params,
+			components: mapComponents(components),
+			els: {}
 		}
 
-		bindMethods(this.methods, options.methods, this.bus)
-		bindMethods(this.setters, options.setters, this.bus)
+		bindMethods(this.methods, methods, this.bus)
+		bindMethods(this.setters, setters, this.bus)
 
-	  this.setup(this.root)
+		this.directive = new Directives(directives, this.setup.bind(this), this.bus)
+		this.reactivity = new Reactivity()
+		this.listeners = new Listeners()
+
+		this.nodes = new Nodes({
+			root,
+			listeners: (/** @type { HTMLElement } */ element, /** @type { string } */ key, /** @type { string } */ value) => {
+				const context = this.directive.getContext(element)
+				const func = dynamicFunction(value, this.bus, context, 'event')
+				this.listeners.add(element, key, (...arg) => func(element, ...arg))
+			},
+			removed: (/** @type { HTMLElement } */ element) => {
+				this.listeners.remove(element)
+				this.reactivity.removeEffects(element)
+			}
+		})
+	  this.setup(root)
 	}
 	/**
 	 * @param { HTMLElement } node
 	 * @param { object } item
 	 */
 	setup(node, item) {
-
 		this.nodes.process(node, (/** @type {HTMLElement} */  element, /** @type {string} */ key, /** @type {string} */ code) => {
 			const context = this.directive.getContext(element)
-			const func = createDynamicFunction(code, this.bus, context, 'item')
+			const func = dynamicFunction(code, this.bus, context,  'item')
 			const update = () => {
 				this.reactivity.removeEffect(update, update.deps)
 				this.activeEffect = update
 				try {
-					const res = func(item)
+					const res = func(element, item)
 					this.directive.apply(element, key, res)
 				} finally {
 					this.activeEffect = null

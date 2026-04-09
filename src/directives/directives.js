@@ -3,6 +3,7 @@ import { attr } from './methods/attr.js'
 import { each } from './methods/each.js'
 import { context } from './methods/context.js'
 import { component } from './methods/component.js'
+import { el } from './methods/el.js'
 
 /**
  * @class Directives
@@ -12,8 +13,9 @@ export class Directives {
 	 * @constructor
 	 * @param { object } clientDirectives
 	 * @param { Function } setup
+	 * @param { object } bus
 	 */
-	constructor(clientDirectives = {}, setup) {
+	constructor(clientDirectives = {}, setup, bus) {
 		this.#contextStorage = new WeakMap()
 		/**
 		 * @type {{ [key: string]: Function }}
@@ -25,7 +27,8 @@ export class Directives {
 		this.specialDirectives = {
 			each: (element, value) => each(element, value, setup),
 			context: (element, value, modifier) => context(element, value, modifier, this.#contextStorage),
-			component: (element, value) => component(element, value, setup)
+			component: (element, value) => component(element, value, setup),
+			el: (element, value) => el(element, value, bus)
 		}
 	}
 	#contextStorage

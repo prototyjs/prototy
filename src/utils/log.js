@@ -2,8 +2,6 @@ import { isObject } from '@/utils/isObject'
 
 const isDev = process.env.NODE_ENV !== 'production'
 
-// log.warn('Invalid prop type: "{0}" expected to be a string, but received {1}.', propName, typeof value)
-
 export const log = {
 	/**
 	 * @param { string } text
@@ -11,12 +9,12 @@ export const log = {
 	 */
 	error(text, ...args) {
 		if (isDev) {
-			console.error(`[PROTOTY] ${format(text, args)}`)
+			console.error(`[PROTOTY] ${format(text, args)}`, ...args)
 		}
 	},
 	warn(text, ...args) {
 		if (isDev) {
-			console.warn(`[PROTOTY] ${format(text, args)}`)
+			console.warn(`[PROTOTY] ${format(text, args)}`, ...args)
 		}
 	}
 }
@@ -28,7 +26,18 @@ export const log = {
  */
 function format(text, args) {
 	return args.reduce((m, v, i) => {
-		const val = isObject(v) ? JSON.stringify(v) : v
-		return m.replace(`{${i}}`, val)
+
+		let val = v
+
+		if (isObject(v) && !(v instanceof HTMLElement)) {
+			try {
+				val = JSON.stringify(v)
+				val = val.length > 100 ? val.slice(0, 100) + '...' : val
+			} catch {
+				val = String(v)
+			}
+		}
+
+		return m.replace(`{${i}}`, String(val))
 	}, text)
 }
