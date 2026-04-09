@@ -1,17 +1,29 @@
-node_modules
-.idea
-.vscode
+# Dependencies
+node_modules/
+
+# Editor settings
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
 
 # Build outputs
 dist/
 dist-demo/
 coverage/
-*.log
-.DS_Store
+test-results.json
 
-# Environment
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Environment variables (Secrets)
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env*.local

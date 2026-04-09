@@ -1,4 +1,4 @@
-import { prototy } from '../src/index.js'
+import { prototy } from '@prototy'
 import main from './main.html?raw'
 
 const app = prototy({
