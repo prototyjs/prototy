@@ -1,3 +1,4 @@
+import { log } from '@/utils/log'
 /**
  *
  */
@@ -14,9 +15,9 @@ export class Listeners {
 	/**
 	 * @param { HTMLElement } element
 	 * @param { string } attr
-	 * @param { Function } fn
+	 * @param { Function } handle
 	 */
-	add(element, attr, fn) {
+	add(element, attr, handle) {
 		if (!this.#storage.has(element)) {
 			this.#storage.set(element, [])
 		}
@@ -28,7 +29,7 @@ export class Listeners {
 			passive: mods.includes('passive')
 		}
 
-		const handler = (/** @type {any} */ event) => {
+		let handler = (event) => {
 			if (mods.includes('stop')) {
 				event.stopPropagation()
 			}
@@ -41,13 +42,31 @@ export class Listeners {
 			if (mods.includes('enter') && event.key !== 'Enter') {
 				return
 			}
-
-			fn(event)
+			handle(event)
 		}
 
+		if (name === 'create') {
+			if (mods.includes('async')) {
+				element._async = true
+			}
+			handler = async ( event ) => {
+				const { detail, timestamp, done } = event
+				const h = handle({ name: detail.name, target: element, timestamp, signal: detail.signal })
+				try {
+					element._async ? await h : h
+				} catch (error) {
+					if (detail.signal?.aborted) {
+						return
+					}
+					log.error('Failed to execute "{0}" listener in component <{1}>', ':oncreate', detail.name)
+					throw error
+				} finally {
+					done()
+				}
+			}
+		}
 		const listener = { name, handler, options }
 		this.#storage.get(element).push(listener)
-
 		element.addEventListener(name, handler, options)
 	}
 

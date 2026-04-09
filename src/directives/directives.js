@@ -26,7 +26,7 @@ export class Directives {
 		this.specialDirectives = {
 			each: (element, value) => each(element, value, setup),
 			context: (element, value, modifier) => context(element, value, modifier, this.#contextStorage),
-			component: (element, value) => component(element, value)
+			component: (element, value) => component(element, value, setup)
 		}
 	}
 	#contextStorage

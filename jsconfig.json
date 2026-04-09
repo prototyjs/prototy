@@ -7,11 +7,12 @@
 		"module": "ESNext",
 		"target": "ESNext",
 		"moduleResolution": "bundler",
+        "allowImportingTsExtensions": false,
         "maxNodeModuleJsDepth": 0,
 		"baseUrl": ".",
 		"paths": {
 			"@/*": [
-				"./src/*"
+				"src/*"
 			]
 		},
 		"jsx": "preserve",

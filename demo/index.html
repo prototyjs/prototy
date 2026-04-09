@@ -9,54 +9,7 @@
             color: red;
         }
     </style>
-    <script type="module">
-
-		import Prototy from '../src/prototy.js'
-        import main from './main.html?raw'
-
-		const prototy = new Prototy({
-			root: root,
-			const: {
-
-			},
-			static: {
-
-			},
-			state: {
-				hidden: true,
-				test: 'remove',
-				value: 2,
-				product: {
-					price: 10,
-					params: {
-						count: 1
-					}
-				},
-				arr: [{ color: 'red' }, { color: 'green' }, { color: 'blue' }, { color: 'green' }]
-
-			},
-			setters: {
-				count: {
-					pre: (v) => v > 0 ? v : 0,
-					post: (v) => console.log('Updated!')
-				},
-				name: (v) => console.log('Updated!') // short for post
-			},
-			directives: {
-				myHidden: (element, value) => {
-					if (typeof value === 'boolean') element.hidden = value
-				}
-			},
-			modifiers: {
-				add: (value, postFix) => value + postFix
-			},
-            components: {
-	            main,
-                color: `<div :text="item.color" class="color"></div>`
-            }
-		})
-
-    </script>
+    <script src="app.js" type="module"></script>
 </head>
 <body>
     <div id="root" :component="components.main"></div>

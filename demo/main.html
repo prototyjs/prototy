@@ -1,26 +1,27 @@
-<h1 :class="{ show: true }">Prototy Demo</h1>
+<h1 :class="{ show: true }" :dataset="{index: 2}">Prototy Demo</h1>
 
 <div :context="{ p: state.product }" :onclick="state.product.params.count++">
     <span>Product Count: </span><span :text="p.params.count"></span> <span :context.scope="{ p1: p.params }"><span :text="p1.count"></span></span>
 </div>
-<div :text="state.value"></div>
 
-<div :text.unit.$="state.value"></div>
+<div :text.json="state.product" id="foo"></div>
 
+<div :text="state.product.params.count + static.params.x"></div>
 
-<div :text="state.test" id="test" :onclick="test.remove()" :onremove="console.log('remove')"></div>
+<div :onclick="methods.add()">add</div>
+<div :component="state.show ? components.first : components.second" :oncreate.async="methods.query(event)" :ondestroy="console.log(event)"></div>
+<!--<div :component="state.show && components.first" :oncreate="console.log(event)" :ondestroy="console.log(event)"></div>-->
+
+<button :onclick="state.show = !state.show">show</button>
+
 
 <div :text.json="state.arr"></div>
-
-<div class="container" :class="{ show: state.value === 3 }">class</div>
-
-<button :onclick="state.value++" :disabled="true" :data-color="'red'">add</button>
 
 <div :onclick="state.arr.splice(1, 0, { color: 'black' })">slice</div>
 <div :onclick="state.arr.push({ color: 'black' })">push</div>
 <div :onclick="state.arr.shift()">shift</div>
 <div :onclick="state.arr.unshift({ color: 'black' })">unshift</div>
-<div :onclick="state.arr[2].color = 'pink'">change</div>
+<div :onclick="state.arr[1].color = 'pink'">change</div>
 <hr>
 <div :each="state.arr" :component="components.color">
 
