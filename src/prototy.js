@@ -159,13 +159,12 @@ class Prototy {
 				    try {
 					    newValue = self.setters[fullPath](newValue, oldValue)
 					    if (Object.is(oldValue, newValue)) {
-								return true
+							return true
 					    }
 				    } finally {
 					    self.activeSetters.delete(fullPath)
 				    }
 			    }
-
 
 			    const success = Reflect.set(target, property, newValue, receiver)
 
