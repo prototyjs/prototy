@@ -3,6 +3,8 @@ import { attr } from './methods/attr.js'
 import { each } from './methods/each.js'
 import { context } from './methods/context.js'
 import { component } from './methods/component.js'
+import { primitive } from './primitive.js'
+import { object } from './methods/object.js'
 import { applyModifier } from '@/directives/modifiers/applyModifier.js'
 
 /**
@@ -45,8 +47,8 @@ export class Directives {
 		}
 
 		if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
-			if (directive === 'style') {
-				this.directives.style(element, value, modifier, args)
+			if (directive === 'object') {
+				this.directives.object(element, value, modifier, args)
 			} else if (directive === 'attr') {
 				this.directives.attr(element, value, modifier, args, directive)
 			} else {
@@ -61,7 +63,7 @@ export class Directives {
 		}
 
 		if (directive in element) {
-			this.primitive(element, value, modifier, args, directive)
+			primitive(element, value, modifier, args, directive)
 			return
 		}
 
@@ -81,22 +83,5 @@ export class Directives {
 			current = current.parentElement
 		}
 		return null
-	}
-
-	/**
-	 * @param { HTMLElement } element
-	 * @param { any } value
-	 * @param { string } modifier
-	 * @param { Array<string> } args
-	 * @param { string } directive
-	 */
-	primitive(element, value, modifier, args, directive) {
-		const v = applyModifier(value, modifier, args)
-
-		if (typeof element[directive] === 'boolean') {
-			element[directive] = Boolean(v)
-		} else {
-			element[directive] = v ?? ''
-		}
 	}
 }

@@ -4,7 +4,8 @@ import { each } from './each.js'
 import { attr } from './attr.js'
 import { html } from './html.js'
 import { show } from './show.js'
-import { style } from './style.js'
+import { object } from './object.js'
+export { primitive } from '../primitive.js'
 
 export default {
 	class: classes,
@@ -12,6 +13,6 @@ export default {
 	each,
 	html,
 	show,
-	style,
+	style: object,
 	attr
 }
