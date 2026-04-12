@@ -29,9 +29,7 @@ describe('El Directive', () => {
 
 		prototy({ root: document.body })
 
-		expect(consoleSpy).toHaveBeenCalledWith(
-			expect.stringContaining('[PROTOTY] ReferenceError: myElement is not defined'),
-			expect.anything()
-		)
+		const lastLogMessage = consoleSpy.mock.lastCall[0]
+		expect(lastLogMessage).toContain('[PROTOTY] ReferenceError: myElement is not defined')
 	})
 })
