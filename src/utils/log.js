@@ -26,9 +26,7 @@ export const log = {
  */
 function format(text, args) {
 	return args.reduce((m, v, i) => {
-
 		let val = v
-
 		if (isObject(v) && !(v instanceof HTMLElement)) {
 			try {
 				val = JSON.stringify(v)
@@ -37,7 +35,6 @@ function format(text, args) {
 				val = String(v)
 			}
 		}
-
-		return m.replace(`{${i}}`, String(val))
+		return m.split(`{${i}}`).join(String(val))
 	}, text)
 }

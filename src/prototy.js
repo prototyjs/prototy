@@ -1,4 +1,5 @@
 import { isObject } from '@/utils/isObject'
+import { unbind } from '@/utils/unbind.js'
 import { dynamicFunction } from '@/utils/dynamicFunction'
 import { mapComponents } from '@/utils/mapComponents'
 import { Directives } from '@/directives/directives'
@@ -63,6 +64,7 @@ class Prototy {
 			removed: (/** @type { HTMLElement } */ element) => {
 				this.listeners.remove(element)
 				this.reactivity.removeEffects(element)
+				unbind(element)
 			}
 		})
 	  this.setup(root)
@@ -80,7 +82,7 @@ class Prototy {
 				this.activeEffect = update
 				try {
 					const res = func(element, item)
-					this.directive.apply(element, key, res)
+					this.directive.apply(element, key, res, code)
 				} finally {
 					this.activeEffect = null
 				}

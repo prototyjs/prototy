@@ -10,7 +10,7 @@ describe('El Directive', () => {
 	})
 
 	it('should register element in app.els when string name is provided', () => {
-		document.body.innerHTML = '<div :el="\'myElement\'"></div>'
+		document.body.innerHTML = '<div :el="`myElement`"></div>'
 		const app = prototy({ root: document.body })
 		expect(document.body.firstElementChild).toBe(app.els?.myElement)
 	})

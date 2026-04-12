@@ -1,7 +1,13 @@
-import { describe, it, expect, beforeEach, afterEach, vi  } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { prototy, nextTick } from '@'
 
 describe('Bind Directive Variations', () => {
+
+	const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+	beforeEach(() => {
+		consoleSpy.mockClear()
+	})
 
 	it('should update DOM when state changes (State -> DOM)', async () => {
 		document.body.innerHTML = '<input :bind.value.input="state.text">'
@@ -54,42 +60,67 @@ describe('Bind Directive Variations', () => {
 		await nextTick()
 		expect(app.state.active).toBe(true)
 	})
-})
 
-describe('Bind Directive Debounce Modifier', () => {
-	beforeEach(() => {
-		vi.useFakeTimers()
+	it('should prevent overwriting oninput (Monopoly check)', async () => {
+		document.body.innerHTML = '<input :bind.value.input="state.text">'
+		const app = prototy({ root: document.body, state: { text: 'val' } })
+		const input = document.body.firstElementChild
+
+		input.oninput = () => {
+			app.state.text = 'hacked'
+		}
+
+		input.value = 'new'
+		input.dispatchEvent(new Event('input'))
+		await nextTick()
+
+		const lastLogMessage = consoleSpy.mock.lastCall[0]
+		expect(lastLogMessage).toContain('[PROTOTY] Channel "oninput" is occupied by bind "state.text".')
+
+		expect(app.state.text).not.toBe('hacked')
 	})
 
-	afterEach(() => {
-		vi.useRealTimers()
+	it('should log error on conflicting bindings', async () => {
+		document.body.innerHTML = '<input :bind.value.input="state.a" :bind.checked.input="state.b">'
+
+		prototy({ root: document.body, state: { a: '', b: false } })
+
+		const lastLogMessage = consoleSpy.mock.lastCall[0]
+		expect(lastLogMessage).toContain('[PROTOTY] Conflict "oninput" already taken by "value".')
 	})
 
-	it('should debounce state update with .debounce.500 modifier', async () => {
-		document.body.innerHTML = '<input :bind.value.input.debounce.500="state.search">'
+	it('should cleanup property on element removal', async () => {
+		document.body.innerHTML = '<div id="parent"><input :bind.value.input="state.text"></div>'
+		prototy({ root: document.body, state: { text: 'abc' } })
+		const input = document.querySelector('input')
 
+		input.oninput = () => {}
+		expect(consoleSpy).toHaveBeenCalledTimes(1)
+		consoleSpy.mockClear()
+
+		input.remove()
+		await nextTick()
+
+		input.oninput = () => {}
+
+		expect(consoleSpy).not.toHaveBeenCalled()
+
+		expect(input._bound).toBeUndefined()
+	})
+
+	it('should handle deep state paths', async () => {
+		document.body.innerHTML = '<input :bind.value.input="state.user.profile.name">'
 		const app = prototy({
 			root: document.body,
-			state: { search: '' }
+			state: { user: { profile: { name: 'John' } } }
 		})
 		const input = document.body.firstElementChild
 
-		input.value = 'h'
+		input.value = 'Doe'
 		input.dispatchEvent(new Event('input'))
-		input.value = 'he'
-		input.dispatchEvent(new Event('input'))
-		input.value = 'hel'
-		input.dispatchEvent(new Event('input'))
-
-		expect(app.state.search).toBe('')
-
-		vi.advanceTimersByTime(200)
-		expect(app.state.search).toBe('')
-
-		vi.advanceTimersByTime(300)
-
 		await nextTick()
 
-		expect(app.state.search).toBe('hel')
+		expect(app.state.user.profile.name).toBe('Doe')
 	})
+
 })

@@ -1,4 +1,5 @@
 import innerDirectives from './methods/index.js'
+import { bind } from './methods/bind.js'
 import { attr } from './methods/attr.js'
 import { each } from './methods/each.js'
 import { context } from './methods/context.js'
@@ -21,14 +22,13 @@ export class Directives {
 		 * @type {{ [key: string]: Function }}
 		 */
 		this.directives = {
+			...clientDirectives,
 			...innerDirectives,
-			...clientDirectives
-		}
-		this.specialDirectives = {
 			each: (element, value) => each(element, value, setup),
 			context: (element, value, modifier) => context(element, value, modifier, this.#contextStorage),
 			component: (element, value) => component(element, value, setup),
-			el: (element, value) => el(element, value, bus)
+			el: (element, value) => el(element, value, bus),
+			bind: (element, value, modifier, args, code) => bind(element, value, modifier, args, code, bus)
 		}
 	}
 	#contextStorage
@@ -37,17 +37,13 @@ export class Directives {
 	 * @param { HTMLElement } element
 	 * @param { string } key
 	 * @param { any } value
+	 * @param { string } code
 	 */
-	apply(element, key, value) {
+	apply(element, key, value, code) {
 		const [directive, modifier, ...args] = key.split('.') // ['text', 'fixed', '2', ...] // text.fixed.2
 
-		if (Object.hasOwn(this.specialDirectives, directive)) {
-			this.specialDirectives[directive](element, value, modifier)
-			return
-		}
-
 		if (Object.hasOwn(this.directives,directive)) {
-			this.directives[directive](element, value, modifier, args)
+			this.directives[directive](element, value, modifier, args, code)
 		} else if (directive in element) {
 			element[directive] = value
 		} else {

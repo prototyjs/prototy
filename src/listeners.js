@@ -58,7 +58,7 @@ export class Listeners {
 					if (detail.signal?.aborted) {
 						return
 					}
-					log.error('Failed to execute "{0}" listener in component <{1}>', ':oncreate', detail.name)
+					log.error('Failed to execute "{0}" listener in component <{1}>.', ':oncreate', detail.name)
 					throw error
 				} finally {
 					done()
