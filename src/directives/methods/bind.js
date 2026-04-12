@@ -11,6 +11,11 @@ import { log } from '@/utils/log.js'
  * @param { object } bus
  */
 export function bind(element, value, property, args, code, bus) {
+	const isWritable = code.startsWith('state.') || code.startsWith('item.')
+	if (!isWritable) {
+		return log.error('Invalid bind path "{0}". Path must start with "state." (e.g., state.text)', code, element)
+	}
+
 	const modifiers = [...args]
 	const eventType = modifiers.shift() || 'input'
 	const eventName = 'on' + eventType

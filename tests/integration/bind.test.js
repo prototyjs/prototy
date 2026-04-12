@@ -123,4 +123,13 @@ describe('Bind Directive Variations', () => {
 		expect(app.state.user.profile.name).toBe('Doe')
 	})
 
+	it('should log error if path does not start with "state."', async () => {
+		document.body.innerHTML = '<input :bind.value.input="username">'
+		prototy({
+			root: document.body,
+			state: { username: 'admin' }
+		})
+		const lastLogMessage = consoleSpy.mock.lastCall[0]
+		expect(lastLogMessage).toContain('[PROTOTY] Invalid bind path "username". Path must start with "state."')
+	})
 })
