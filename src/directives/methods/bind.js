@@ -13,7 +13,8 @@ import { log } from '@/utils/log.js'
 export function bind(element, value, property, args, code, bus) {
 	const isWritable = code.startsWith('state.') || code.startsWith('item.')
 	if (!isWritable) {
-		return log.error('Invalid bind path "{0}". Path must start with "state." (e.g., state.text)', code, element)
+		log.error('Invalid bind path "{0}". Path must start with "state." (e.g., state.text)', code, element)
+		return
 	}
 
 	const modifiers = [...args]
