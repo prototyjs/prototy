@@ -25,10 +25,12 @@ class Prototy {
 	 */
 	constructor(options = { state: {}, root: document.body, static: {}, methods: {}, directives: {}, components: {}, setters: {} }) {
 		this.root = options.root
+		this.els = {}
 		this.pendingTargets = new Map()
-		this.directive = new Directives(options.directives, this.setup.bind(this))
+		this.directive = new Directives(options.directives, this.setup.bind(this), this)
 		this.reactivity = new Reactivity()
 		this.listeners = new Listeners()
+		
 
 		this.state = this.createProxy(options.state)
 
@@ -54,7 +56,8 @@ class Prototy {
 			state: this.state,
 			methods: this.methods,
 			static: options.static,
-			components: mapComponents(options.components)
+			components: mapComponents(options.components),
+			els: this.els
 		}
 
 		bindMethods(this.methods, options.methods, this.bus)
@@ -70,6 +73,10 @@ class Prototy {
 
 		this.nodes.process(node, (/** @type {HTMLElement} */  element, /** @type {string} */ key, /** @type {string} */ code) => {
 			const context = this.directive.getContext(element)
+			if (key === 'el') {
+				this.directive.apply(element, key, code)
+				return
+			}
 			const func = createDynamicFunction(code, this.bus, context, 'item')
 			const update = () => {
 				this.reactivity.removeEffect(update, update.deps)

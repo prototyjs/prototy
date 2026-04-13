@@ -1,76 +1,96 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Prototy Demo</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prototy Demo</title>
     <style>
-        .show {
-            color: red;
-        }
+      .show {
+        color: red;
+      }
+     
     </style>
     <script type="module">
+      import { Prototy } from "../src/prototy.js";
+      import main from "./main.html?raw";
 
-		import { Prototy } from '../src/prototy.js'
-        import main from './main.html?raw'
-
-		const prototy = new Prototy({
-			root: document.getElementById('root'),
-			static: {
-                params: {
-					x: 0,
-                    y: 0
-                }
-			},
-			state: {
-				show: false,
-				hidden: true,
-				test: 'remove',
-				value: 2,
-				product: {
-					price: 10,
-					params: {
-						count: 1
-					}
-				},
-				arr: [{ color: 'red' }, { color: 'green' }, { color: 'blue' }, { color: 'green' }]
-
-			},
-			methods: {
-				add() {
-					this.state.product.params.count++
-                },
-				query: ({ signal }) => new Promise(res => {
-					const t = setTimeout(res, 2000)
-					signal?.addEventListener('abort', () => clearTimeout(t), { once: true })
-				})
+      const prototy = new Prototy({
+        root: document.getElementById("root"),
+        static: {
+          params: {
+            x: 0,
+            y: 0,
+          },
+        },
+        state: {
+          show: false,
+          hidden: true,
+          test: "remove",
+          value: 2,
+          product: {
+            price: 10,
+            params: {
+              count: 1,
             },
-			setters: {
-				'arr.1.color'(newValue, oldValue) {
-					console.log(newValue, oldValue, this)
-					this.state.arr[1].color = 'oooo' // protected
-                    return newValue
-				},
-			},
-			directives: {
-				myHidden: (element, value) => {
-					if (typeof value === 'boolean') element.hidden = value
-				}
-			},
-			modifiers: {
-				add: (value, postFix) => value + postFix
-			},
-            components: {
-	            main,
-                color: `<div :text="item.color" class="color"></div>`,
-                first: '<h2>first</h2>',
-                second: '<h2>second</h2>',
-            }
-		})
-
+          },
+          arr: [
+            { color: "red" },
+            { color: "green" },
+            { color: "blue" },
+            { color: "green" },
+          ],
+          notes: [],
+          inputValue: "",
+        },
+        methods: {
+          add() {
+            this.state.product.params.count++;
+            console.log(this.els.my);
+            prototy.els.my.style.backgroundColor = "red";
+          },
+          query: ({ signal }) =>
+            new Promise((res) => {
+              const t = setTimeout(res, 2000);
+              signal?.addEventListener("abort", () => clearTimeout(t), {
+                once: true,
+              });
+            }),
+          inputChangeHandler(e) {
+            console.log(e);
+            this.state.inputValue = e.target.value;
+          },
+          addNewNote() {
+            console.log(this.state.inputValue);
+            this.state.notes.push({ note: this.state.inputValue });
+            this.state.inputValue = 'test';
+          },
+        },
+        setters: {
+          "arr.1.color"(newValue, oldValue) {
+            console.log(newValue, oldValue, this);
+            this.state.arr[1].color = "oooo"; // protected
+            return newValue;
+          },
+        },
+        directives: {
+          myHidden: (element, value) => {
+            if (typeof value === "boolean") element.hidden = value;
+          },
+        },
+        modifiers: {
+          add: (value, postFix) => value + postFix,
+        },
+        components: {
+          main,
+          color: `<div :text="item.color" class="color"></div>`,
+          first: "<h2>first</h2>",
+          second: "<h2>second</h2>",
+          note: `<div :text="item.note"></div>`,
+        },
+      });
     </script>
-</head>
-<body>
+  </head>
+  <body>
     <div id="root" :component="components.main"></div>
-</body>
+  </body>
 </html>

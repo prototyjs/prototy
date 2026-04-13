@@ -12,12 +12,14 @@ export class Directives {
 	 * @constructor
 	 * @param { object } clientDirectives
 	 * @param { Function } setup
+	 * @param { object} prototy
 	 */
-	constructor(clientDirectives = {}, setup) {
+	constructor(clientDirectives = {}, setup, prototy) {
 		this.#contextStorage = new WeakMap()
 		/**
 		 * @type {{ [key: string]: Function }}
 		 */
+		this.prototy = prototy
 		this.directives = {
 			...innerDirectives,
 			...clientDirectives
@@ -25,7 +27,12 @@ export class Directives {
 		this.specialDirectives = {
 			each: (element, value) => each(element, value, setup),
 			context: (element, value, modifier) => context(element, value, modifier, this.#contextStorage),
-			component: (element, value) => component(element, value, setup)
+			component: (element, value) => component(element, value, setup),
+			el: (element, value) => {
+				if (value) {
+					this.prototy.els[value] = element
+				}
+			}
 		}
 	}
 	#contextStorage
@@ -45,9 +52,9 @@ export class Directives {
 
 		if (Object.hasOwn(this.directives,directive)) {
 			this.directives[directive](element, value, modifier, args)
-		} else if (Object.hasOwn(element, directive)) {
-			// const v = applyModifier(value, modifier, args, directive)
-			// element[directive] = v
+		} else if (directive in element) {
+			//const v = applyModifier(value, modifier, args, directive)
+			element[directive] = value
 		} else {
 			attr(element, value, modifier, args, directive)
 		}
