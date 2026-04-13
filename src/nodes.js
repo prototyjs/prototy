@@ -24,10 +24,8 @@ export class Nodes {
 	// eslint-disable-next-line sonarjs/cognitive-complexity
 	process(node, handler) {
 		const stack = [node]
-
 		while (stack.length) {
 			const current = stack.pop()
-
 			if (current.nodeType === 1) {
 				const attrs = current.attributes
 				let hasDirectives = false
@@ -44,10 +42,10 @@ export class Nodes {
 					this.nodes.add(current)
 				}
 
-				let child = current.firstElementChild
+				let child = current.lastElementChild
 				while (child) {
 					stack.push(child)
-					child = child.nextElementSibling
+					child = child.previousElementSibling
 				}
 			}
 		}

@@ -65,6 +65,11 @@ class Prototy {
 				this.listeners.remove(element)
 				this.reactivity.removeEffects(element)
 				unbind(element)
+				if (element._el) {
+					if (this.bus.els[element._el] === element) {
+						delete this.bus.els[element._el]
+					}
+				}
 			}
 		})
 	  this.setup(root)
