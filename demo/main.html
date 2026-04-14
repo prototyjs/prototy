@@ -1,4 +1,4 @@
-<h1 :class="{ show: true }" :style="{ background: 'red' }" :dataset="{ index: 1 }" data-index="1" >Prototy Demo</h1>
+<h1 :class="{ show: true }" :style="{ background: 'red' }" data-index="1" >Prototy Demo</h1>
 
 <div :context="{ p: state.product }" :onclick="state.product.params.count++">
     <span>Product Count: </span><span :text="p.params.count"></span> <span :context.scope="{ p1: p.params }"><span :text="p1.count"></span></span>
@@ -14,7 +14,7 @@
 
 <button :onclick="state.show = !state.show">show</button>
 
-<div :el="'myEl'">Element</div>
+<div el="myEl">Element</div>
 <div :text.json="state.arr"></div>
 
 <div :onclick="state.arr.splice(1, 0, { color: 'black' })">slice</div>

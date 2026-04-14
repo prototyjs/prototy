@@ -10,9 +10,10 @@ export class Nodes {
 	 * @param { Function } options.listeners
 	 * @param { Function } options.removed
 	 */
-	constructor({ root, listeners, removed }) {
+	constructor({ root, listeners, removed, attribute }) {
 		this.listeners = listeners
 		this.removed = removed
+		this.attribute = attribute
 		this.nodes = new WeakSet()
 		this.observer = null
 		this.#observer(root)
@@ -32,9 +33,12 @@ export class Nodes {
 
 				for (let i = attrs.length - 1; i >= 0; i--) {
 					const attr = attrs[i]
+					this.attribute(current, attr.name, attr.value)
 					if (attr.name.charCodeAt(0) === 58) {
 						hasDirectives = true
 						this.directive(attr, current, handler)
+					} else if (attr.name === 'el') {
+						hasDirectives = true
 					}
 				}
 

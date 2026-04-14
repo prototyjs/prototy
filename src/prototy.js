@@ -70,6 +70,14 @@ class Prototy {
 						delete this.bus.els[element._el]
 					}
 				}
+			},
+			attribute: (/** @type { HTMLElement } */ element, /** @type { string } */ key, /** @type { string } */ value) => {
+				if (key === 'el') {
+					const name = value
+					element._el = name
+					this.bus.els[name] = element
+					console.log(this.bus.els)
+				}
 			}
 		})
 	  this.setup(root)
@@ -87,7 +95,9 @@ class Prototy {
 				this.activeEffect = update
 				try {
 					const res = func(element, item)
-					this.directive.apply(element, key, res, code)
+					if (key !== 'el') {
+						this.directive.apply(element, key, res, code)
+					}
 				} finally {
 					this.activeEffect = null
 				}

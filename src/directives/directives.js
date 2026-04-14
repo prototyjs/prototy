@@ -4,7 +4,6 @@ import { attr } from './methods/attr.js'
 import { each } from './methods/each.js'
 import { context } from './methods/context.js'
 import { component } from './methods/component.js'
-import { el } from './methods/el.js'
 
 /**
  * @class Directives
@@ -27,7 +26,6 @@ export class Directives {
 			each: (element, value) => each(element, value, setup),
 			context: (element, value, modifier) => context(element, value, modifier, this.#contextStorage),
 			component: (element, value) => component(element, value, setup),
-			el: (element, value) => el(element, value, bus),
 			bind: (element, value, modifier, args, code) => bind(element, value, modifier, args, code, bus)
 		}
 	}
