@@ -1,4 +1,5 @@
 import { render } from '@/utils/render'
+import { mount } from '@/utils/mount'
 import { dispatchEvent } from '@/utils/dispatchEvent'
 
 /**
@@ -18,16 +19,19 @@ export function component(element, value= {}, setup) {
 		dispatchEvent(element, 'destroy', { name: element._component })
 		element._component = null
 	}
-
 	if (!value || !value.template) {
 		element.innerHTML = ''
 		return
 	}
-
+	const isEach = element.hasAttribute(':each')
 	const node = render(value.template)
+
 	element._component = value.name
 
-	if (element.hasAttribute(':each')) {
+	if (isEach) {
+		if (element._template) {
+			return
+		}
 		element._template = node.firstElementChild
 	} else {
 		element.innerHTML = ''
@@ -37,14 +41,11 @@ export function component(element, value= {}, setup) {
 				if (signal.aborted) {
 					return
 				}
-				setup(node)
-				element.appendChild(node)
+				mount(element, node, setup)
 			})
 		} else {
-			setup(node)
-			element.appendChild(node)
+			mount(element, node, setup)
 			dispatchEvent(element, 'create', { name: value.name })
 		}
-
 	}
 }

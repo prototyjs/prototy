@@ -7,6 +7,7 @@ import { Reactivity } from '@/reactivity'
 import { Listeners } from '@/listeners'
 import { Nodes } from '@/nodes'
 import { bindMethods } from '@/utils/bindMethods'
+import { log } from '@/utils/log'
 
 const IS_PROXY = Symbol('is_proxy')
 /**
@@ -76,7 +77,34 @@ class Prototy {
 					const name = value
 					element._el = name
 					this.bus.els[name] = element
-					console.log(this.bus.els)
+				}
+				if (key === ':each') {
+					const hasContent = element.firstElementChild || element.textContent.trim() !== ''
+					if (hasContent) {
+						log.error('Content (slots) is not allowed inside the :each directive.', element)
+					}
+				}
+				if (key === ':component') {
+					if (element._slots) {
+						return
+					}
+					element._slots = {}
+					Array.from(element.childNodes).forEach(node => {
+						if (node.nodeType === 3 && !node.textContent.trim()) {
+							node.remove()
+							return
+						}
+						const name = (node.nodeType === 1 && node.getAttribute('slot')) || 'default'
+						node._keep = true
+						node.remove()
+
+						if (element._slots[name]) {
+							log.error('Slot "{0}" is already occupied in component', name, element)
+							return
+						}
+						this.setup(node)
+						element._slots[name] = node
+					})
 				}
 			}
 		})

@@ -94,17 +94,20 @@ export class Nodes {
 	 * @param { HTMLElement } node
 	 */
 	#check(node) {
-		if (this.nodes.has(node)) {
-			this.removed(node)
+		if (node._keep && node.parentNode) {
+			return
 		}
 		const stack = [node]
 		while (stack.length) {
 			const current = stack.pop()
+
+			if (this.nodes.has(current)) {
+				this.removed(current)
+				this.nodes.delete(current)
+			}
+
 			let child = current.firstElementChild
 			while (child) {
-				if (this.nodes.has(child)) {
-					this.removed(child)
-				}
 				stack.push(child)
 				child = child.nextElementSibling
 			}

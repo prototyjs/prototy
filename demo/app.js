@@ -48,7 +48,7 @@ const app = prototy({
 	components: {
 		main,
 		color: `<div :text="item.color" class="color"></div>`,
-		first: '<h2>first</h2>',
-		second: '<h2>second</h2>'
+		first: '<h2>first</h2><slot></slot>',
+		second: '<h2>second</h2><slot></slot>'
 	}
 })
