@@ -4,7 +4,7 @@
     <span>Product Count: </span><span :text="p.params.count"></span> <span :context.scope="{ p1: p.params }"><span :text="p1.count"></span></span>
 </div>
 
-<div :text.json="state.product" id="foo"></div>
+<div :text.json="state.product" id="foo" :data-index!!.attr.trim="state.url + ' '" data-index!!="//" text=""></div>
 
 <div :text="state.product.params.count"></div>
 

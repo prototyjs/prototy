@@ -85,7 +85,6 @@ describe('Component Slots', () => {
 		})
 
 		expect(document.querySelector('.async')).toBeNull()
-		await nextTick()
 		await new Promise(r => setTimeout(r, 50))
 		expect(document.querySelector('.async').textContent).toContain('Async Content')
 	})

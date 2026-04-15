@@ -38,6 +38,9 @@ export class Directives {
 	 * @param { string } code
 	 */
 	apply(element, key, value, code) {
+		if (key === 'el') {
+			return
+		}
 		const [directive, modifier, ...args] = key.split('.') // ['text', 'fixed', '2', ...] // text.fixed.2
 
 		if (Object.hasOwn(this.directives,directive)) {

@@ -123,9 +123,7 @@ class Prototy {
 				this.activeEffect = update
 				try {
 					const res = func(element, item)
-					if (key !== 'el') {
-						this.directive.apply(element, key, res, code)
-					}
+					this.directive.apply(element, key, res, code)
 				} finally {
 					this.activeEffect = null
 				}
