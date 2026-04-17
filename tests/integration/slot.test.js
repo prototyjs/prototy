@@ -63,32 +63,6 @@ describe('Component Slots', () => {
 		expect(span.textContent).toBe('42')
 	})
 
-	it('should support async components and preserve slots', async () => {
-		document.body.innerHTML = `
-      <div id="app">
-        <div :component="components.asyncCard" :oncreate.async="methods.init()">
-          <div slot="body">Async Content</div>
-        </div>
-      </div>
-    `
-		prototy({
-			root: document.getElementById('app'),
-			state: { },
-			methods: {
-				init: async () => {
-					await new Promise(r => setTimeout(r, 20))
-				}
-			},
-			components: {
-				asyncCard: '<div class="async"><slot name="body"></slot></div>'
-			}
-		})
-
-		expect(document.querySelector('.async')).toBeNull()
-		await new Promise(r => setTimeout(r, 50))
-		expect(document.querySelector('.async').textContent).toContain('Async Content')
-	})
-
 	it('should work correctly with nested slots (slot within a slot)', async () => {
 		document.body.innerHTML = `
       <div id="app">

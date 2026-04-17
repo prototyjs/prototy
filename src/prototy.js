@@ -95,15 +95,13 @@ class Prototy {
 							return
 						}
 						const name = (node.nodeType === 1 && node.getAttribute('slot')) || 'default'
-						node._keep = true
-						node.remove()
-
 						if (element._slots[name]) {
 							log.error('Slot "{0}" is already occupied in component', name, element)
 							return
 						}
-						this.setup(node)
+						node._keep = true
 						element._slots[name] = node
+						node.remove()
 					})
 				}
 			}
