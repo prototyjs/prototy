@@ -1,13 +1,13 @@
 import { isObject } from '@/utils/isObject'
-import { unbind } from '@/utils/unbind.js'
+import { unbind } from '@/utils/unbind'
 import { dynamicFunction } from '@/utils/dynamicFunction'
-import { mapComponents } from '@/utils/mapComponents'
-import { Directives } from '@/directives/directives'
+import { mapComponents } from '@/component/mapComponents'
+import { Directives } from '@/directives'
 import { Reactivity } from '@/reactivity'
 import { Listeners } from '@/listeners'
 import { Nodes } from '@/nodes'
 import { bindMethods } from '@/utils/bindMethods'
-import { log } from '@/utils/log'
+import { log } from '@/log'
 
 const IS_PROXY = Symbol('is_proxy')
 /**

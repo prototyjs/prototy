@@ -1,6 +1,6 @@
-import { applyModifier } from '../modifiers/applyModifier'
-import { setDeepValue } from '@/utils/setDeepValue.js'
-import { log } from '@/utils/log.js'
+import { applyModifier } from '@/directives/modifiers/applyModifier'
+import { setDeepValue } from '@/utils/setDeepValue'
+import { log } from '@/log'
 
 /**
  * @param { HTMLElement } element

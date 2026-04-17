@@ -1,8 +1,8 @@
-import { Prototy } from '@/prototy.js'
+import { Prototy } from '@/prototy'
 import { nextTick } from '@/utils/nextTick'
 import { isObject } from '@/utils/isObject'
-import { isEqual } from '@/utils/isEqual.js'
-import { kebabToCamel } from '@/utils/kebabToCamel.js'
+import { isEqual } from '@/utils/isEqual'
+import { kebabToCamel } from '@/utils/kebabToCamel'
 
 /**
  * @param { object } options

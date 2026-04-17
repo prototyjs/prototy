@@ -1,9 +1,9 @@
-import { applyModifier } from '../modifiers/applyModifier.js'
+import { applyModifier } from '@/directives/modifiers/applyModifier'
 /**
- * 
- * @param { HTMLElement } element 
- * @param { object } value 
- * @param { string } modifier 
+ *
+ * @param { HTMLElement } element
+ * @param { object } value
+ * @param { string } modifier
  * @param { Array <string> } args
  * @param { string } attrName
  */

@@ -1,5 +1,5 @@
-import { render } from '@/utils/render'
-import { mount } from '@/utils/mount'
+import { render } from '@/component/render'
+import { mount } from '@/component/mount'
 import { dispatchEvent } from '@/utils/dispatchEvent'
 
 /**

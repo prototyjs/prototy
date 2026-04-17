@@ -1,9 +1,9 @@
-import innerDirectives from './methods/index.js'
-import { bind } from './methods/bind.js'
-import { attr } from './methods/attr.js'
-import { each } from './methods/each.js'
-import { context } from './methods/context.js'
-import { component } from './methods/component.js'
+import innerDirectives from './directives/index'
+import { bind } from './directives/bind'
+import { attr } from './directives/attr'
+import { each } from './directives/each'
+import { context } from './directives/context'
+import { component } from './directives/component.js'
 
 /**
  * @class Directives
