@@ -45,6 +45,10 @@ export class Directives {
 			this.specialDirectives[directive](element, value, modifier)
 			return
 		}
+		if (Object.hasOwn(this.directives, directive)) {
+			this.directives[directive](element, value, modifier, args)
+			return
+		}
 
 		if (value !== null && typeof value === 'object' && !Array.isArray(value)) {
 			if (directive === 'object') {
@@ -54,11 +58,6 @@ export class Directives {
 			} else {
 				console.warn(`Directive "${directive}" cannot handle object value`)
 			}
-			return
-		}
-
-		if (Object.hasOwn(this.directives, directive)) {
-			this.directives[directive](element, value, modifier, args)
 			return
 		}
 

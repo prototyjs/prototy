@@ -10,15 +10,11 @@ export function object(element, value, modifier) {
 	if (!isObject(value)) {
 		return
 	}
-	// if (modifier === 'style') {
-	// 	Object.assign(element.style, value)
-	// 	return
-	// }
 	if (modifier === 'data') {
 		Object.entries(value).forEach(([key, val]) => {
 			element.setAttribute(`data-${key}`, val)
 		})
 		return
 	}
-	Object.assign(element.style, value)
+	Object.assign(element.directive, value)
 }
