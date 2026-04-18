@@ -1,4 +1,4 @@
-<h1 :class="{ show: true }" :dataset="{index: 2}">Prototy Demo</h1>
+<h1 :class="{ show: true }" :style="{ background: 'red' }" data-index="1" >Prototy Demo</h1>
 
 <div :context="{ p: state.product }" :onclick="state.product.params.count++">
     <span>Product Count: </span><span :text="p.params.count"></span> <span :context.scope="{ p1: p.params }"><span :text="p1.count"></span></span>
@@ -6,15 +6,17 @@
 
 <div :text.json="state.product" id="foo"></div>
 
-<div :text="state.product.params.count + static.params.x"></div>
+<div :text="state.product.params.count"></div>
 
 <div :onclick="methods.add()">add</div>
-<div :component="state.show ? components.first : components.second" :oncreate.async="methods.query(event)" :ondestroy="console.log(event)"></div>
+<div :component="state.show ? components.first : components.second" :oncreate.async="methods.query(event)" :ondestroy="console.log(event)">
+    <h3 :text="state.product.params.count">slot</h3>
+</div>
 <!--<div :component="state.show && components.first" :oncreate="console.log(event)" :ondestroy="console.log(event)"></div>-->
 
 <button :onclick="state.show = !state.show">show</button>
 
-
+<div el="myEl">Element</div>
 <div :text.json="state.arr"></div>
 
 <div :onclick="state.arr.splice(1, 0, { color: 'black' })">slice</div>

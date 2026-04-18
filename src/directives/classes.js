@@ -1,4 +1,4 @@
-import { isObject } from '../../utils/isObject.js'
+import { isObject } from '@/utils/isObject'
 /**
  *
  * @param { HTMLElement } element

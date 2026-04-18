@@ -1,19 +1,20 @@
 import { isObject } from '@/utils/isObject'
-import { shouldTrigger } from '@/utils/shouldTrigger'
-import { createDynamicFunction } from '@/utils/createDynamicFunction'
-import { mapComponents } from '@/utils/mapComponents'
-import { Directives } from '@/directives/directives'
+import { unbind } from '@/utils/unbind'
+import { dynamicFunction } from '@/utils/dynamicFunction'
+import { mapComponents } from '@/component/mapComponents'
+import { Directives } from '@/directives'
 import { Reactivity } from '@/reactivity'
 import { Listeners } from '@/listeners'
 import { Nodes } from '@/nodes'
 import { bindMethods } from '@/utils/bindMethods'
+import { log } from '@/log'
 
 const IS_PROXY = Symbol('is_proxy')
 /**
  * @typedef { object } PrototyOptions
  * @property { object } state
  * @property { HTMLElement } root
- * @property { object } static
+ * @property { object } params
  * @property { Record<string, Function> } methods
  * @property { Record<string, Function> } setters
  * @property { object } directives
@@ -22,60 +23,105 @@ class Prototy {
 	/**
 	 * @param { PrototyOptions } options
 	 */
-	constructor(options = { state: {}, root: document.body, static: {}, methods: {}, directives: {}, components: {}, setters: {} }) {
-		this.root = options.root
+	constructor({
+		state = {},
+		root = document.body,
+		params = {},
+		methods = {},
+		directives= {},
+		components= {},
+		setters= {}
+	}) {
 		this.pendingTargets = new Map()
-		this.directive = new Directives(options.directives, this.setup.bind(this))
-		this.reactivity = new Reactivity()
-		this.listeners = new Listeners()
-
-		this.state = this.createProxy(options.state)
-
-		this.nodes = new Nodes({
-			root: this.root,
-			fnListener: (/** @type { HTMLElement } */ node, /** @type { string } */ key, /** @type { string } */ code) => {
-				const context = this.directive.getContext(node)
-				const func = createDynamicFunction(code, this.bus, context, 'event')
-				this.listeners.add(node, key, func)
-			},
-			fnRemove: (/** @type { HTMLElement } */ node) => {
-				this.listeners.remove(node)
-				this.reactivity.removeElementEffects(node)
-				// event remove node
-			}
-		})
+		this.state = this.createProxy(state)
 
 		this.methods = {}
 		this.setters = {}
 		this.activeSetters = new Set()
 
 		this.bus = {
+			root,
 			state: this.state,
 			methods: this.methods,
-			static: options.static,
-			components: mapComponents(options.components)
+			params,
+			components: mapComponents(components),
+			els: {}
 		}
 
-		bindMethods(this.methods, options.methods, this.bus)
-		bindMethods(this.setters, options.setters, this.bus)
+		bindMethods(this.methods, methods, this.bus)
+		bindMethods(this.setters, setters, this.bus)
 
-	  this.setup(this.root)
+		this.directive = new Directives(directives, this.setup.bind(this), this.bus)
+		this.reactivity = new Reactivity()
+		this.listeners = new Listeners()
+
+		this.nodes = new Nodes({
+			root,
+			listeners: (/** @type { HTMLElement } */ element, /** @type { string } */ key, /** @type { string } */ value) => {
+				const context = this.directive.getContext(element)
+				const func = dynamicFunction(value, this.bus, context, 'event')
+				this.listeners.add(element, key, (...arg) => func(element, ...arg))
+			},
+			removed: (/** @type { HTMLElement } */ element) => {
+				this.listeners.remove(element)
+				this.reactivity.removeEffects(element)
+				unbind(element)
+				if (element._el) {
+					if (this.bus.els[element._el] === element) {
+						delete this.bus.els[element._el]
+					}
+				}
+			},
+			attribute: (/** @type { HTMLElement } */ element, /** @type { string } */ key, /** @type { string } */ value) => {
+				if (key === 'el') {
+					const name = value
+					element._el = name
+					this.bus.els[name] = element
+				}
+				if (key === ':each') {
+					const hasContent = element.firstElementChild || element.textContent.trim() !== ''
+					if (hasContent) {
+						log.error('Content (slots) is not allowed inside the :each directive.', element)
+					}
+				}
+				if (key === ':component') {
+					if (element._slots) {
+						return
+					}
+					element._slots = {}
+					Array.from(element.childNodes).forEach(node => {
+						if (node.nodeType === 3 && !node.textContent.trim()) {
+							node.remove()
+							return
+						}
+						const name = (node.nodeType === 1 && node.getAttribute('slot')) || 'default'
+						if (element._slots[name]) {
+							log.error('Slot "{0}" is already occupied in component', name, element)
+							return
+						}
+						node._keep = true
+						element._slots[name] = node
+						node.remove()
+					})
+				}
+			}
+		})
+	  this.setup(root)
 	}
 	/**
 	 * @param { HTMLElement } node
 	 * @param { object } item
 	 */
 	setup(node, item) {
-
 		this.nodes.process(node, (/** @type {HTMLElement} */  element, /** @type {string} */ key, /** @type {string} */ code) => {
 			const context = this.directive.getContext(element)
-			const func = createDynamicFunction(code, this.bus, context, 'item')
+			const func = dynamicFunction(code, this.bus, context,  'item')
 			const update = () => {
 				this.reactivity.removeEffect(update, update.deps)
 				this.activeEffect = update
 				try {
-					const res = func(item)
-					this.directive.apply(element, key, res)
+					const res = func(element, item)
+					this.directive.apply(element, key, res, code)
 				} finally {
 					this.activeEffect = null
 				}
@@ -117,6 +163,7 @@ class Prototy {
 			      return true
 		      }
 	        const value = Reflect.get(target, property, receiver)
+
 		      const isObservable = typeof property !== 'symbol' &&
 			      (property in target) &&
 			      typeof value !== 'function'
@@ -132,7 +179,15 @@ class Prototy {
 				    return Reflect.set(target, property, value, receiver)
 			    }
 
+			    const isArray = Array.isArray(target)
 			    const oldValue = Reflect.get(target, property)
+
+			    const isLength = isArray && property === 'length'
+
+			    if (!isLength && Object.is(oldValue, value)) {
+				    return true
+			    }
+
 			    const fullPath = path ? `${path}.${property.toString()}` : property.toString()
 			    let newValue = value
 
@@ -140,14 +195,13 @@ class Prototy {
 				    newValue = self.createProxy(value, fullPath)
 			    }
 
-			    if (self.activeSetters.has(fullPath)) {
-				    return Reflect.set(target, property, newValue, receiver)
-			    }
-
-			    if (typeof self.setters?.[fullPath] === 'function') {
+			    if (typeof self.setters?.[fullPath] === 'function' && !self.activeSetters.has(fullPath)) {
 				    self.activeSetters.add(fullPath)
 				    try {
 					    newValue = self.setters[fullPath](newValue, oldValue)
+					    if (Object.is(oldValue, newValue)) {
+							return true
+					    }
 				    } finally {
 					    self.activeSetters.delete(fullPath)
 				    }
@@ -155,9 +209,15 @@ class Prototy {
 
 			    const success = Reflect.set(target, property, newValue, receiver)
 
-			    if (success && shouldTrigger(target, property, oldValue, newValue)) {
+			    if (success) {
+
 				    self.schedule(target, property)
+
+				    if (isArray && !isLength) {
+					    self.schedule(target, 'length')
+				    }
 			    }
+
 			    return success
 		    }
 		})

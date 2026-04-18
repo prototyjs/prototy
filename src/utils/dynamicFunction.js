@@ -1,3 +1,5 @@
+import { log } from '@/log'
+
 const PLACEHOLDER = Symbol('dynamic-value-placeholder')
 
 /**
@@ -7,7 +9,7 @@ const PLACEHOLDER = Symbol('dynamic-value-placeholder')
  * @param { string } [key='']
  * @returns { Function }
  */
-export function createDynamicFunction(code, bus, context= {}, key = '') {
+export function dynamicFunction(code, bus, context= {}, key = '') {
 	const mergedContext = { ...bus, ...context }
 	if (key) {
 		mergedContext[key] = PLACEHOLDER
@@ -17,10 +19,15 @@ export function createDynamicFunction(code, bus, context= {}, key = '') {
 	const values = Object.values(mergedContext)
 
 	// eslint-disable-next-line sonarjs/code-eval
-	const fn = new Function(...keys, `return ${code}`)
+	const fn = new Function('el', ...keys, `return ${code}`)
 
-	return (/** @type { any } */ value) => {
+	return (el, value) => {
 		const newValues = values.map(v => v === PLACEHOLDER  ? value : v)
-		return fn(...newValues)
+		try {
+			return fn(el, ...newValues)
+		} catch (err) {
+			log.error(err.toString(), el)
+			return undefined
+		}
 	}
 }

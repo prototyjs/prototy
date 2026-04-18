@@ -2,29 +2,26 @@
   "name": "prototy",
   "version": "1.0.0",
   "description": "A simple JS framework for rapid UI prototyping on the web.",
-  "main": "src/index.js",
+  "main": "./dist/prototy.js",
   "scripts": {
     "dev": "vite --config vite.config.demo.js",
-    "build": "npm run lint && npm run build:lib",
-    "build:lib": "vite build --config vite.config.lib.js",
-    "build:demo": "vite build --config vite.config.demo.js",
-    "lint": "eslint ./src -f table",
-    "prepare": "husky",
+    "lint": "eslint ./src --format table",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:coverage": "vitest run --coverage",
-    "test:ci": "vitest run --coverage --reporter=json --outputFile=test-results.json"
+    "test:ci": "vitest run --coverage --reporter=json --outputFile=test-results.json",
+    "build": "npm run lint && npm run test && vite build --config vite.config.js",
+    "build:demo": "vite build --config vite.config.demo.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/prototyjs/prototy.git"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/prototyjs/prototy/issues"
   },
-  "homepage": "https://github.com/prototyjs/prototy#readme",
+  "homepage": "https://github.io",
   "devDependencies": {
     "@cspell/eslint-plugin": "^9.6.0",
     "@eslint/js": "^9.39.2",
@@ -42,9 +39,14 @@
     "lint-staged": "^16.2.7",
     "tsc-files": "^1.1.4",
     "typescript": "^5.9.3",
+    "vite": "^6.4.2",
     "vitest": "^4.1.2"
   },
   "type": "module",
+  "module": "./dist/prototy.js",
+  "files": [
+    "dist"
+  ],
   "lint-staged": {
     "src/**/*.js": [
       "eslint --no-fix --format table",
@@ -53,8 +55,5 @@
     "src/**/!(*.js)": [
       "eslint --no-fix --format table"
     ]
-  },
-  "dependencies": {
-    "vite": "^7.3.1"
   }
 }

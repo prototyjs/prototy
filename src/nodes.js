@@ -7,44 +7,38 @@ export class Nodes {
 	/**
 	 * @param { object } options
 	 * @param { HTMLElement } options.root
-	 * @param { Function } options.fnListener
-	 * @param { Function } options.fnRemove
+	 * @param { Function } options.listeners
+	 * @param { Function } options.removed
 	 */
-	constructor({ root, fnListener, fnRemove }) {
-		this.fnListener = fnListener
-		this.fnRemove = fnRemove
+	constructor({ root, listeners, removed, attribute }) {
+		this.listeners = listeners
+		this.removed = removed
+		this.attribute = attribute
 		this.nodes = new WeakSet()
 		this.observer = null
 		this.#observer(root)
 	}
-
 	/**
 	 * @param { HTMLElement } node
-	 * @param { Function } fnProperty
+	 * @param { Function } handler
 	 */
-	process(node, fnProperty) {
+	// eslint-disable-next-line sonarjs/cognitive-complexity
+	process(node, handler) {
 		const stack = [node]
-
 		while (stack.length) {
 			const current = stack.pop()
-
 			if (current.nodeType === 1) {
 				const attrs = current.attributes
 				let hasDirectives = false
 
 				for (let i = attrs.length - 1; i >= 0; i--) {
 					const attr = attrs[i]
+					this.attribute(current, attr.name, attr.value)
 					if (attr.name.charCodeAt(0) === 58) {
 						hasDirectives = true
-						const name = attr.name.slice(1)
-						const key = kebabToCamel(name)
-
-						if (key.charCodeAt(0) === 111 && key.charCodeAt(1) === 110) {
-							this.fnListener(current, key.slice(2).toLowerCase(), attr.value)
-						} else {
-							fnProperty(current, key, attr.value)
-						}
-						current.removeAttribute(attr.name)
+						this.directive(attr, current, handler)
+					} else if (attr.name === 'el') {
+						hasDirectives = true
 					}
 				}
 
@@ -52,15 +46,30 @@ export class Nodes {
 					this.nodes.add(current)
 				}
 
-				let child = current.firstElementChild
+				let child = current.lastElementChild
 				while (child) {
 					stack.push(child)
-					child = child.nextElementSibling
+					child = child.previousElementSibling
 				}
 			}
 		}
 	}
+	/**
+	 * @param { string } attr
+	 * @param { HTMLElement } node
+	 * @param { Function } handler
+	 */
+	directive(attr, node, handler) {
+		const name = attr.name.slice(1)
+		const key = kebabToCamel(name)
 
+		if (key.charCodeAt(0) === 111 && key.charCodeAt(1) === 110) {
+			this.listeners(node, key.slice(2).toLowerCase(), attr.value)
+		} else {
+			handler(node, key, attr.value)
+		}
+		node.removeAttribute(attr.name)
+	}
 	/**
 	 * @param { HTMLElement } root
 	 */
@@ -85,17 +94,22 @@ export class Nodes {
 	 * @param { HTMLElement } node
 	 */
 	#check(node) {
-		if (this.nodes.has(node)) {
-			this.fnRemove(node)
+		if (node._keep) {
+			return
 		}
 		const stack = [node]
 		while (stack.length) {
 			const current = stack.pop()
+			if (current._keep) {
+				continue
+			}
+			if (this.nodes.has(current)) {
+				this.removed(current)
+				this.nodes.delete(current)
+			}
+
 			let child = current.firstElementChild
 			while (child) {
-				if (this.nodes.has(child)) {
-					this.fnRemove(child)
-				}
 				stack.push(child)
 				child = child.nextElementSibling
 			}

@@ -1,13 +1,11 @@
-import { prototy } from '../src/index.js'
+import { prototy } from '@prototy'
 import main from './main.html?raw'
 
 const app = prototy({
 	root: document.getElementById('root'),
-	static: {
-		params: {
-			x: 0,
-			y: 0
-		}
+	params: {
+		x: 0,
+		y: 0
 	},
 	state: {
 		show: false,
@@ -37,7 +35,7 @@ const app = prototy({
 			console.log(newValue, oldValue, this)
 			this.state.arr[1].color = 'oooo' // protected
 			return newValue
-		},
+		}
 	},
 	directives: {
 		myHidden: (element, value) => {
@@ -50,7 +48,7 @@ const app = prototy({
 	components: {
 		main,
 		color: `<div :text="item.color" class="color"></div>`,
-		first: '<h2>first</h2>',
-		second: '<h2>second</h2>'
+		first: '<h2>first</h2><slot></slot>',
+		second: '<h2>second</h2><slot></slot>'
 	}
 })
