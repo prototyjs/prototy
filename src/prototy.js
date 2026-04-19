@@ -38,7 +38,6 @@ class Prototy {
 		this.methods = {}
 		this.setters = {}
 		this.activeSetters = new Set()
-
 		this.bus = {
 			root,
 			state: this.state,
@@ -155,9 +154,6 @@ class Prototy {
 	    }
 
 	    return new Proxy(state, {
-		    getPrototypeOf(target) {
-			    return { target, instance: 'Proxy' }
-		    },
 	      get(target, property, receiver) {
 		      if (property === IS_PROXY) {
 			      return true
@@ -192,7 +188,7 @@ class Prototy {
 			    let newValue = value
 
 			    if (isObject(value) && !value[IS_PROXY]) {
-				    newValue = self.createProxy(value, fullPath)
+					newValue = self.createProxy(value, fullPath)
 			    }
 
 			    if (typeof self.setters?.[fullPath] === 'function' && !self.activeSetters.has(fullPath)) {

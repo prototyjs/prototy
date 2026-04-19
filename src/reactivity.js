@@ -3,7 +3,6 @@
  */
 export class Reactivity {
 	#storage = new WeakMap()
-	// #effectElement = new WeakMap()
 	/**
 	 * @param { object } target
 	 * @param { string } key

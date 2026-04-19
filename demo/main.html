@@ -27,6 +27,4 @@
 <div :onclick="state.arr = state.arr.filter(item => item.color !== 'black' )">filter</div>
 <div :onclick="state.arr[1].color = 'pink'">change</div>
 <hr>
-<div :each="state.arr" :component="components.color">
-
-</div>
+<div :each="state.arr" :component="components.color"></div>
