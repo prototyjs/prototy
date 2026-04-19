@@ -9,6 +9,7 @@
 <div :text="state.product.params.count"></div>
 
 <div :onclick="methods.add()">add</div>
+
 <div :component="state.show ? components.first : components.second" :oncreate.async="methods.query(event)" :ondestroy="console.log(event)">
     <h3 :text="state.product.params.count">slot</h3>
 </div>
@@ -23,6 +24,7 @@
 <div :onclick="state.arr.push({ color: 'black' })">push</div>
 <div :onclick="state.arr.shift()">shift</div>
 <div :onclick="state.arr.unshift({ color: 'black' })">unshift</div>
+<div :onclick="state.arr = state.arr.filter(item => item.color !== 'black' )">filter</div>
 <div :onclick="state.arr[1].color = 'pink'">change</div>
 <hr>
 <div :each="state.arr" :component="components.color">

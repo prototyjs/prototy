@@ -233,23 +233,22 @@ class Prototy {
 			queueMicrotask(() => {
 				const changedKeys = this.pendingTargets.get(target)
 				this.pendingTargets.delete(target)
-				changedKeys.forEach(key => this.trigger(target, key))
+
+				const uniqueEffects = new Set()
+				changedKeys.forEach(key => {
+					const effects = this.reactivity.find(target, key)
+					effects.forEach(eff => uniqueEffects.add(eff))
+				})
+
+				console.log('[Trigger] Target:', target, `Key: ${Array.from(changedKeys)}, Found effects: ${uniqueEffects.size}`)
+				uniqueEffects.forEach(update => {
+					if (update !== this.activeEffect) {
+						update()
+					}
+				})
 			})
 		}
 		this.pendingTargets.get(target).add(property)
-	}
-	/**
-	 * @param { object } target
-	 * @param { string } key
-	 */
-	trigger(target, key) {
-		const effects = this.reactivity.find(target, key)
-		console.log('[Trigger] Target:', target, `Key: ${key}, Found effects: ${effects.length}`)
-		effects.forEach(update => {
-			if (update !== this.activeEffect) {
-				update()
-			}
-		})
 	}
 }
 export { Prototy }

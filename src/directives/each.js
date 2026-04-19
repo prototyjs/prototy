@@ -23,8 +23,8 @@ export function each(container, array, setup) {
 		let node = nodeMap.get(item)
 
 		if (!node) {
-
 			node = container._template.cloneNode(true)
+			console.log(node)
 			nodeMap.set(item, node)
 			setup(node, item)
 		}
