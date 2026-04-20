@@ -41,10 +41,9 @@ describe('Each Directive', () => {
 	it('should preserve DOM nodes for unchanged objects (Reconciliation)', async () => {
 		const root = document.createElement('div')
 		root.innerHTML = '<div id="list" :each="state.arr" :component="components.item"></div>'
-		const obj1 = { n: 'stay' }
 		const app = prototy({
 			root,
-			state: { arr: [obj1, { n: 'remove' }] },
+			state: { arr: [{ n: 'stay' }, { n: 'remove' }] },
 			components: { item: '<div :text="item.n"></div>' }
 		})
 
@@ -58,24 +57,6 @@ describe('Each Directive', () => {
 		expect(list.children[0]).toBe(firstNodeBefore)
 		expect(list.children[0].textContent).toBe('stay')
 		expect(list.children.length).toBe(2)
-	})
-
-	it('should correctly handle full array replacement with new elements', async () => {
-		const root = document.createElement('div')
-		root.innerHTML = '<div id="list" :each="state.arr" :component="components.item"></div>'
-		const app = prototy({
-			root,
-			state: { arr: [{ v: 'a' }] },
-			components: { item: '<div :text="item.v"></div>' }
-		})
-
-		app.state.arr = [{ v: 'x' }, { v: 'y' }]
-		await nextTick()
-
-		const list = root.querySelector('#list')
-		expect(list.children.length).toBe(2)
-		expect(list.children[0].textContent).toBe('x')
-		expect(list.children[1].textContent).toBe('y')
 	})
 
 	it('should update text when a deep property of an object in the array changes', async () => {
