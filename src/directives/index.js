@@ -4,7 +4,7 @@ import { each } from './each'
 import { attr } from './attr'
 import { html } from './html'
 import { show } from './show'
-import { style } from './style'
+import { object } from './object.js'
 
 export default {
 	class: classes,
@@ -12,6 +12,6 @@ export default {
 	each,
 	html,
 	show,
-	style,
+	object ,
 	attr
 }

@@ -1,4 +1,4 @@
-<h1 :class="{ show: true }" :style="{ background: 'red' }" data-index="1" >Prototy Demo</h1>
+<h1 :class="{ show: true }" :style="{ color: 'yellow', background: 'green' }" data-index="1" data-user-id="123" data-role="admin" >Prototy Demo</h1>
 
 <div :context="{ p: state.product }" :onclick="state.product.params.count++">
     <span>Product Count: </span><span :text="p.params.count"></span> <span :context.scope="{ p1: p.params }"><span :text="p1.count"></span></span>
