@@ -4,7 +4,7 @@ import { attr } from './directives/attr'
 import { each } from './directives/each'
 import { context } from './directives/context'
 import { component } from './directives/component.js'
-import { isObject } from '@/utils/isObject.js'
+import { property } from './directives/property'
 
 /**
  * @class Directives
@@ -44,18 +44,15 @@ export class Directives {
 		}
 		const [directive, modifier, ...args] = key.split('.') // ['text', 'fixed', '2', ...] // text.fixed.2
 
-		if (directive === 'style' && isObject(value)) {
-			Object.assign(element.style, value)
+		if (Object.hasOwn(this.directives, directive)) {
+			this.directives[directive](element, value, modifier, args, code, directive)
 			return
 		}
-
-		if (Object.hasOwn(this.directives,directive)) {
-			this.directives[directive](element, value, modifier, args, code, directive)
-		} else if (directive in element) {
-			element[directive] = value
-		} else {
-			attr(element, value, modifier, args, directive)
+		if (directive in element) {
+			property(element, value, modifier, args, directive)
+			return
 		}
+		attr(element, value, modifier, args, directive)
 	}
 	/**
 	 * @param { HTMLElement } element

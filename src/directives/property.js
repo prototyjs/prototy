@@ -1,3 +1,4 @@
+import { isObject } from '@/utils/isObject.js'
 import { applyModifier } from '@/directives/modifiers/applyModifier.js'
 
 /**
@@ -7,7 +8,13 @@ import { applyModifier } from '@/directives/modifiers/applyModifier.js'
  * @param { Array<string> } args
  * @param { string } directive
  */
-export function primitive(element, value, modifier, args, directive) {
+export function property(element, value, modifier, args, directive) {
+
+	if (isObject(value)) {
+		Object.assign(element[directive], value)
+		return
+	}
+
 	const v = applyModifier(value, modifier, args)
 
 	if (typeof element[directive] === 'boolean') {
