@@ -94,13 +94,15 @@ export class Nodes {
 	 * @param { HTMLElement } node
 	 */
 	#check(node) {
-		if (node._keep && node.parentNode) {
+		if (node._keep) {
 			return
 		}
 		const stack = [node]
 		while (stack.length) {
 			const current = stack.pop()
-
+			if (current._keep) {
+				continue
+			}
 			if (this.nodes.has(current)) {
 				this.removed(current)
 				this.nodes.delete(current)

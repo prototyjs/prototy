@@ -1,13 +1,13 @@
 import { isObject } from '@/utils/isObject'
-import { unbind } from '@/utils/unbind.js'
+import { unbind } from '@/utils/unbind'
 import { dynamicFunction } from '@/utils/dynamicFunction'
-import { mapComponents } from '@/utils/mapComponents'
-import { Directives } from '@/directives/directives'
+import { mapComponents } from '@/component/mapComponents'
+import { Directives } from '@/directives'
 import { Reactivity } from '@/reactivity'
 import { Listeners } from '@/listeners'
 import { Nodes } from '@/nodes'
 import { bindMethods } from '@/utils/bindMethods'
-import { log } from '@/utils/log'
+import { log } from '@/log'
 
 const IS_PROXY = Symbol('is_proxy')
 /**
@@ -38,7 +38,6 @@ class Prototy {
 		this.methods = {}
 		this.setters = {}
 		this.activeSetters = new Set()
-
 		this.bus = {
 			root,
 			state: this.state,
@@ -95,15 +94,13 @@ class Prototy {
 							return
 						}
 						const name = (node.nodeType === 1 && node.getAttribute('slot')) || 'default'
-						node._keep = true
-						node.remove()
-
 						if (element._slots[name]) {
 							log.error('Slot "{0}" is already occupied in component', name, element)
 							return
 						}
-						this.setup(node)
+						node._keep = true
 						element._slots[name] = node
+						node.remove()
 					})
 				}
 			}
@@ -157,9 +154,6 @@ class Prototy {
 	    }
 
 	    return new Proxy(state, {
-		    getPrototypeOf(target) {
-			    return { target, instance: 'Proxy' }
-		    },
 	      get(target, property, receiver) {
 		      if (property === IS_PROXY) {
 			      return true
@@ -194,7 +188,7 @@ class Prototy {
 			    let newValue = value
 
 			    if (isObject(value) && !value[IS_PROXY]) {
-				    newValue = self.createProxy(value, fullPath)
+					newValue = self.createProxy(value, fullPath)
 			    }
 
 			    if (typeof self.setters?.[fullPath] === 'function' && !self.activeSetters.has(fullPath)) {
@@ -235,23 +229,22 @@ class Prototy {
 			queueMicrotask(() => {
 				const changedKeys = this.pendingTargets.get(target)
 				this.pendingTargets.delete(target)
-				changedKeys.forEach(key => this.trigger(target, key))
+
+				const uniqueEffects = new Set()
+				changedKeys.forEach(key => {
+					const effects = this.reactivity.find(target, key)
+					effects.forEach(eff => uniqueEffects.add(eff))
+				})
+
+				console.log('[Trigger] Target:', target, `Key: ${Array.from(changedKeys)}, Found effects: ${uniqueEffects.size}`)
+				uniqueEffects.forEach(update => {
+					if (update !== this.activeEffect) {
+						update()
+					}
+				})
 			})
 		}
 		this.pendingTargets.get(target).add(property)
-	}
-	/**
-	 * @param { object } target
-	 * @param { string } key
-	 */
-	trigger(target, key) {
-		const effects = this.reactivity.find(target, key)
-		console.log('[Trigger] Target:', target, `Key: ${key}, Found effects: ${effects.length}`)
-		effects.forEach(update => {
-			if (update !== this.activeEffect) {
-				update()
-			}
-		})
 	}
 }
 export { Prototy }

@@ -4,7 +4,6 @@
  * @param { Function } setup
  */
 export function mount(element, node, setup) {
-	setup(node)
 	if (element._slots) {
 		const slots = node.querySelectorAll('slot')
 		slots.forEach(slot => {
@@ -12,6 +11,10 @@ export function mount(element, node, setup) {
 			const content = element._slots[name]
 			if (content) {
 				slot.replaceWith(content)
+				if (!content._mounted) {
+					setup(content)
+					content._mounted = true
+				}
 			} else {
 				if (slot.childNodes.length === 0) {
 					slot.remove()
@@ -21,5 +24,6 @@ export function mount(element, node, setup) {
 			}
 		})
 	}
+	setup(node)
 	element.appendChild(node)
 }

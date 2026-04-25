@@ -1,4 +1,4 @@
-import { applyModifier } from '../modifiers/applyModifier'
+import { applyModifier } from '@/directives/modifiers/applyModifier'
 
 /**
  *

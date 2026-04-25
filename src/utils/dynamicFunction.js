@@ -1,4 +1,4 @@
-import { log } from '@/utils/log.js'
+import { log } from '@/log'
 
 const PLACEHOLDER = Symbol('dynamic-value-placeholder')
 
