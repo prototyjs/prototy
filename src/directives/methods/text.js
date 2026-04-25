@@ -7,5 +7,6 @@ import { applyModifier } from '../modifiers/applyModifier'
  * @param { Array<string> } args
  */
 export function text(element, value, modifier, args) {
+
 	element.textContent = applyModifier(value, modifier, args) ?? ''
 }
