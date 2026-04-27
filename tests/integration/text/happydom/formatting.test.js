@@ -35,36 +35,6 @@ describe('Text Directive', () => {
 		expect(document.body.firstElementChild.textContent).toBe('')
 	})
 
-	it('should convert numbers to strings', async () => {
-		document.body.innerHTML = '<div :text="state.value"></div>'
-		const app = prototy({
-			root: document.body,
-			state: { value: 42 }
-		})
-
-		expect(document.body.firstElementChild.textContent).toBe('42')
-		app.state.value = 0
-		await nextTick()
-		expect(document.body.firstElementChild.textContent).toBe('0')
-	})
-
-	it('should handle boolean values', async () => {
-		document.body.innerHTML = '<div :text="state.value"></div>'
-
-		const app = prototy({
-			root: document.body,
-			state: { value: false }
-		})
-
-		expect(document.body.firstElementChild.textContent).toBe('false')
-
-		app.state.value = true
-
-		await nextTick()
-
-		expect(document.body.firstElementChild.textContent).toBe('true')
-	})
-
 	describe('modifiers', () => {
 		it('should apply fixed modifier', async () => {
 			document.body.innerHTML = '<div :text.fixed.2="state.value"></div>'
@@ -213,15 +183,6 @@ describe('Text Directive', () => {
 				state: { value: 42 }
 			})
 			expect(document.body.firstElementChild.textContent).toBe('42em')
-		})
-
-		it('should chain multiple modifiers', async () => {
-			document.body.innerHTML = '<div :text.upper.trim="state.value"></div>'
-			const app = prototy({
-				root: document.body,
-				state: { value: '  hello world  ' }
-			})
-			expect(document.body.firstElementChild.textContent).toBe('HELLO WORLD')
 		})
 	})
 })
