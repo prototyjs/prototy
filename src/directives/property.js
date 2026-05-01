@@ -1,21 +1,23 @@
 import { isObject } from '@/utils/isObject.js'
-import { applyModifier } from '@/directives/modifiers/applyModifier.js'
 
 /**
  * @param { HTMLElement } element
  * @param { any } value
- * @param { string } modifier
- * @param { Array<string> } args
+ * @param { string } modifierName
+ * @param { Array<string> } modifierArgs
  * @param { string } directive
+ * @param { any } modifiers
  */
-export function property(element, value, modifier, args, directive) {
-
+export function property(element, value, modifierName, modifierArgs, directive, modifiers) {
 	if (isObject(value)) {
 		Object.assign(element[directive], value)
 		return
 	}
 
-	const v = applyModifier(value, modifier, args)
+	let v = value
+	if (modifiers && typeof modifiers.apply === 'function') {
+		v = modifiers.apply(modifierName, value, ...modifierArgs)
+	}
 
 	if (typeof element[directive] === 'boolean') {
 		element[directive] = Boolean(v)

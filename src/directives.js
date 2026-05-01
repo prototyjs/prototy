@@ -5,6 +5,7 @@ import { each } from './directives/each'
 import { context } from './directives/context'
 import { component } from './directives/component.js'
 import { property } from './directives/property'
+import { Modifiers } from './directives/modifiers/modifiers'
 
 /**
  * @class Directives
@@ -15,9 +16,11 @@ export class Directives {
 	 * @param { object } clientDirectives
 	 * @param { Function } setup
 	 * @param { object } bus
+	 * @param { Modifiers } modifiers
 	 */
-	constructor(clientDirectives = {}, setup, bus) {
+	constructor(clientDirectives = {}, setup, bus, modifiers) {
 		this.#contextStorage = new WeakMap()
+		this.modifiers = modifiers
 		/**
 		 * @type {{ [key: string]: Function }}
 		 */
@@ -45,14 +48,14 @@ export class Directives {
 		const [directive, modifier, ...args] = key.split('.') // ['text', 'fixed', '2', ...] // text.fixed.2
 
 		if (Object.hasOwn(this.directives, directive)) {
-			this.directives[directive](element, value, modifier, args, code, directive)
+			this.directives[directive](element, value, modifier, args, code, directive, this.modifiers)
 			return
 		}
 		if (directive in element) {
-			property(element, value, modifier, args, directive)
+			property(element, value, modifier, args, directive, this.modifiers)
 			return
 		}
-		attr(element, value, modifier, args, directive)
+		attr(element, value, modifier, args, directive, directive, this.modifiers)
 	}
 	/**
 	 * @param { HTMLElement } element

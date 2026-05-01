@@ -1,4 +1,3 @@
-import { applyModifier } from '@/directives/modifiers/applyModifier'
 import { setDeepValue } from '@/utils/setDeepValue'
 import { log } from '@/log'
 
@@ -9,20 +8,25 @@ import { log } from '@/log'
  * @param { Array<string> } args
  * @param { string } code
  * @param { object } bus
+ * @param { import('./modifiers/modifiers.js').Modifiers } modifiers
  */
-export function bind(element, value, property, args, code, bus) {
+export function bind(element, value, property, args, code, bus, modifiers) {
 	const isWritable = code.startsWith('state.') || code.startsWith('item.')
 	if (!isWritable) {
-		log.error('Invalid bind path "{0}". Path must start with "state." (e.g., state.text)', code, element)
+		log.error(
+			'Invalid bind path "{0}". Path must start with "state." (e.g., state.text)',
+			code,
+			element,
+		)
 		return
 	}
 
-	const modifiers = [...args]
-	const eventType = modifiers.shift() || 'input'
+	const modifierArgs = [...args]
+	const eventType = modifierArgs.shift() || 'input'
 	const eventName = 'on' + eventType
 
-	const modifierName = modifiers.shift()
-	const modifierArgs = modifiers
+	const modifierName = modifierArgs.shift()
+	const remainingModifierArgs = modifierArgs
 
 	if (element[property] !== value) {
 		element[property] = value ?? ''
@@ -39,7 +43,7 @@ export function bind(element, value, property, args, code, bus) {
 
 	if (!element._bound[eventName]) {
 		const handler = () => {
-			const result = applyModifier(element[property], modifierName, modifierArgs)
+			const result = modifiers.apply(modifierName, element[property], ...remainingModifierArgs)
 			setDeepValue(bus.state, code, result)
 		}
 
@@ -49,7 +53,7 @@ export function bind(element, value, property, args, code, bus) {
 				log.error('Channel "{0}" is occupied by bind "{1}".', eventName, code, element)
 			},
 			configurable: true,
-			enumerable: true
+			enumerable: true,
 		})
 
 		element._bound[eventName] = property
