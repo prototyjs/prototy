@@ -8,7 +8,7 @@ import { Listeners } from '@/listeners'
 import { Nodes } from '@/nodes'
 import { bindMethods } from '@/utils/bindMethods'
 import { log } from '@/log'
-import { Modifiers } from './directives/modifiers/modifiers'
+import { Modifiers } from './directives/modifiers'
 
 const IS_PROXY = Symbol('is_proxy')
 /**
@@ -52,7 +52,7 @@ class Prototy {
 		bindMethods(this.methods, methods, this.bus)
 		bindMethods(this.setters, setters, this.bus)
 		this.modifiers = new Modifiers(modifiers)
-		this.directive = new Directives(directives, this.setup.bind(this), this.bus, this.modifiers)
+		this.directive = new Directives(directives, this.setup.bind(this), this.bus, this.modifiers.apply)
 		this.reactivity = new Reactivity()
 		this.listeners = new Listeners()
 		

@@ -1,22 +1,18 @@
 /**
  * @param { HTMLElement } element
  * @param { any } value
- * @param { string } modifierName
- * @param { Array<string> } modifierArgs
- * @param { string } attrName
+ * @param { string } modifier
+ * @param { Array<string> } args
+ * @param { string } code
  * @param { string } directive
- * @param { any } modifiers
+ * @param { Function } transform
  */
-export function attr(element, value, modifierName, modifierArgs, attrName, directive, modifiers) {
-	let v = value
-	
-	if (modifiers && typeof modifiers.apply === 'function') {
-		v = modifiers.apply(modifierName, value, ...modifierArgs)
-	}
+export function attr(element, value, modifier, args, code, directive, transform) {
+	const v = value
 	
 	if (v !== undefined && v !== null && v !== false) {
-		element.setAttribute(attrName, v)
+		element.setAttribute(modifier, v)
 	} else {
-		element.removeAttribute(attrName)
+		element.removeAttribute(modifier)
 	}
 }

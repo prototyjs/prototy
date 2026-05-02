@@ -8,7 +8,7 @@ import { log } from '@/log'
  * @param { Array<string> } args
  * @param { string } code
  * @param { object } bus
- * @param { import('./modifiers/modifiers.js').Modifiers } modifiers
+ * @param { import('./modifiers.js').Modifiers } modifiers
  */
 export function bind(element, value, property, args, code, bus, modifiers) {
 	const isWritable = code.startsWith('state.') || code.startsWith('item.')
