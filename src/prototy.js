@@ -32,7 +32,7 @@ class Prototy {
 		directives = {},
 		modifiers = {},
 		components = {},
-		setters= {}
+		setters = {}
 	}) {
 		this.pendingTargets = new Map()
 		this.state = this.createProxy(state)

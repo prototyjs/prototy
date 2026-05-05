@@ -1,5 +1,6 @@
 import { setDeepValue } from '@/utils/setDeepValue'
 import { log } from '@/log'
+import { Modifiers } from './modifiers'
 
 /**
  * @param { HTMLElement } element
@@ -8,25 +9,21 @@ import { log } from '@/log'
  * @param { Array<string> } args
  * @param { string } code
  * @param { object } bus
- * @param { import('./modifiers.js').Modifiers } modifiers
+ * @param { Modifiers } modifiers
  */
 export function bind(element, value, property, args, code, bus, modifiers) {
 	const isWritable = code.startsWith('state.') || code.startsWith('item.')
 	if (!isWritable) {
-		log.error(
-			'Invalid bind path "{0}". Path must start with "state." (e.g., state.text)',
-			code,
-			element,
-		)
+		log.error('Invalid bind path "{0}". Path must start with "state." (e.g., state.text)', code, element)
 		return
 	}
 
-	const modifierArgs = [...args]
-	const eventType = modifierArgs.shift() || 'input'
+	const modifiersArgs = [...args]
+	const eventType = modifiersArgs.shift() || 'input'
 	const eventName = 'on' + eventType
 
-	const modifierName = modifierArgs.shift()
-	const remainingModifierArgs = modifierArgs
+	const modifierName = modifiersArgs.shift()
+	const remainingModifierArgs = modifiersArgs
 
 	if (element[property] !== value) {
 		element[property] = value ?? ''
@@ -53,7 +50,7 @@ export function bind(element, value, property, args, code, bus, modifiers) {
 				log.error('Channel "{0}" is occupied by bind "{1}".', eventName, code, element)
 			},
 			configurable: true,
-			enumerable: true,
+			enumerable: true
 		})
 
 		element._bound[eventName] = property
