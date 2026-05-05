@@ -32,7 +32,7 @@ class Prototy {
 		directives = {},
 		modifiers = {},
 		components = {},
-		setters = {},
+		setters= {}
 	}) {
 		this.pendingTargets = new Map()
 		this.state = this.createProxy(state)
@@ -52,22 +52,14 @@ class Prototy {
 		bindMethods(this.methods, methods, this.bus)
 		bindMethods(this.setters, setters, this.bus)
 		this.modifiers = new Modifiers(modifiers)
-		this.directive = new Directives(
-			directives,
-			this.setup.bind(this),
-			this.bus,
-			this.modifiers.transform.bind(this.modifiers)
-		)
+		this.directive = new Directives(directives, this.setup.bind(this), this.bus, this.modifiers.transform.bind(this.modifiers))
 		this.reactivity = new Reactivity()
 		this.listeners = new Listeners()
+		
 
 		this.nodes = new Nodes({
 			root,
-			listeners: (
-				/** @type { HTMLElement } */ element,
-				/** @type { string } */ key,
-				/** @type { string } */ value,
-			) => {
+			listeners: (/** @type { HTMLElement } */ element, /** @type { string } */ key, /** @type { string } */ value) => {
 				const context = this.directive.getContext(element)
 				const func = dynamicFunction(value, this.bus, context, 'event')
 				this.listeners.add(element, key, (...arg) => func(element, ...arg))
@@ -82,11 +74,7 @@ class Prototy {
 					}
 				}
 			},
-			attribute: (
-				/** @type { HTMLElement } */ element,
-				/** @type { string } */ key,
-				/** @type { string } */ value,
-			) => {
+			attribute: (/** @type { HTMLElement } */ element, /** @type { string } */ key, /** @type { string } */ value) => {
 				if (key === 'el') {
 					const name = value
 					element._el = name
@@ -103,7 +91,7 @@ class Prototy {
 						return
 					}
 					element._slots = {}
-					Array.from(element.childNodes).forEach((node) => {
+					Array.from(element.childNodes).forEach(node => {
 						if (node.nodeType === 3 && !node.textContent.trim()) {
 							node.remove()
 							return
@@ -118,43 +106,36 @@ class Prototy {
 						node.remove()
 					})
 				}
-			},
+			}
 		})
-		this.setup(root)
+	  this.setup(root)
 	}
 	/**
 	 * @param { HTMLElement } node
 	 * @param { object } item
 	 */
 	setup(node, item) {
-		this.nodes.process(
-			node,
-			(
-				/** @type {HTMLElement} */ element,
-				/** @type {string} */ key,
-				/** @type {string} */ code,
-			) => {
-				const context = this.directive.getContext(element)
-				const func = dynamicFunction(code, this.bus, context, 'item')
-				const update = () => {
-					this.reactivity.removeEffect(update, update.deps)
-					this.activeEffect = update
-					try {
-						const res = func(element, item)
-						this.directive.apply(element, key, res, code)
-					} finally {
-						this.activeEffect = null
-					}
+		this.nodes.process(node, (/** @type {HTMLElement} */  element, /** @type {string} */ key, /** @type {string} */ code) => {
+			const context = this.directive.getContext(element)
+			const func = dynamicFunction(code, this.bus, context,  'item')
+			const update = () => {
+				this.reactivity.removeEffect(update, update.deps)
+				this.activeEffect = update
+				try {
+					const res = func(element, item)
+					this.directive.apply(element, key, res, code)
+				} finally {
+					this.activeEffect = null
 				}
-				if (!element._effects) {
-					element._effects = new Set()
-				}
-				element._effects.add(update)
+			}
+			if (!element._effects) {
+				element._effects = new Set()
+			}
+			element._effects.add(update)
 
-				update.deps = new Set()
-				update()
-			},
-		)
+			update.deps = new Set()
+			update()
+		})
 	}
 	/**
 	 * @param { any } state
@@ -165,74 +146,79 @@ class Prototy {
 		const self = this
 
 		if (isObject(state)) {
-			Object.keys(state).forEach((key) => {
-				if (isObject(state[key])) {
-					state[key] = this.createProxy(state[key], path ? `${path}.${key}` : key)
-				}
-			})
-		}
+	      Object.keys(state).forEach((key) => {
+	        if (isObject(state[key])) {
+	          state[key] = this.createProxy(
+	            state[key],
+	            path ? `${path}.${key}` : key
+	          )
+	        }
+	      })
+	    }
 
-		return new Proxy(state, {
-			get(target, property, receiver) {
-				if (property === IS_PROXY) {
-					return true
-				}
-				const value = Reflect.get(target, property, receiver)
+	    return new Proxy(state, {
+	      get(target, property, receiver) {
+		      if (property === IS_PROXY) {
+			      return true
+		      }
+	        const value = Reflect.get(target, property, receiver)
 
-				const isObservable =
-					typeof property !== 'symbol' && property in target && typeof value !== 'function'
+		      const isObservable = typeof property !== 'symbol' &&
+			      (property in target) &&
+			      typeof value !== 'function'
 
-				if (isObservable && self.activeEffect) {
-					self.reactivity.add(target, property, self.activeEffect)
-					self.activeEffect.deps.add({ target, property })
-				}
-				return value
-			},
-			set(target, property, value, receiver) {
-				if (typeof property === 'symbol') {
-					return Reflect.set(target, property, value, receiver)
-				}
+		      if (isObservable && self.activeEffect) {
+			      self.reactivity.add(target, property, self.activeEffect)
+			      self.activeEffect.deps.add({ target, property })
+		      }
+	        return value
+	      },
+		    set(target, property, value, receiver) {
+			    if (typeof property === 'symbol') {
+				    return Reflect.set(target, property, value, receiver)
+			    }
 
-				const isArray = Array.isArray(target)
-				const oldValue = Reflect.get(target, property)
+			    const isArray = Array.isArray(target)
+			    const oldValue = Reflect.get(target, property)
 
-				const isLength = isArray && property === 'length'
+			    const isLength = isArray && property === 'length'
 
-				if (!isLength && Object.is(oldValue, value)) {
-					return true
-				}
+			    if (!isLength && Object.is(oldValue, value)) {
+				    return true
+			    }
 
-				const fullPath = path ? `${path}.${property.toString()}` : property.toString()
-				let newValue = value
+			    const fullPath = path ? `${path}.${property.toString()}` : property.toString()
+			    let newValue = value
 
-				if (isObject(value) && !value[IS_PROXY]) {
+			    if (isObject(value) && !value[IS_PROXY]) {
 					newValue = self.createProxy(value, fullPath)
-				}
+			    }
 
-				if (typeof self.setters?.[fullPath] === 'function' && !self.activeSetters.has(fullPath)) {
-					self.activeSetters.add(fullPath)
-					try {
-						newValue = self.setters[fullPath](newValue, oldValue)
-						if (Object.is(oldValue, newValue)) {
+			    if (typeof self.setters?.[fullPath] === 'function' && !self.activeSetters.has(fullPath)) {
+				    self.activeSetters.add(fullPath)
+				    try {
+					    newValue = self.setters[fullPath](newValue, oldValue)
+					    if (Object.is(oldValue, newValue)) {
 							return true
-						}
-					} finally {
-						self.activeSetters.delete(fullPath)
-					}
-				}
+					    }
+				    } finally {
+					    self.activeSetters.delete(fullPath)
+				    }
+			    }
 
-				const success = Reflect.set(target, property, newValue, receiver)
+			    const success = Reflect.set(target, property, newValue, receiver)
 
-				if (success) {
-					self.schedule(target, property)
+			    if (success) {
 
-					if (isArray && !isLength) {
-						self.schedule(target, 'length')
-					}
-				}
+				    self.schedule(target, property)
 
-				return success
-			},
+				    if (isArray && !isLength) {
+					    self.schedule(target, 'length')
+				    }
+			    }
+
+			    return success
+		    }
 		})
 	}
 	/**
@@ -248,17 +234,13 @@ class Prototy {
 				this.pendingTargets.delete(target)
 
 				const uniqueEffects = new Set()
-				changedKeys.forEach((key) => {
+				changedKeys.forEach(key => {
 					const effects = this.reactivity.find(target, key)
-					effects.forEach((eff) => uniqueEffects.add(eff))
+					effects.forEach(eff => uniqueEffects.add(eff))
 				})
 
-				console.log(
-					'[Trigger] Target:',
-					target,
-					`Key: ${Array.from(changedKeys)}, Found effects: ${uniqueEffects.size}`,
-				)
-				uniqueEffects.forEach((update) => {
+				console.log('[Trigger] Target:', target, `Key: ${Array.from(changedKeys)}, Found effects: ${uniqueEffects.size}`)
+				uniqueEffects.forEach(update => {
 					if (update !== this.activeEffect) {
 						update()
 					}
