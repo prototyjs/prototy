@@ -1,5 +1,37 @@
 <h1 :class="{ show: true }" :style="{ color: 'yellow', background: 'green' }" data-index="1" data-user-id="123" data-role="admin" >Prototy Demo</h1>
+<!-- Тест :class реактивности -->
+<div>
+  <div :class="{ active: state.isActive, test: state.isTest }" style="padding: 20px; margin: 10px; border: 1px solid #ccc;">
+    <p>Тест :class директивы</p>
+    <p :text="'active: ' + state.isActive"></p>
+    <p :text="'test: ' + state.isTest"></p>
+  </div>
+  <button :onclick="state.isActive = !state.isActive">Toggle Active</button>
+  <button :onclick="state.isTest = !state.isTest">Toggle Test</button>
+</div>
+<!-- Тест :attr директивы -->
+<div>
+  <div :data-test="state.dataValue" :data-custom="state.customValue"
+       style="padding: 20px; margin: 10px; border: 1px solid #ccc;">
+    <p>Тест :attr директивы</p>
+    <p :text="'data-test: ' + state.dataValue"></p>
+    <p :text="'data-custom: ' + state.customValue"></p>
+  </div>
+  <button :onclick="state.dataValue = 'новое значение'">Изменить data-test</button>
+  <button :onclick="state.customValue = 'кастом'">Изменить data-custom</button>
+  <button :onclick="state.dataValue = null">Удалить data-test</button>
+</div>
 
+<style>
+  .active {
+    background-color: yellow;
+    font-weight: bold;
+  }
+  .test {
+    color: red;
+    border: 2px solid red;
+  }
+</style>
 <div :context="{ p: state.product }" :onclick="state.product.params.count++">
     <span>Product Count: </span><span :text="p.params.count"></span> <span :context.scope="{ p1: p.params }"><span :text="p1.count"></span></span>
 </div>

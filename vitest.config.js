@@ -3,7 +3,7 @@ import path from 'path'
 
 export default defineConfig({
 	test: {
-		environment: 'happy-dom',
+		environment: 'jsdom',
 		globals: true,
 		include: ['tests/**/*.test.js'],
 		coverage: {
