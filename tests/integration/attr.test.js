@@ -1,40 +1,77 @@
 import { describe, it, expect } from 'vitest'
-import { attr } from '@/directives/attr.js'
+import { prototy, nextTick } from '@'
 
-describe('attr directive', () => {
+describe('Attr Directive', () => {
 
-	it('sets attribute when value is valid', () => {
-		const element = document.createElement('div')
-
-		attr(element, 'test-value', null, [], 'data-test')
-
-		expect(element.getAttribute('data-test')).toBe('test-value')
+	it('sets attribute when value is string', async () => {
+		document.body.innerHTML = '<div :dataTest="state.value"></div>'
+		prototy({
+			root: document.body,
+			state: { value: 'test-value' }
+		})
+		await nextTick()
+		expect(document.body.firstElementChild.getAttribute('dataTest')).toBe('test-value')
 	})
 
-	it('removes attribute when value is null', () => {
-		const element = document.createElement('div')
-		element.setAttribute('data-test', 'old-value')
-
-		attr(element, null, null, [], 'data-test')
-
-		expect(element.hasAttribute('data-test')).toBe(false)
+	it('removes attribute when value is null', async () => {
+		document.body.innerHTML = '<div :dataTest="state.value"></div>'
+		prototy({
+			root: document.body,
+			state: { value: null }
+		})
+		await nextTick()
+		expect(document.body.firstElementChild.hasAttribute('dataTest')).toBe(false)
 	})
 
-	it('removes attribute when value is undefined', () => {
-		const element = document.createElement('div')
-		element.setAttribute('data-test', 'old-value')
-
-		attr(element, undefined, null, [], 'data-test')
-
-		expect(element.hasAttribute('data-test')).toBe(false)
+	it('removes attribute when value is false', async () => {
+		document.body.innerHTML = '<div :dataTest="state.value"></div>'
+		prototy({
+			root: document.body,
+			state: { value: false }
+		})
+		await nextTick()
+		expect(document.body.firstElementChild.hasAttribute('dataTest')).toBe(false)
 	})
 
-	it('removes attribute when value is false', () => {
-		const element = document.createElement('div')
-		element.setAttribute('data-test', 'old-value')
+	it('updates attribute when value changes', async () => {
+		document.body.innerHTML = '<div :dataTest="state.value"></div>'
+		const app = prototy({
+			root: document.body,
+			state: { value: 'initial' }
+		})
+		await nextTick()
+		expect(document.body.firstElementChild.getAttribute('dataTest')).toBe('initial')
 
-		attr(element, false, null, [], 'data-test')
+		app.state.value = 'updated'
+		await nextTick()
+		expect(document.body.firstElementChild.getAttribute('dataTest')).toBe('updated')
+	})
 
-		expect(element.hasAttribute('data-test')).toBe(false)
+	it('removes attribute when value changes to null', async () => {
+		document.body.innerHTML = '<div :dataTest="state.value"></div>'
+		const app = prototy({
+			root: document.body,
+			state: { value: 'exists' }
+		})
+		await nextTick()
+		expect(document.body.firstElementChild.getAttribute('dataTest')).toBe('exists')
+
+		app.state.value = null
+		await nextTick()
+		expect(document.body.firstElementChild.hasAttribute('dataTest')).toBe(false)
+	})
+
+	it('adds attribute when value changes from null to string', async () => {
+		document.body.innerHTML = '<div :dataTest="state.value"></div>'
+		const app = prototy({
+			root: document.body,
+			state: { value: null }
+		})
+		await nextTick()
+		expect(document.body.firstElementChild.hasAttribute('dataTest')).toBe(false)
+
+		app.state.value = 'new-value'
+		await nextTick()
+		expect(document.body.firstElementChild.getAttribute('dataTest')).toBe('new-value')
 	})
 })
