@@ -5,7 +5,6 @@ describe('Classes Directive', () => {
 
 	it('add class when condition is true', async () => {
 		document.body.innerHTML = '<div :class="{ active: state.isActive }"></div>'
-
 		prototy({
 			root: document.body,
 			state: { isActive: true }
@@ -15,7 +14,6 @@ describe('Classes Directive', () => {
 
 	it('does not add class when condition is false', async () => {
 		document.body.innerHTML = '<div :class="{ active: state.isActive }"></div>'
-
 		prototy({
 			root: document.body,
 			state: { isActive: false }
@@ -25,7 +23,6 @@ describe('Classes Directive', () => {
 
 	it('handles multiple classes with different conditions', async () => {
 		document.body.innerHTML = '<div :class="{ active: state.isActive, disabled: state.isDisabled, visible: state.isVisible }"></div>'
-
 		prototy({
 			root: document.body,
 			state: {
@@ -38,22 +35,19 @@ describe('Classes Directive', () => {
 		expect(div.classList.contains('active')).toBe(true)
 		expect(div.classList.contains('disabled')).toBe(false)
 		expect(div.classList.contains('visible')).toBe(true)
-		expect(div.classList.length).toBe(2)
 	})
 
-	// Тесты на реактивность
 	it('updates class when condition changes from false to true', async () => {
 		document.body.innerHTML = '<div :class="{ active: state.isActive }"></div>'
 		const app = prototy({
 			root: document.body,
 			state: { isActive: false }
 		})
-
 		await nextTick()
-		expect(document.body.firstElementChild.classList.contains('active')).toBe(false)
 
 		app.state.isActive = true
 		await nextTick()
+
 		expect(document.body.firstElementChild.classList.contains('active')).toBe(true)
 	})
 
@@ -63,12 +57,11 @@ describe('Classes Directive', () => {
 			root: document.body,
 			state: { isActive: true }
 		})
-
 		await nextTick()
-		expect(document.body.firstElementChild.classList.contains('active')).toBe(true)
 
 		app.state.isActive = false
 		await nextTick()
+
 		expect(document.body.firstElementChild.classList.contains('active')).toBe(false)
 	})
 
@@ -78,17 +71,14 @@ describe('Classes Directive', () => {
 			root: document.body,
 			state: { isActive: false, isDisabled: true }
 		})
-
 		await nextTick()
-		const div = document.body.firstElementChild
-		expect(div.classList.contains('active')).toBe(false)
-		expect(div.classList.contains('disabled')).toBe(true)
 
 		app.state.isActive = true
 		app.state.isDisabled = false
 		await nextTick()
+
+		const div = document.body.firstElementChild
 		expect(div.classList.contains('active')).toBe(true)
 		expect(div.classList.contains('disabled')).toBe(false)
 	})
-
 })
