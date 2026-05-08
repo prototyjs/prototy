@@ -1,4 +1,4 @@
-import innerDirectives from './directives/index'
+import innerDirectives from './directives/index.js'
 import { bind } from './directives/bind'
 import { attr } from './directives/attr'
 import { each } from './directives/each'

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { prototy } from '@'
+import { prototy, nextTick } from '@'
 
 describe('Classes Directive', () => {
 
@@ -10,7 +10,6 @@ describe('Classes Directive', () => {
 			root: document.body,
 			state: { isActive: true }
 		})
-
 		expect(document.body.firstElementChild.classList.contains('active')).toBe(true)
 	})
 
@@ -21,7 +20,6 @@ describe('Classes Directive', () => {
 			root: document.body,
 			state: { isActive: false }
 		})
-
 		expect(document.body.firstElementChild.classList.contains('active')).toBe(false)
 	})
 
@@ -36,12 +34,61 @@ describe('Classes Directive', () => {
 				isVisible: true
 			}
 		})
-
 		const div = document.body.firstElementChild
 		expect(div.classList.contains('active')).toBe(true)
 		expect(div.classList.contains('disabled')).toBe(false)
 		expect(div.classList.contains('visible')).toBe(true)
 		expect(div.classList.length).toBe(2)
+	})
+
+	// Тесты на реактивность
+	it('updates class when condition changes from false to true', async () => {
+		document.body.innerHTML = '<div :class="{ active: state.isActive }"></div>'
+		const app = prototy({
+			root: document.body,
+			state: { isActive: false }
+		})
+
+		await nextTick()
+		expect(document.body.firstElementChild.classList.contains('active')).toBe(false)
+
+		app.state.isActive = true
+		await nextTick()
+		expect(document.body.firstElementChild.classList.contains('active')).toBe(true)
+	})
+
+	it('updates class when condition changes from true to false', async () => {
+		document.body.innerHTML = '<div :class="{ active: state.isActive }"></div>'
+		const app = prototy({
+			root: document.body,
+			state: { isActive: true }
+		})
+
+		await nextTick()
+		expect(document.body.firstElementChild.classList.contains('active')).toBe(true)
+
+		app.state.isActive = false
+		await nextTick()
+		expect(document.body.firstElementChild.classList.contains('active')).toBe(false)
+	})
+
+	it('updates multiple classes reactively', async () => {
+		document.body.innerHTML = '<div :class="{ active: state.isActive, disabled: state.isDisabled }"></div>'
+		const app = prototy({
+			root: document.body,
+			state: { isActive: false, isDisabled: true }
+		})
+
+		await nextTick()
+		const div = document.body.firstElementChild
+		expect(div.classList.contains('active')).toBe(false)
+		expect(div.classList.contains('disabled')).toBe(true)
+
+		app.state.isActive = true
+		app.state.isDisabled = false
+		await nextTick()
+		expect(div.classList.contains('active')).toBe(true)
+		expect(div.classList.contains('disabled')).toBe(false)
 	})
 
 })
