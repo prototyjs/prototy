@@ -271,7 +271,9 @@ class Prototy {
 		this.pendingTargets.get(target).add(property)
 	}
 	/**
-	 *
+	 * @param { HTMLElement } element
+	 * @param { boolean } reactive
+	 * @returns { any }
 	 */
 	getContext(element, reactive = true) {
 		const self = this
@@ -298,7 +300,8 @@ class Prototy {
 		})
 	}
 	/**
-	 *
+	 * @param { HTMLElement } element
+	 * @param { any } newValue
 	 */
 	updateContext(element, newValue) {
 		let entry = this.contextStorage.get(element)
