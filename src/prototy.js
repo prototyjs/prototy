@@ -8,7 +8,7 @@ import { Listeners } from '@/listeners'
 import { Nodes } from '@/nodes'
 import { bindMethods } from '@/utils/bindMethods'
 import { log } from '@/log'
-import { Modifiers } from './directives/modifiers'
+import { Modifiers } from '@/directives/modifiers'
 
 const IS_PROXY = Symbol('is_proxy')
 /**

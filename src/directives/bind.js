@@ -10,8 +10,9 @@ import { Modifiers } from './modifiers'
  * @param { string } code
  * @param { object } bus
  * @param { Modifiers } modifiers
+ * @param { Function } transform 
  */
-export function bind(element, value, property, args, code, bus, modifiers) {
+export function bind(element, value, property, args, code, bus, modifiers, transform) {
 	const isWritable = code.startsWith('state.') || code.startsWith('item.')
 	if (!isWritable) {
 		log.error('Invalid bind path "{0}". Path must start with "state." (e.g., state.text)', code, element)
@@ -40,7 +41,7 @@ export function bind(element, value, property, args, code, bus, modifiers) {
 
 	if (!element._bound[eventName]) {
 		const handler = () => {
-			const result = modifiers.apply(modifierName, element[property], ...remainingModifierArgs)
+			const result = transform(modifierName, element[property], ...remainingModifierArgs)
 			setDeepValue(bus.state, code, result)
 		}
 

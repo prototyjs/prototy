@@ -11,8 +11,8 @@ export function attr(element, value, modifier, args, code, directive, transform)
 	const v = value
 	
 	if (v !== undefined && v !== null && v !== false) {
-		element.setAttribute(modifier, v)
+		element.setAttribute(directive, v)
 	} else {
-		element.removeAttribute(modifier)
+		element.removeAttribute(directive)
 	}
 }
