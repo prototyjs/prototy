@@ -1,17 +1,17 @@
-import { applyModifier } from '@/directives/modifiers/applyModifier'
 /**
  *
  * @param { HTMLElement } element
  * @param { object } value
  * @param { string } modifier
  * @param { Array <string> } args
- * @param { string } attrName
+ * @param { Function } transform 
+ * @param { string } directive
  */
-export function attr(element, value, modifier, args, attrName) {
-	const v = applyModifier(value, modifier, args)
+export function attr(element, value, modifier, args, transform, directive) {
+	const v = transform(value, modifier, args)
 	if (v !== undefined && v !== null && v !== false) {
-		element.setAttribute(attrName, v)
+		element.setAttribute(directive, v)
 	} else {
-		element.removeAttribute(attrName)
+		element.removeAttribute(directive)
 	}
 }

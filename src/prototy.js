@@ -3,6 +3,7 @@ import { unbind } from '@/utils/unbind'
 import { dynamicFunction } from '@/utils/dynamicFunction'
 import { mapComponents } from '@/component/mapComponents'
 import { Directives } from '@/directives'
+import { Modifiers } from '@/modifiers'
 import { Reactivity } from '@/reactivity'
 import { Listeners } from '@/listeners'
 import { Nodes } from '@/nodes'
@@ -16,8 +17,10 @@ const IS_PROXY = Symbol('is_proxy')
  * @property { HTMLElement } root
  * @property { object } params
  * @property { Record<string, Function> } methods
+ * @property { Record<string, Function> } directives
+ * @property { Record<string, Function> } modifiers
+ * @property { object } components
  * @property { Record<string, Function> } setters
- * @property { object } directives
  */
 class Prototy {
 	/**
@@ -28,10 +31,10 @@ class Prototy {
 		root = document.body,
 		params = {},
 		methods = {},
-		directives= {},
-		// modifiers = {},
-		components= {},
-		setters= {}
+		directives = {},
+		modifiers = {},
+		components = {},
+		setters = {}
 	}) {
 		this.pendingTargets = new Map()
 		this.state = this.createProxy(state)
@@ -110,12 +113,14 @@ class Prototy {
 				}
 			}
 		})
+		this.modifiers = new Modifiers(modifiers)
 		this.directive = new Directives(directives, this.bus, {
 			setup: this.setup.bind(this),
 			unprocess: this.nodes.unprocess.bind(this.nodes),
-			context: this.updateContext.bind(this)
+			context: this.updateContext.bind(this),
+			transform: this.modifiers.transform.bind(this.modifiers)
 		})
-
+		
 		this.setup(root)
 	}
 	/**
