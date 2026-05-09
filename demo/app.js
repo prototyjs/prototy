@@ -8,14 +8,15 @@ const app = prototy({
 		y: 0
 	},
 	state: {
-		show: false,
+		tabName: 'first',
+		show: true,
 		hidden: true,
 		test: 'remove',
 		value: 2,
 		product: {
 			price: 10,
 			params: {
-				count: 1
+				count: 42
 			}
 		},
 		arr: [{ color: 'red' }, { color: 'green' }, { color: 'blue' }, { color: 'green' }]
@@ -39,7 +40,9 @@ const app = prototy({
 	},
 	directives: {
 		myHidden: (element, value) => {
-			if (typeof value === 'boolean') element.hidden = value
+			if (typeof value === 'boolean') {
+				element.hidden = value
+			}
 		}
 	},
 	modifiers: {
@@ -47,8 +50,12 @@ const app = prototy({
 	},
 	components: {
 		main,
-		color: `<div :text="item.color" class="color"></div>`,
-		first: '<h2>first</h2><slot></slot>',
-		second: '<h2>second</h2><slot></slot>'
+		color: `<div class="color">
+			<span :text="index"></span>
+			<span :text="item.color"></span>
+		</div>`,
+		first: '<h2>first</h2><slot></slot><span :text="p.params.count"></span>',
+		second: '<h2>second</h2><slot></slot><span :text="p.params.count"></span>',
+		withEl: '<div :text="p.params.count">EL</div>'
 	}
 })

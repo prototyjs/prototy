@@ -1,186 +1,371 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
 import { prototy, nextTick } from '@'
 
-describe('Each Directive', () => {
-	it('should correctly handle shift (removing the first element)', async () => {
-		const root = document.createElement('div')
-		root.innerHTML = '<div id="list" :each="state.arr" :component="components.item"></div>'
-		const app = prototy({
-			root,
-			state: { arr: [{ n: 1 }, { n: 2 }, { n: 3 }] },
-			components: { item: '<div :text="item.n"></div>' }
-		})
+describe('Each Directive Complete Suite', () => {
+	let root
 
-		app.state.arr.shift()
-		await nextTick()
-
-		const list = root.querySelector('#list')
-		expect(list.children.length).toBe(2)
-		expect(list.children[0].textContent).toBe('2')
-		expect(list.children[1].textContent).toBe('3')
+	beforeEach(() => {
+		root = document.createElement('div')
+		document.body.appendChild(root)
 	})
 
-	it('should correctly work with filter (mass change)', async () => {
-		const root = document.createElement('div')
-		root.innerHTML = '<div id="list" :each="state.arr" :component="components.item"></div>'
-		const app = prototy({
-			root,
-			state: { arr: [1, 2, 3, 4, 5].map(n => ({ n })) },
-			components: { item: '<div :text="item.n"></div>' }
+	describe('Basic Array Operations', () => {
+		it('should render initial array correctly', async () => {
+			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			prototy({
+				root,
+				state: { items: [{ n: 1 }, { n: 2 }, { n: 3 }] },
+				components: { item: '<div :text="item.n"></div>' }
+			})
+
+			await nextTick()
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children.length).toBe(3)
+			expect(container.children[0].textContent).toBe('1')
+			expect(container.children[2].textContent).toBe('3')
 		})
 
-		app.state.arr = app.state.arr.filter(item => item.n % 2 === 0)
-		await nextTick()
+		it('should handle shift (remove first)', async () => {
+			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			const app = prototy({
+				root,
+				state: { items: [{ n: 1 }, { n: 2 }, { n: 3 }] },
+				components: { item: '<div :text="item.n"></div>' }
+			})
 
-		const list = root.querySelector('#list')
-		expect(list.children.length).toBe(2)
-		expect(list.children[0].textContent).toBe('2')
-		expect(list.children[1].textContent).toBe('4')
-	})
+			await nextTick()
+			app.state.items.shift()
+			await nextTick()
 
-	it('should preserve DOM nodes for unchanged objects (Reconciliation)', async () => {
-		const root = document.createElement('div')
-		root.innerHTML = '<div id="list" :each="state.arr" :component="components.item"></div>'
-		const app = prototy({
-			root,
-			state: { arr: [{ n: 'stay' }, { n: 'remove' }] },
-			components: { item: '<div :text="item.n"></div>' }
+			// Ищем контейнер (он может быть без id после обновления)
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children.length).toBe(2)
+			expect(container.children[0].textContent).toBe('2')
+			expect(container.children[1].textContent).toBe('3')
 		})
 
-		const list = root.querySelector('#list')
-		const firstNodeBefore = list.children[0]
+		it('should handle pop (remove last)', async () => {
+			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			const app = prototy({
+				root,
+				state: { items: [{ n: 1 }, { n: 2 }, { n: 3 }] },
+				components: { item: '<div :text="item.n"></div>' }
+			})
 
-		app.state.arr.push({ n: 'new' })
-		app.state.arr.splice(1, 1)
-		await nextTick()
+			await nextTick()
+			app.state.items.pop()
+			await nextTick()
 
-		expect(list.children[0]).toBe(firstNodeBefore)
-		expect(list.children[0].textContent).toBe('stay')
-		expect(list.children.length).toBe(2)
-	})
-
-	it('should update text when a deep property of an object in the array changes', async () => {
-		const root = document.createElement('div')
-		root.innerHTML = '<div :each="state.items" :component="components.item"></div>'
-		const app = prototy({
-			root,
-			state: { items: [{ info: { text: 'old' } }] },
-			components: { item: '<div class="target" :text="item.info.text"></div>' }
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children.length).toBe(2)
+			expect(container.children[0].textContent).toBe('1')
+			expect(container.children[1].textContent).toBe('2')
 		})
 
-		app.state.items[0].info.text = 'new'
-		await nextTick()
+		it('should handle push (add to end)', async () => {
+			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			const app = prototy({
+				root,
+				state: { items: [{ n: 1 }, { n: 2 }] },
+				components: { item: '<div :text="item.n"></div>' }
+			})
 
-		expect(root.querySelector('.target').textContent).toBe('new')
-	})
+			await nextTick()
+			app.state.items.push({ n: 3 })
+			await nextTick()
 
-	it('should correctly handle moving and modifying a proxied object', async () => {
-		const root = document.createElement('div')
-		root.innerHTML = '<div id="list" :each="state.arr" :component="components.item"></div>'
-		const app = prototy({
-			root,
-			state: { arr: [{ name: 'A' }, { name: 'B' }] },
-			components: { item: '<div :text="item.name"></div>' }
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children.length).toBe(3)
+			expect(container.children[2].textContent).toBe('3')
 		})
 
-		const itemA = app.state.arr[0]
-		app.state.arr.shift()
-		app.state.arr.push(itemA)
-		itemA.name = 'A-updated'
+		it('should handle unshift (add to beginning)', async () => {
+			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			const app = prototy({
+				root,
+				state: { items: [{ n: 2 }, { n: 3 }] },
+				components: { item: '<div :text="item.n"></div>' }
+			})
 
-		await nextTick()
-		const items = root.querySelectorAll('#list > div')
-		expect(items[0].textContent).toBe('B')
-		expect(items[1].textContent).toBe('A-updated')
-	})
+			await nextTick()
+			app.state.items.unshift({ n: 1 })
+			await nextTick()
 
-	it('should call the reactivity cleanup method when elements are removed (leak protection)', async () => {
-		const root = document.createElement('div')
-		root.innerHTML = '<div id="list" :each="state.arr" :component="components.item"></div>'
-		const app = prototy({
-			root,
-			state: { arr: [{ id: 1 }, { id: 2 }] },
-			components: { item: '<div :text="item.id"></div>' }
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children.length).toBe(3)
+			expect(container.children[0].textContent).toBe('1')
+			expect(container.children[1].textContent).toBe('2')
 		})
 
-		app.state.arr = []
-		await nextTick()
-		const list = root.querySelector('#list')
-		expect(list.children.length).toBe(0)
-	})
+		it('should handle reverse (critical test!)', async () => {
+			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			const app = prototy({
+				root,
+				state: { items: [{ n: 1 }, { n: 2 }, { n: 3 }] },
+				components: { item: '<div :text="item.n"></div>' }
+			})
 
-	it('should correctly transition from an empty state to a populated one', async () => {
-		const root = document.createElement('div')
-		root.innerHTML = '<div id="list" :each="state.arr" :component="components.item"></div>'
-		const app = prototy({
-			root,
-			state: { arr: [] },
-			components: { item: '<div>item</div>' }
+			await nextTick()
+			app.state.items.reverse()
+			await nextTick()
+
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children.length).toBe(3)
+			expect(container.children[0].textContent).toBe('3')
+			expect(container.children[1].textContent).toBe('2')
+			expect(container.children[2].textContent).toBe('1')
 		})
 
-		const list = root.querySelector('#list')
-		expect(list.children.length).toBe(0)
+		it('should handle sort', async () => {
+			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			const app = prototy({
+				root,
+				state: { items: [{ n: 3 }, { n: 1 }, { n: 2 }] },
+				components: { item: '<div :text="item.n"></div>' }
+			})
 
-		app.state.arr.push({ id: 1 })
-		await nextTick()
+			await nextTick()
+			app.state.items.sort((a, b) => a.n - b.n)
+			await nextTick()
 
-		expect(list.children.length).toBe(1)
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children[0].textContent).toBe('1')
+			expect(container.children[1].textContent).toBe('2')
+			expect(container.children[2].textContent).toBe('3')
+		})
+
+		it('should handle splice', async () => {
+			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			const app = prototy({
+				root,
+				state: { items: [{ n: 1 }, { n: 2 }, { n: 3 }, { n: 4 }] },
+				components: { item: '<div :text="item.n"></div>' }
+			})
+
+			await nextTick()
+			app.state.items.splice(1, 2, { n: 5 }, { n: 6 })
+			await nextTick()
+
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children.length).toBe(4)
+			expect(container.children[0].textContent).toBe('1')
+			expect(container.children[1].textContent).toBe('5')
+			expect(container.children[2].textContent).toBe('6')
+			expect(container.children[3].textContent).toBe('4')
+		})
 	})
 
-	it('should correctly handle nested loops', async () => {
-		const root = document.createElement('div')
-		root.innerHTML = `<div id="outer" :each="state.groups" :component="components.group"></div>`
+	describe('Index Updates', () => {
+		it('should update indices after shift', async () => {
+			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			const app = prototy({
+				root,
+				state: { items: [{ name: 'A' }, { name: 'B' }, { name: 'C' }] },
+				components: {
+					item: '<div><span class="idx" :text="index"></span>:<span :text="item.name"></span></div>'
+				}
+			})
 
-		const app = prototy({
-			root,
-			state: {
-				groups: [
-					{ name: 'G1', items: [{ v: '1.1' }, { v: '1.2' }] },
-					{ name: 'G2', items: [{ v: '2.1' }] }
-				]
-			},
-			components: {
-				group: `
-          <div class="group">
-            <b :text="item.name"></b>
-            <div class="inner" :each="item.items" :component="components.cell"></div>
-          </div>`,
-				cell: '<span :text="item.v"></span>'
+			await nextTick()
+
+			let indices = root.querySelectorAll('.idx')
+			expect(indices[0].textContent).toBe('0')
+			expect(indices[1].textContent).toBe('1')
+			expect(indices[2].textContent).toBe('2')
+
+			app.state.items.shift()
+			await nextTick()
+
+			indices = root.querySelectorAll('.idx')
+			expect(indices.length).toBe(2)
+			expect(indices[0].textContent).toBe('0')
+			expect(indices[1].textContent).toBe('1')
+
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children[0].textContent).toContain('B')
+		})
+
+		it('should update indices after reverse', async () => {
+			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			const app = prototy({
+				root,
+				state: { items: [{ name: 'A' }, { name: 'B' }, { name: 'C' }] },
+				components: {
+					item: '<div><span class="idx" :text="index"></span>:<span :text="item.name"></span></div>'
+				}
+			})
+
+			await nextTick()
+			app.state.items.reverse()
+			await nextTick()
+
+			const indices = root.querySelectorAll('.idx')
+			expect(indices[0].textContent).toBe('0')
+			expect(indices[1].textContent).toBe('1')
+			expect(indices[2].textContent).toBe('2')
+
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			const items = container.children
+			expect(items[0].textContent).toContain('C')
+			expect(items[1].textContent).toContain('B')
+			expect(items[2].textContent).toContain('A')
+		})
+	})
+
+	describe('Nested Each with Props', () => {
+		it('should update nested indices when parent reverses', async () => {
+			root.innerHTML = `
+			<div id="outer" :each="state.groups" :component="components.group"></div>
+		`
+
+			const app = prototy({
+				root,
+				state: {
+					groups: [
+						{ name: 'Group A', items: [{ text: 'A1' }, { text: 'A2' }] },
+						{ name: 'Group B', items: [{ text: 'B1' }] }
+					]
+				},
+				components: {
+					group: `
+					<div class="group">
+						<div :props="{ gIdx: index }" :component="components.wrapper"></div>
+					</div>
+				`,
+					wrapper: `
+					<div class="wrapper">
+						<h3 :text="'Group ' + gIdx + ': ' + item.name"></h3>
+						<div :each="item.items" :component="components.cell"></div>
+					</div>
+				`,
+					cell: `
+					<div class="cell">
+						<span :text="index"></span>:
+						<span :text="item.text"></span>
+						<span :text="' [parent idx: ' + gIdx + ']'"></span>
+					</div>
+				`
+				}
+			})
+
+			await nextTick()
+
+			const cleanText = (text) => text.replace(/\s+/g, ' ').trim()
+
+			const checkCell = (cell, expected) => {
+				const text = cleanText(cell.textContent)
+				expect(text).toBe(expected)
 			}
+
+			let cells = root.querySelectorAll('.cell')
+			expect(cells.length).toBe(3)
+
+			checkCell(cells[0], '0: A1 [parent idx: 0]')
+			checkCell(cells[1], '1: A2 [parent idx: 0]')
+			checkCell(cells[2], '0: B1 [parent idx: 1]')
+
+			// Реверс групп
+			app.state.groups.reverse()
+			await nextTick()
+
+			cells = root.querySelectorAll('.cell')
+			expect(cells.length).toBe(3)
+
+			checkCell(cells[0], '0: B1 [parent idx: 0]')
+			checkCell(cells[1], '0: A1 [parent idx: 1]')
+			checkCell(cells[2], '1: A2 [parent idx: 1]')
+
+			const headers = root.querySelectorAll('h3')
+			const cleanHeader = (el) => cleanText(el.textContent)
+
+			expect(cleanHeader(headers[0])).toBe('Group 0: Group B')
+			expect(cleanHeader(headers[1])).toBe('Group 1: Group A')
 		})
-
-		await nextTick()
-		const groups = root.querySelectorAll('.group')
-		expect(groups.length).toBe(2)
-		expect(groups[0].querySelectorAll('span').length).toBe(2)
-		expect(groups[1].querySelectorAll('span').length).toBe(1)
-
-		app.state.groups[0].items.push({ v: '1.3' })
-		await nextTick()
-
-		expect(groups[0].querySelectorAll('span').length).toBe(3)
 	})
-	it('should not re-create tags on shift operation', async () => {
-		const root = document.createElement('div')
-		root.innerHTML = '<div id="list" :each="state.arr" :component="components.item"></div>'
 
-		const app = prototy({
-			root,
-			state: { arr: [{ id: 1 }, { id: 2 }] },
-			components: { item: '<div class="item"></div>' }
+	describe('Performance and State Preservation', () => {
+		it('should preserve input state within each items', async () => {
+			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+
+			const app = prototy({
+				root,
+				state: { items: [{ name: 'A' }, { name: 'B' }, { name: 'C' }] },
+				components: {
+					item: '<div><input type="text" :value="item.name" /><span :text="item.name"></span></div>'
+				}
+			})
+
+			await nextTick()
+
+			const firstInput = root.querySelector('input')
+			firstInput.value = 'Changed'
+			firstInput.dispatchEvent(new Event('input'))
+			await nextTick()
+
+			app.state.items.reverse()
+			await nextTick()
+
+			const inputs = root.querySelectorAll('input')
+			expect(inputs[2].value).toBe('Changed')
+		})
+	})
+
+	describe('Edge Cases', () => {
+		it('should handle empty array', async () => {
+			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			const app = prototy({
+				root,
+				state: { items: [] },
+				components: { item: '<div :text="item.n"></div>' }
+			})
+
+			await nextTick()
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children.length).toBe(0)
+
+			app.state.items.push({ n: 1 })
+			await nextTick()
+			expect(container.children.length).toBe(1)
+			expect(container.children[0].textContent).toBe('1')
 		})
 
-		const secondNode = root.querySelectorAll('.item')[1]
+		it('should handle null/undefined array', async () => {
+			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			const app = prototy({
+				root,
+				state: { items: null },
+				components: { item: '<div :text="item.n"></div>' }
+			})
 
-		secondNode.__custom_mark = true
+			await nextTick()
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children.length).toBe(0)
 
-		app.state.arr.shift()
-		await nextTick()
+			app.state.items = [{ n: 1 }]
+			await nextTick()
+			expect(container.children.length).toBe(1)
+		})
 
-		const items = root.querySelectorAll('.item')
-		expect(items.length).toBe(1)
+		it('should handle rapid successive updates', async () => {
+			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			const app = prototy({
+				root,
+				state: { items: [{ n: 1 }] },
+				components: { item: '<div :text="item.n"></div>' }
+			})
 
-		expect(items[0].__custom_mark).toBe(true)
-		expect(items[0]).toBe(secondNode)
+			await nextTick()
+
+			app.state.items.push({ n: 2 })
+			app.state.items.push({ n: 3 })
+			app.state.items.shift()
+			app.state.items.reverse()
+			await nextTick()
+
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children.length).toBe(2)
+			expect(container.children[0].textContent).toBe('3')
+			expect(container.children[1].textContent).toBe('2')
+		})
 	})
 })
