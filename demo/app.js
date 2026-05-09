@@ -19,7 +19,11 @@ const app = prototy({
 				count: 42
 			}
 		},
-		arr: [{ color: 'red' }, { color: 'green' }, { color: 'blue' }, { color: 'green' }]
+		arr: [{ color: 'red' }, { color: 'green' }, { color: 'blue' }, { color: 'green' }],
+		isActive: false,
+		isTest: false,
+		dataValue: 'начальное значение',
+		customValue: 'новое значение'
 
 	},
 	methods: {

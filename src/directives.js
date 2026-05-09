@@ -3,6 +3,7 @@ import { bind } from './directives/bind'
 import { attr } from './directives/attr'
 import { each } from './directives/each'
 import { component } from './directives/component.js'
+import { property } from './directives/property'
 
 /**
  * @class Directives
@@ -39,12 +40,14 @@ export class Directives {
 		if (key === 'el') {
 			return
 		}
-		if (Object.hasOwn(this.directives,directive)) {
-			this.directives[directive](element, value, modifier, args, code)
-		} else if (directive in element) {
-			element[directive] = value
-		} else {
-			attr(element, value, modifier, args, directive)
+		if (Object.hasOwn(this.directives, directive)) {
+			this.directives[directive](element, value, modifier, args, code, directive)
+			return
 		}
+		if (directive in element) {
+			property(element, value, modifier, args, directive)
+			return
+		}
+		attr(element, value, modifier, args, directive)
 	}
 }
