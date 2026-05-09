@@ -184,47 +184,40 @@ describe('Text Directive', () => {
 			})
 			expect(document.body.firstElementChild.textContent).toBe('42em')
 		})
-	})
-})
+		it('should convert numbers to strings', async () => {
+			document.body.innerHTML = '<div :text="state.value"></div>'
+			const app = prototy({
+				root: document.body,
+				state: { value: 42 }
+			})
 
-describe('Text Directive - boolean and zero (jsdom)', () => {
-	beforeEach(() => {
-		document.body.innerHTML = ''
-	})
-
-	it('should handle false as string', async () => {
-		document.body.innerHTML = '<div :text="state.value"></div>'
-		const app = prototy({
-			root: document.body,
-			state: { value: true }
+			expect(document.body.firstElementChild.textContent).toBe('42')
+			app.state.value = 0
+			await nextTick()
+			expect(document.body.firstElementChild.textContent).toBe('0')
 		})
-		expect(document.body.firstElementChild.textContent).toBe('true')
-		app.state.value = false
-		await nextTick()
-		expect(document.body.firstElementChild.textContent).toBe('false')
-	})
-
-	it('should handle 0 as string', async () => {
-		document.body.innerHTML = '<div :text="state.value"></div>'
-		const app = prototy({
-			root: document.body,
-			state: { value: 42 }
+		it('should handle false as string', async () => {
+			document.body.innerHTML = '<div :text="state.value"></div>'
+			const app = prototy({
+				root: document.body,
+				state: { value: true }
+			})
+			expect(document.body.firstElementChild.textContent).toBe('true')
+			app.state.value = false
+			await nextTick()
+			expect(document.body.firstElementChild.textContent).toBe('false')
 		})
-		expect(document.body.firstElementChild.textContent).toBe('42')
-		app.state.value = 0
-		await nextTick()
-		expect(document.body.firstElementChild.textContent).toBe('0')
-	})
-})
-it('should convert numbers to strings', async () => {
-	document.body.innerHTML = '<div :text="state.value"></div>'
-	const app = prototy({
-		root: document.body,
-		state: { value: 42 }
-	})
 
-	expect(document.body.firstElementChild.textContent).toBe('42')
-	app.state.value = 0
-	await nextTick()
-	expect(document.body.firstElementChild.textContent).toBe('0')
+		it('should handle 0 as string', async () => {
+			document.body.innerHTML = '<div :text="state.value"></div>'
+			const app = prototy({
+				root: document.body,
+				state: { value: 42 }
+			})
+			expect(document.body.firstElementChild.textContent).toBe('42')
+			app.state.value = 0
+			await nextTick()
+			expect(document.body.firstElementChild.textContent).toBe('0')
+		})	
+	})
 })
