@@ -64,6 +64,11 @@ export class Listeners {
 					done()
 				}
 			}
+		} else if (name === 'destroy') {
+			handler = (event) => {
+				const { detail } = event
+				handle({ name: detail.name, target: element })
+			}
 		}
 		const listener = { name, handler, options }
 		this.#storage.get(element).push(listener)

@@ -11,12 +11,6 @@ import { log } from '@/log'
  * @param { object } bus
  */
 export function bind(element, value, property, args, code, bus) {
-	const isWritable = code.startsWith('state.') || code.startsWith('item.')
-	if (!isWritable) {
-		log.error('Invalid bind path "{0}". Path must start with "state." (e.g., state.text)', code, element)
-		return
-	}
-
 	const modifiers = [...args]
 	const eventType = modifiers.shift() || 'input'
 	const eventName = 'on' + eventType
@@ -24,8 +18,16 @@ export function bind(element, value, property, args, code, bus) {
 	const modifierName = modifiers.shift()
 	const modifierArgs = modifiers
 
-	if (element[property] !== value) {
-		element[property] = value ?? ''
+	const canWrite = code.startsWith('state.')
+
+	if (property === 'checked') {
+		if (element.checked !== Boolean(value)) {
+			element.checked = Boolean(value)
+		}
+	} else {
+		if (element[property] !== value && value !== undefined) {
+			element[property] = value ?? ''
+		}
 	}
 
 	if (!element._bound) {
@@ -33,15 +35,25 @@ export function bind(element, value, property, args, code, bus) {
 	}
 
 	if (element._bound[eventName] && element._bound[eventName] !== property) {
-		log.error('Conflict "{0}" already taken by "{1}".', eventName, property, element)
+		log.error('Conflict "{0}" already taken by "{1}".', eventName, element._bound[eventName], element)
 		return
 	}
 
 	if (!element._bound[eventName]) {
 		const handler = () => {
-			const result = applyModifier(element[property], modifierName, modifierArgs)
+			if (!canWrite) {
+				return
+			}
+
+			const result = applyModifier(
+				property === 'checked' ? element.checked : element[property],
+				modifierName,
+				modifierArgs
+			)
 			setDeepValue(bus.state, code, result)
 		}
+
+		element.addEventListener(eventType, handler)
 
 		Object.defineProperty(element, eventName, {
 			get: () => handler,

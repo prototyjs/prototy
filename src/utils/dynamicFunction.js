@@ -1,33 +1,56 @@
 import { log } from '@/log'
-
-const PLACEHOLDER = Symbol('dynamic-value-placeholder')
-
 /**
  * @param { string } code
  * @param { object } bus
- * @param { object } context
  * @param { string } [key='']
  * @returns { Function }
  */
-export function dynamicFunction(code, bus, context= {}, key = '') {
-	const mergedContext = { ...bus, ...context }
-	if (key) {
-		mergedContext[key] = PLACEHOLDER
-	}
-
-	const keys = Object.keys(mergedContext)
-	const values = Object.values(mergedContext)
+export function dynamicFunction(code, bus, key = '') {
+	const localDeclaration = key ? `const ${key} = local` : ''
 
 	// eslint-disable-next-line sonarjs/code-eval
-	const fn = new Function('el', ...keys, `return ${code}`)
+	const fn = new Function('el', 'scope', 'local', `
+        ${localDeclaration}
+        with(scope) {
+            try {
+                return ${code}
+            } catch (err) {
+                console.warn('Runtime error in expression:', err)
+                return undefined
+            }
+        }
+    `)
 
-	return (el, value) => {
-		const newValues = values.map(v => v === PLACEHOLDER  ? value : v)
-		try {
-			return fn(el, ...newValues)
-		} catch (err) {
-			log.error(err.toString(), el)
-			return undefined
-		}
+	return (el, context, local) => {
+		const scopeProxy = new Proxy({}, {
+			get(_, prop) {
+
+				if (prop === 'el') {
+					return el
+				}
+
+				const fromContext = context[prop]
+				if (fromContext !== undefined) {
+					return fromContext
+				}
+
+				if (prop in bus) {
+					return bus[prop]
+				}
+
+				if (prop === Symbol.unscopables) {
+					return undefined
+				}
+				if (prop in window) {
+					return window[prop]
+				}
+				log.error('ReferenceError: "{0}" is not defined', prop, el)
+			},
+			has(_, prop) {
+				return prop !== key
+			}
+		})
+
+		return fn(el, scopeProxy, local)
 	}
 }

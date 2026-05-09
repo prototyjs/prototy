@@ -2,6 +2,7 @@
  *
  */
 export class Reactivity {
+	activeEffect = null
 	#storage = new WeakMap()
 	/**
 	 * @param { object } target

@@ -1,62 +1,30 @@
-<h1 :class="{ show: true }" :style="{ color: 'yellow', background: 'green' }" data-index="1" data-user-id="123" data-role="admin" >Prototy Demo</h1>
-<!-- Тест :class реактивности -->
-<div>
-  <div :class="{ active: state.isActive, test: state.isTest }" style="padding: 20px; margin: 10px; border: 1px solid #ccc;">
-    <p>Тест :class директивы</p>
-    <p :text="'active: ' + state.isActive"></p>
-    <p :text="'test: ' + state.isTest"></p>
-  </div>
-  <button :onclick="state.isActive = !state.isActive">Toggle Active</button>
-  <button :onclick="state.isTest = !state.isTest">Toggle Test</button>
-</div>
-<!-- Тест :attr директивы -->
-<div>
-  <div :data-test="state.dataValue" :data-custom="state.customValue"
-       style="padding: 20px; margin: 10px; border: 1px solid #ccc;">
-    <p>Тест :attr директивы</p>
-    <p :text="'data-test: ' + state.dataValue"></p>
-    <p :text="'data-custom: ' + state.customValue"></p>
-  </div>
-  <button :onclick="state.dataValue = 'новое значение'">Изменить data-test</button>
-  <button :onclick="state.customValue = 'кастом'">Изменить data-custom</button>
-  <button :onclick="state.dataValue = null">Удалить data-test</button>
-</div>
+<!--<h1 :class="{ show: true }" :style="{ background: 'red' }" data-index="1" >Prototy Demo</h1>-->
 
-<style>
-  .active {
-    background-color: yellow;
-    font-weight: bold;
-  }
-  .test {
-    color: red;
-    border: 2px solid red;
-  }
-</style>
-<div :context="{ p: state.product }" :onclick="state.product.params.count++">
-    <span>Product Count: </span><span :text="p.params.count"></span> <span :context.scope="{ p1: p.params }"><span :text="p1.count"></span></span>
-</div>
+<!--<div :text.json="state.product" id="foo"></div>-->
 
-<div :text.json="state.product" id="foo"></div>
+<!--<div :text="state.product.params.count"></div>-->
 
-<div :text="state.product.params.count"></div>
+<!--:oncreate.async="methods.query(event)" -->
 
-<div :onclick="methods.add()">add</div>
+<button :onclick="state.product.params.count++">add</button>
 
-<div :component="state.show ? components.first : components.second" :oncreate.async="methods.query(event)" :ondestroy="console.log(event)">
+
+<div :component="components[state.show ? 'first' : 'second']" :oncreate.async="methods.query(event)" :ondestroy="console.log(event)" :props="{ p: state.product }">
     <h3 :text="state.product.params.count">slot</h3>
 </div>
-<!--<div :component="state.show && components.first" :oncreate="console.log(event)" :ondestroy="console.log(event)"></div>-->
 
 <button :onclick="state.show = !state.show">show</button>
 
-<div el="myEl">Element</div>
-<div :text.json="state.arr"></div>
+<div :component="state.show && components.withEl" :props="{ p: state.product }"></div>
 
-<div :onclick="state.arr.splice(1, 0, { color: 'black' })">slice</div>
-<div :onclick="state.arr.push({ color: 'black' })">push</div>
-<div :onclick="state.arr.shift()">shift</div>
-<div :onclick="state.arr.unshift({ color: 'black' })">unshift</div>
-<div :onclick="state.arr = state.arr.filter(item => item.color !== 'black' )">filter</div>
-<div :onclick="state.arr[1].color = 'pink'">change</div>
-<hr>
-<div :each="state.arr" :component="components.color"></div>
+<!--<div :el="console.log(el)">Element</div>-->
+<!--&lt;!&ndash;<div :text.json="state.arr"></div>&ndash;&gt;-->
+
+<!--<div :onclick="state.arr.splice(1, 0, { color: 'black' })">slice</div>-->
+<!--<div :onclick="state.arr.push({ color: 'black' })">push</div>-->
+<!--<div :onclick="state.arr.shift()">shift</div>-->
+<!--<div :onclick="state.arr.unshift({ color: 'black' })">unshift</div>-->
+<!--<div :onclick="state.arr = state.arr.filter(item => item.color !== 'black' )">filter</div>-->
+<!--<div :onclick="state.arr[1].color = 'pink'">change</div>-->
+<!--<hr>-->
+<!--<div :each="state.arr" :component="components.color" :props="{ test: 0 }"></div>-->

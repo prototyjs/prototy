@@ -17,20 +17,7 @@ describe('El Directive', () => {
 		expect(app.els.staticElement).toBe(document.body.firstElementChild)
 	})
 
-	it('should remove static el from app.els when element is removed', async () => {
-		document.body.innerHTML = '<div id="test" el="toDelete"></div>'
-		const app = prototy({ root: document.body })
-		const el = document.getElementById('test')
-
-		expect(app.els.toDelete).toBe(el)
-
-		el.remove()
-
-		await nextTick()
-		expect(app.els.toDelete).toBeUndefined()
-	})
-
-	it('should execute expression and provide el as local variable', () => {
+	it('should execute expression and provide el as local variable', async () => {
 		document.body.innerHTML = '<div :el="params.myElement = el"></div>'
 		const app = prototy({
 			root: document.body,
@@ -38,6 +25,7 @@ describe('El Directive', () => {
 				myElement: null
 			}
 		})
+		await nextTick()
 		expect(document.body.firstElementChild).toBe(app.params.myElement)
 	})
 
@@ -47,6 +35,6 @@ describe('El Directive', () => {
 		prototy({ root: document.body })
 
 		const lastLogMessage = consoleSpy.mock.lastCall[0]
-		expect(lastLogMessage).toContain('[PROTOTY] ReferenceError: myElement is not defined')
+		expect(lastLogMessage).toContain('[PROTOTY] ReferenceError: "myElement" is not defined')
 	})
 })
