@@ -89,25 +89,6 @@ describe('Bind Directive Variations', () => {
 		expect(lastLogMessage).toContain('[PROTOTY] Conflict "oninput" already taken by "value".')
 	})
 
-	it('should cleanup property on element removal', async () => {
-		document.body.innerHTML = '<div id="parent"><input :bind.value.input="state.text"></div>'
-		prototy({ root: document.body, state: { text: 'abc' } })
-		const input = document.querySelector('input')
-
-		input.oninput = () => {}
-		expect(consoleSpy).toHaveBeenCalledTimes(1)
-		consoleSpy.mockClear()
-
-		input.remove()
-		await nextTick()
-
-		input.oninput = () => {}
-
-		expect(consoleSpy).not.toHaveBeenCalled()
-
-		expect(input._bound).toBeUndefined()
-	})
-
 	it('should handle deep state paths', async () => {
 		document.body.innerHTML = '<input :bind.value.input="state.user.profile.name">'
 		const app = prototy({
@@ -122,14 +103,86 @@ describe('Bind Directive Variations', () => {
 
 		expect(app.state.user.profile.name).toBe('Doe')
 	})
+})
 
-	it('should log error if path does not start with "state."', async () => {
-		document.body.innerHTML = '<input :bind.value.input="username">'
-		prototy({
+describe('Bind Directive with Props', () => {
+	beforeEach(() => {
+		document.body.innerHTML = ''
+	})
+
+	it('should bind to props value (readonly)', async () => {
+		document.body.innerHTML = `
+			<div :component="components.card" :props="{ userName: state.name }"></div>`
+
+		const app = prototy({
 			root: document.body,
-			state: { username: 'admin' }
+			state: { name: 'John' },
+			components: {
+				card: '<input :bind.value.input="userName">'
+			}
 		})
-		const lastLogMessage = consoleSpy.mock.lastCall[0]
-		expect(lastLogMessage).toContain('[PROTOTY] Invalid bind path "username". Path must start with "state."')
+
+		await nextTick()
+
+		const input = document.querySelector('input')
+		expect(input.value).toBe('John')
+
+		input.value = 'Jane'
+		input.dispatchEvent(new Event('input'))
+		await nextTick()
+
+		expect(app.state.name).toBe('John')
+		expect(input.value).toBe('Jane')
+	})
+
+	it('should NOT modify item in each (readonly)', async () => {
+		document.body.innerHTML = '<div :each="state.items" :component="components.item"></div>'
+
+		const app = prototy({
+			root: document.body,
+			state: {
+				items: [{ name: 'Alice' }, { name: 'Bob' }]
+			},
+			components: {
+				item: '<div><input :bind.value.input="item.name"></div>'
+			}
+		})
+
+		await nextTick()
+
+		const inputs = document.querySelectorAll('input')
+		expect(inputs[0].value).toBe('Alice')
+
+		inputs[0].value = 'Alice Changed'
+		inputs[0].dispatchEvent(new Event('input'))
+		await nextTick()
+
+		expect(app.state.items[0].name).toBe('Alice')
+	})
+
+	it('should bind to props and update when parent state changes', async () => {
+		document.body.innerHTML = '<div :component="components.card" :props="{ value: state.counter }"></div>'
+
+		const app = prototy({
+			root: document.body,
+			state: { counter: 5 },
+			components: {
+				card: '<span :text="value"></span><input :bind.value.input="value">'
+			}
+		})
+
+		await nextTick()
+
+		const input = document.querySelector('input')
+		const span = document.querySelector('span')
+
+		expect(input.value).toBe('5')
+		expect(span.textContent).toBe('5')
+
+		app.state.counter = 10
+		await nextTick()
+
+		expect(input.value).toBe('10')
+		expect(span.textContent).toBe('10')
 	})
 })

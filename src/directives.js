@@ -2,7 +2,6 @@ import defaultDirectives from './directives/index'
 import { bind } from './directives/bind'
 import { attr } from './directives/attr'
 import { each } from './directives/each'
-import { context } from './directives/context'
 import { component } from './directives/component.js'
 import { property } from './directives/property'
 
@@ -13,7 +12,6 @@ export class Directives {
 	/**
 	 * @constructor
 	 * @param { object } clientDirectives
-	 * @param { Function } setup
 	 * @param { object } bus
 	 * @param { Function } transform
 	 */
@@ -42,11 +40,11 @@ export class Directives {
 	 * @param { string } code
 	 */
 	apply(element, key, value, code) {
+		const [directive, modifier, ...args] = key.split('.')
+
 		if (key === 'el') {
 			return
 		}
-		const [directive, modifier, ...args] = key.split('.') // ['text', 'fixed', '2', ...] // text.fixed.2
-
 		if (Object.hasOwn(this.directives, directive)) {
 			this.directives[directive](element, value, modifier, args, code, directive, this.transform)
 			return

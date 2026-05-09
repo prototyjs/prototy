@@ -25,7 +25,7 @@ describe('Component Slots', () => {
 				card: `<div class="card"><slot name="header"></slot></div>`
 			}
 		})
-
+		await nextTick()
 		expect(document.querySelector('h1').textContent).toBe('Hello')
 		app.state.title = 'Updated'
 		await nextTick()

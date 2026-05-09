@@ -6,17 +6,15 @@ import { kebabToCamel } from '@/utils/kebabToCamel'
 export class Nodes {
 	/**
 	 * @param { object } options
-	 * @param { HTMLElement } options.root
 	 * @param { Function } options.listeners
-	 * @param { Function } options.removed
+	 * @param { Function } options.destroy
 	 */
-	constructor({ root, listeners, removed, attribute }) {
+	constructor({ listeners, destroy, attribute }) {
 		this.listeners = listeners
-		this.removed = removed
+		this.destroy = destroy
 		this.attribute = attribute
 		this.nodes = new WeakSet()
-		this.observer = null
-		this.#observer(root)
+		this.priority = { ':props': 1, ':component': 2, ':each': 3 }
 	}
 	/**
 	 * @param { HTMLElement } node
@@ -28,18 +26,26 @@ export class Nodes {
 		while (stack.length) {
 			const current = stack.pop()
 			if (current.nodeType === 1) {
-				const attrs = current.attributes
-				let hasDirectives = false
+				const attrs = Array.from(current.attributes)
 
-				for (let i = attrs.length - 1; i >= 0; i--) {
+				attrs.sort((a, b) => (this.priority[a.name] || 99) - (this.priority[b.name] || 99))
+
+				let hasDirectives = false
+				const toRemove = []
+
+				for (let i = 0; i < attrs.length; i++) {
 					const attr = attrs[i]
 					this.attribute(current, attr.name, attr.value)
 					if (attr.name.charCodeAt(0) === 58) {
 						hasDirectives = true
-						this.directive(attr, current, handler)
+						this.directive(attr, current, handler, toRemove)
 					} else if (attr.name === 'el') {
 						hasDirectives = true
 					}
+				}
+
+				for (const attrName of toRemove) {
+					current.removeAttribute(attrName)
 				}
 
 				if (hasDirectives) {
@@ -58,8 +64,9 @@ export class Nodes {
 	 * @param { string } attr
 	 * @param { HTMLElement } node
 	 * @param { Function } handler
+	 * @param { Array } toRemove
 	 */
-	directive(attr, node, handler) {
+	directive(attr, node, handler, toRemove) {
 		const name = attr.name.slice(1)
 		const key = kebabToCamel(name)
 
@@ -68,43 +75,21 @@ export class Nodes {
 		} else {
 			handler(node, key, attr.value)
 		}
-		node.removeAttribute(attr.name)
+		toRemove.push(attr.name)
 	}
-	/**
-	 * @param { HTMLElement } root
-	 */
-	#observer(root) {
-		this.observer = new MutationObserver((mutations) => {
-			mutations.forEach(mutation => {
-				mutation.removedNodes.forEach(node => {
-					if (node.nodeType === 1) {
-						this.#check(node)
-					}
-				})
-			})
-		})
-
-		this.observer.observe(root, {
-			childList: true,
-			subtree: true
-		})
-	}
-
 	/**
 	 * @param { HTMLElement } node
 	 */
-	#check(node) {
-		if (node._keep) {
-			return
-		}
+	unprocess(node) {
 		const stack = [node]
 		while (stack.length) {
 			const current = stack.pop()
 			if (current._keep) {
 				continue
 			}
+
 			if (this.nodes.has(current)) {
-				this.removed(current)
+				this.destroy(current)
 				this.nodes.delete(current)
 			}
 
@@ -113,15 +98,6 @@ export class Nodes {
 				stack.push(child)
 				child = child.nextElementSibling
 			}
-		}
-	}
-	/**
-	 *
-	 */
-	destroy() {
-		if (this.observer) {
-			this.observer.disconnect()
-			this.observer = null
 		}
 	}
 }
