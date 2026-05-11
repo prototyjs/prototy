@@ -16,6 +16,7 @@ export class Directives {
 	 * @param { object } methods
 	 */
 	constructor(clientDirectives = {}, bus, methods) {
+		this.methods = methods
 		/**
 		 * @type {{ [key: string]: Function }}
 		 */
@@ -24,7 +25,7 @@ export class Directives {
 			...innerDirectives,
 			each: (element, value) => each(element, value, methods),
 			component: (element, value) => component(element, value, methods),
-			bind: (element, value, modifier, args, code) => bind(element, value, modifier, args, code, bus)
+			bind: (element, value, modifier, args, transform, directive, code) => bind(element, value, modifier, args, transform, code, bus)
 		}
 	}
 	/**
@@ -41,13 +42,14 @@ export class Directives {
 			return
 		}
 		if (Object.hasOwn(this.directives, directive)) {
-			this.directives[directive](element, value, modifier, args, code, directive)
+			
+			this.directives[directive](element, value, modifier, args, this.methods.transform, directive, code)
 			return
 		}
 		if (directive in element) {
-			property(element, value, modifier, args, directive)
+			property(element, value, modifier, args, this.methods.transform, directive)
 			return
 		}
-		attr(element, value, modifier, args, directive)
+		attr(element, value, modifier, args, this.methods.transform, directive)
 	}
 }

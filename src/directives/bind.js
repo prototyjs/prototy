@@ -1,4 +1,3 @@
-import { applyModifier } from '@/directives/modifiers/applyModifier'
 import { setDeepValue } from '@/utils/setDeepValue'
 import { log } from '@/log'
 
@@ -7,10 +6,11 @@ import { log } from '@/log'
  * @param { any } value
  * @param { string } property
  * @param { Array<string> } args
+ * @param { Function } transform 
  * @param { string } code
  * @param { object } bus
  */
-export function bind(element, value, property, args, code, bus) {
+export function bind(element, value, property, args, transform, code, bus) {
 	const modifiers = [...args]
 	const eventType = modifiers.shift() || 'input'
 	const eventName = 'on' + eventType
@@ -45,7 +45,7 @@ export function bind(element, value, property, args, code, bus) {
 				return
 			}
 
-			const result = applyModifier(
+			const result = transform(
 				property === 'checked' ? element.checked : element[property],
 				modifierName,
 				modifierArgs
