@@ -7,5 +7,5 @@
  * @param { Function } transform
  */
 export function text(element, value, modifier, args, transform) {
-	element.textContent = transform(value, modifier, args) ?? ''
+	element.textContent = transform(value, modifier, ...args) ?? ''
 }

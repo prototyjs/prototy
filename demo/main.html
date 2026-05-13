@@ -6,7 +6,7 @@
 
 <!--:oncreate.async="methods.query(event)" -->
 
-<button :onclick="state.product.params.count++">add</button>
+<!-- <button :onclick="state.product.params.count++">add</button>
 
 
 <div :component="components[state.show ? 'first' : 'second']" :oncreate.async="methods.query(event)" :ondestroy="console.log(event)" :props="{ p: state.product }">
@@ -15,7 +15,9 @@
 
 <button :onclick="state.show = !state.show">show</button>
 
-<div :component="state.show && components.withEl" :props="{ p: state.product }"></div>
+<div :component="state.show && components.withEl" :props="{ p: state.product }"></div> -->
+<div :text.unit.s="state.value"></div>
+<div :text.clamp.0.100="state.value1"></div>
 
 <!--<div :el="console.log(el)">Element</div>-->
 <!--&lt;!&ndash;<div :text.json="state.arr"></div>&ndash;&gt;-->

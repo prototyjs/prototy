@@ -12,7 +12,8 @@ const app = prototy({
 		show: true,
 		hidden: true,
 		test: 'remove',
-		value: 2,
+		value: 42,
+		value1: 150,
 		product: {
 			price: 10,
 			params: {
