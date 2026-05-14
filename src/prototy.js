@@ -306,6 +306,9 @@ class Prototy {
 				    if (Object.is(oldValue, newValue)) {
 							return true
 				    }
+			    } catch (e) {
+				    log.error('Error in setter for "{0}": {1}', fullPath, e.message)
+				    newValue = oldValue
 			    } finally {
 				    self.activeSetters.delete(fullPath)
 			    }
@@ -331,33 +334,79 @@ class Prototy {
 	 * @param { string } property
 	 */
 	schedule(target, property) {
-		if (!this.pendingTargets.has(target)) {
-			this.pendingTargets.set(target, new Set())
+		const addToPending = (obj, prop) => {
+			if (!this.pendingTargets.has(obj)) {
+				this.pendingTargets.set(obj, new Set())
 
-			queueMicrotask(() => {
-				const changedKeys = this.pendingTargets.get(target)
-				this.pendingTargets.delete(target)
+				queueMicrotask(() => {
+					const changedKeys = this.pendingTargets.get(obj)
+					this.pendingTargets.delete(obj)
 
-				const uniqueEffects = new Set()
-				changedKeys.forEach(key => {
-					const effects = this.reactivity.find(target, key)
-					effects.forEach(eff => uniqueEffects.add(eff))
+					const uniqueEffects = new Set()
+					changedKeys.forEach(key => {
+						const effects = this.reactivity.find(obj, key)
+						// eslint-disable-next-line sonarjs/no-nested-functions
+						effects.forEach(eff => uniqueEffects.add(eff))
 
-					const value = target[key]
-					if (value && value._path) {
-						const pathEffects = this.reactivity.find(target, value._path)
-						pathEffects.forEach(eff => uniqueEffects.add(eff))
-					}
+						const value = obj[key]
+						if (value && value._path) {
+							const pathEffects = this.reactivity.find(obj, value._path)
+							// eslint-disable-next-line sonarjs/no-nested-functions
+							pathEffects.forEach(eff => uniqueEffects.add(eff))
+						}
+					})
+
+					uniqueEffects.forEach(update => {
+						if (update !== this.reactivity.activeEffect) {
+							update()
+						}
+					})
 				})
-
-				uniqueEffects.forEach(update => {
-					if (update !== this.reactivity.activeEffect) {
-						update()
-					}
-				})
-			})
+			}
+			this.pendingTargets.get(obj).add(prop)
 		}
-		this.pendingTargets.get(target).add(property)
+
+		addToPending(target, property)
+
+		let current = target
+		while (current && current._parent) {
+			const parentProperty = current._path ? current._path.split('.').pop() : null
+			if (parentProperty) {
+				addToPending(current._parent, parentProperty)
+			}
+			current = current._parent
+		}
+	}
+	/**
+	 * @param { string } path
+	 * @param { any } value
+	 */
+	update(path, value) {
+		if (typeof path !== 'string') {
+			log.error('update() expects path to be a string, but received {0}', typeof path)
+			return
+		}
+		const segments = path.split('.')
+		const lastKey = segments.pop()
+		const target = segments.reduce((acc, k) => acc?.[k], this.state)
+		if (!target || typeof target !== 'object') {
+			log.error('Update error: path "{0}" is unreachable', path)
+			return
+		}
+		const setter = this.setters[path]
+		const oldValue = target[lastKey]
+		if (typeof setter === 'function') {
+			this.activeSetters.add(path)
+			try {
+				target[lastKey] = setter(value, oldValue, 'external')
+			} finally {
+				this.activeSetters.delete(path)
+			}
+		} else {
+			if (oldValue !== value) {
+				target[lastKey] = value
+			}
+		}
 	}
 	/**
 	 * @param { HTMLElement } element
@@ -414,6 +463,22 @@ class Prototy {
 						effect()
 					}
 				})
+			}
+		}
+	}
+	/**
+	 * @param { HTMLElement } element
+	 */
+	destroy(element) {
+		if (!element) {
+			return
+		}
+		this.listeners.remove(element)
+		this.reactivity.removeEffects(element)
+		unbind(element)
+		if (element._el) {
+			if (this.bus.els[element._el] === element) {
+				delete this.bus.els[element._el]
 			}
 		}
 	}
