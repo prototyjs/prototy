@@ -235,10 +235,25 @@ class Prototy {
 	      })
 	    }
 		if (path) {
-			state._path = path
-			state._parent = parent
+    	Object.defineProperty(state, '_path', {
+        	value: path,
+        	enumerable: false,
+        	writable: true,
+        	configurable: true
+    	})
+			Object.defineProperty(state, '_parent', {
+				value: parent,
+				enumerable: false,
+				writable: true,
+				configurable: true
+			})
 		}
-		state[IS_PROXY] = true
+		Object.defineProperty(state, IS_PROXY, {
+    		value: true,
+    		enumerable: false,
+    		writable: false,
+    		configurable: false
+		})
 
 		return new Proxy(state, {
 			get(target, property, receiver) {
@@ -286,7 +301,7 @@ class Prototy {
 		    if (typeof self.setters?.[fullPath] === 'function' && !self.activeSetters.has(fullPath)) {
 			    self.activeSetters.add(fullPath)
 			    try {
-				    newValue = self.setters[fullPath](newValue, oldValue, 'internal') // v, old, origin
+				    newValue = self.setters[fullPath](newValue, oldValue)
 				    if (Object.is(oldValue, newValue)) {
 							return true
 				    }
