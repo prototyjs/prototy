@@ -4,7 +4,7 @@ import { prototy, nextTick } from '@'
 describe('Classes Directive', () => {
 
 	it('add class when condition is true', async () => {
-		document.body.innerHTML = '<div :class="{ active: state.isActive }"></div>'
+		document.body.innerHTML = '<div :class="{ active: isActive }"></div>'
 		prototy({
 			root: document.body,
 			state: { isActive: true }
@@ -13,7 +13,7 @@ describe('Classes Directive', () => {
 	})
 
 	it('does not add class when condition is false', async () => {
-		document.body.innerHTML = '<div :class="{ active: state.isActive }"></div>'
+		document.body.innerHTML = '<div :class="{ active: isActive }"></div>'
 		prototy({
 			root: document.body,
 			state: { isActive: false }
@@ -22,7 +22,7 @@ describe('Classes Directive', () => {
 	})
 
 	it('handles multiple classes with different conditions', async () => {
-		document.body.innerHTML = '<div :class="{ active: state.isActive, disabled: state.isDisabled, visible: state.isVisible }"></div>'
+		document.body.innerHTML = '<div :class="{ active: isActive, disabled: isDisabled, visible: isVisible }"></div>'
 		prototy({
 			root: document.body,
 			state: {
@@ -38,7 +38,7 @@ describe('Classes Directive', () => {
 	})
 
 	it('updates class when condition changes from false to true', async () => {
-		document.body.innerHTML = '<div :class="{ active: state.isActive }"></div>'
+		document.body.innerHTML = '<div :class="{ active: isActive }"></div>'
 		const app = prototy({
 			root: document.body,
 			state: { isActive: false }
@@ -52,7 +52,7 @@ describe('Classes Directive', () => {
 	})
 
 	it('updates class when condition changes from true to false', async () => {
-		document.body.innerHTML = '<div :class="{ active: state.isActive }"></div>'
+		document.body.innerHTML = '<div :class="{ active: isActive }"></div>'
 		const app = prototy({
 			root: document.body,
 			state: { isActive: true }
@@ -66,7 +66,7 @@ describe('Classes Directive', () => {
 	})
 
 	it('updates multiple classes reactively', async () => {
-		document.body.innerHTML = '<div :class="{ active: state.isActive, disabled: state.isDisabled }"></div>'
+		document.body.innerHTML = '<div :class="{ active: isActive, disabled: isDisabled }"></div>'
 		const app = prototy({
 			root: document.body,
 			state: { isActive: false, isDisabled: true }

@@ -14,7 +14,7 @@ describe('Component Slots', () => {
 		document.body.innerHTML = `
       <div id="app">
         <div :component="components.card">
-          <h1 slot="header" :text="state.title"></h1>
+          <h1 slot="header" :text="title"></h1>
         </div>
       </div>
     `
@@ -22,7 +22,7 @@ describe('Component Slots', () => {
 			root: document.getElementById('app'),
 			state: { title: 'Hello' },
 			components: {
-				card: `<div class="card"><slot name="header"></slot></div>`
+				card: '<div class="card"><slot name="header"></slot></div>'
 			}
 		})
 		await nextTick()
@@ -37,8 +37,8 @@ describe('Component Slots', () => {
 	it('should maintain slot reactivity when the parent template changes', async () => {
 		document.body.innerHTML = `
       <div id="app">
-        <div :component="state.showFirst ? components.first : components.second">
-          <span slot="content" :text="state.count"></span>
+        <div :component="showFirst ? components.first : components.second">
+          <span slot="content" :text="count"></span>
         </div>
       </div>
     `
@@ -69,7 +69,7 @@ describe('Component Slots', () => {
         <div :component="components.outer">
           <div slot="outer-slot">
             <div :component="components.inner">
-              <b slot="inner-slot" :text="state.val"></b>
+              <b slot="inner-slot" :text="val"></b>
             </div>
           </div>
         </div>
@@ -101,7 +101,7 @@ describe('Component Slots', () => {
 		prototy({
 			root: document.getElementById('app'),
 			components: {
-				card: `<div><slot name="header">Default Header</slot></div>`
+				card: '<div><slot name="header">Default Header</slot></div>'
 			}
 		})
 
@@ -119,7 +119,7 @@ describe('Component Slots', () => {
 		prototy({
 			root: document.getElementById('app'),
 			components: {
-				card: `<div><slot name="header"></slot></div>`
+				card: '<div><slot name="header"></slot></div>'
 			}
 		})
 

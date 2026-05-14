@@ -11,7 +11,7 @@ describe('Each Directive Complete Suite', () => {
 
 	describe('Basic Array Operations', () => {
 		it('should render initial array correctly', async () => {
-			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			root.innerHTML = '<div id="list" :each="items" :component="components.item"></div>'
 			prototy({
 				root,
 				state: { items: [{ n: 1 }, { n: 2 }, { n: 3 }] },
@@ -26,7 +26,7 @@ describe('Each Directive Complete Suite', () => {
 		})
 
 		it('should handle shift (remove first)', async () => {
-			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			root.innerHTML = '<div id="list" :each="items" :component="components.item"></div>'
 			const app = prototy({
 				root,
 				state: { items: [{ n: 1 }, { n: 2 }, { n: 3 }] },
@@ -37,7 +37,6 @@ describe('Each Directive Complete Suite', () => {
 			app.state.items.shift()
 			await nextTick()
 
-			// Ищем контейнер (он может быть без id после обновления)
 			const container = root.querySelector('[id="list"]') || root.children[0]
 			expect(container.children.length).toBe(2)
 			expect(container.children[0].textContent).toBe('2')
@@ -45,7 +44,7 @@ describe('Each Directive Complete Suite', () => {
 		})
 
 		it('should handle pop (remove last)', async () => {
-			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			root.innerHTML = '<div id="list" :each="items" :component="components.item"></div>'
 			const app = prototy({
 				root,
 				state: { items: [{ n: 1 }, { n: 2 }, { n: 3 }] },
@@ -63,7 +62,7 @@ describe('Each Directive Complete Suite', () => {
 		})
 
 		it('should handle push (add to end)', async () => {
-			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			root.innerHTML = '<div id="list" :each="items" :component="components.item"></div>'
 			const app = prototy({
 				root,
 				state: { items: [{ n: 1 }, { n: 2 }] },
@@ -80,7 +79,7 @@ describe('Each Directive Complete Suite', () => {
 		})
 
 		it('should handle unshift (add to beginning)', async () => {
-			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			root.innerHTML = '<div id="list" :each="items" :component="components.item"></div>'
 			const app = prototy({
 				root,
 				state: { items: [{ n: 2 }, { n: 3 }] },
@@ -98,7 +97,7 @@ describe('Each Directive Complete Suite', () => {
 		})
 
 		it('should handle reverse (critical test!)', async () => {
-			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			root.innerHTML = '<div id="list" :each="items" :component="components.item"></div>'
 			const app = prototy({
 				root,
 				state: { items: [{ n: 1 }, { n: 2 }, { n: 3 }] },
@@ -117,7 +116,7 @@ describe('Each Directive Complete Suite', () => {
 		})
 
 		it('should handle sort', async () => {
-			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			root.innerHTML = '<div id="list" :each="items" :component="components.item"></div>'
 			const app = prototy({
 				root,
 				state: { items: [{ n: 3 }, { n: 1 }, { n: 2 }] },
@@ -135,7 +134,7 @@ describe('Each Directive Complete Suite', () => {
 		})
 
 		it('should handle splice', async () => {
-			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			root.innerHTML = '<div id="list" :each="items" :component="components.item"></div>'
 			const app = prototy({
 				root,
 				state: { items: [{ n: 1 }, { n: 2 }, { n: 3 }, { n: 4 }] },
@@ -157,7 +156,7 @@ describe('Each Directive Complete Suite', () => {
 
 	describe('Index Updates', () => {
 		it('should update indices after shift', async () => {
-			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			root.innerHTML = '<div id="list" :each="items" :component="components.item"></div>'
 			const app = prototy({
 				root,
 				state: { items: [{ name: 'A' }, { name: 'B' }, { name: 'C' }] },
@@ -186,7 +185,7 @@ describe('Each Directive Complete Suite', () => {
 		})
 
 		it('should update indices after reverse', async () => {
-			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			root.innerHTML = '<div id="list" :each="items" :component="components.item"></div>'
 			const app = prototy({
 				root,
 				state: { items: [{ name: 'A' }, { name: 'B' }, { name: 'C' }] },
@@ -215,7 +214,7 @@ describe('Each Directive Complete Suite', () => {
 	describe('Nested Each with Props', () => {
 		it('should update nested indices when parent reverses', async () => {
 			root.innerHTML = `
-			<div id="outer" :each="state.groups" :component="components.group"></div>
+			<div id="outer" :each="groups" :component="components.group"></div>
 		`
 
 			const app = prototy({
@@ -285,7 +284,7 @@ describe('Each Directive Complete Suite', () => {
 
 	describe('Performance and State Preservation', () => {
 		it('should preserve input state within each items', async () => {
-			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			root.innerHTML = '<div id="list" :each="items" :component="components.item"></div>'
 
 			const app = prototy({
 				root,
@@ -312,7 +311,7 @@ describe('Each Directive Complete Suite', () => {
 
 	describe('Edge Cases', () => {
 		it('should handle empty array', async () => {
-			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			root.innerHTML = '<div id="list" :each="items" :component="components.item"></div>'
 			const app = prototy({
 				root,
 				state: { items: [] },
@@ -330,7 +329,7 @@ describe('Each Directive Complete Suite', () => {
 		})
 
 		it('should handle null/undefined array', async () => {
-			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			root.innerHTML = '<div id="list" :each="items" :component="components.item"></div>'
 			const app = prototy({
 				root,
 				state: { items: null },
@@ -347,7 +346,7 @@ describe('Each Directive Complete Suite', () => {
 		})
 
 		it('should handle rapid successive updates', async () => {
-			root.innerHTML = '<div id="list" :each="state.items" :component="components.item"></div>'
+			root.innerHTML = '<div id="list" :each="items" :component="components.item"></div>'
 			const app = prototy({
 				root,
 				state: { items: [{ n: 1 }] },

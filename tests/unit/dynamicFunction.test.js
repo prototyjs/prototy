@@ -3,12 +3,17 @@ import { dynamicFunction } from '@/utils/dynamicFunction.js'
 
 describe('dynamicFunction', () => {
 	const bus = {
-		state: { score: 10 }
+		state: { score: 10 },
+		methods: {},
+		params: {},
+		root: document.body,
+		components: {},
+		els: {}
 	}
 	const el = document.createElement('div')
 
 	it('should execute basic code using bus context', () => {
-		const code = 'state.score * 2'
+		const code = 'score * 2'
 		const fn = dynamicFunction(code, bus)
 		expect(fn(el, {})).toBe(20)
 	})
@@ -20,7 +25,7 @@ describe('dynamicFunction', () => {
 	})
 
 	it('should correctly merge bus and dynamic context from DOM', () => {
-		const code = 'state.score * multiplier'
+		const code = 'score * multiplier'
 		const fn = dynamicFunction(code, bus)
 
 		const dynamicContext = { multiplier: 3 }
@@ -31,7 +36,8 @@ describe('dynamicFunction', () => {
 		const code = 'item + "_" + index'
 		const fn = dynamicFunction(code, bus, 'item')
 
-		expect(fn(el, {}, 'test', 5)).toBe('test_5')
+		const dynamicContext = { index: 5 }  // index в context
+		expect(fn(el, dynamicContext, 'test')).toBe('test_5')
 	})
 
 	it('should handle event variable for listeners', () => {
@@ -40,5 +46,23 @@ describe('dynamicFunction', () => {
 
 		const mockEvent = { type: 'click' }
 		expect(fn(el, {}, mockEvent)).toBe('click')
+	})
+
+	it('should provide el variable', () => {
+		const code = 'el.tagName'
+		const fn = dynamicFunction(code, bus)
+
+		expect(fn(el, {})).toBe('DIV')
+	})
+
+	it('should access params', () => {
+		const testBus = {
+			...bus,
+			params: { version: '1.0' }
+		}
+		const code = 'version'
+		const fn = dynamicFunction(code, testBus)
+
+		expect(fn(el, {})).toBe('1.0')
 	})
 })

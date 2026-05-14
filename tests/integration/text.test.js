@@ -3,10 +3,16 @@ import { prototy, nextTick } from '@'
 
 describe('Text Directive', () => {
 	it('should update text after state change', async () => {
-		document.body.innerHTML = '<div :text="state.value"></div>'
+		document.body.innerHTML = '<div :text="value"></div>'
 		const app = prototy({
 			root: document.body,
-			state: { value: 1 }
+			state: { value: 1 },
+			params: {
+				max: 9
+			},
+			methods: {
+				add() {}
+			}
 		})
 
 		expect(document.body.firstElementChild.textContent).toBe('1')

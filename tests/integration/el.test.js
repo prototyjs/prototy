@@ -18,15 +18,17 @@ describe('El Directive', () => {
 	})
 
 	it('should execute expression and provide el as local variable', async () => {
-		document.body.innerHTML = '<div :el="params.myElement = el"></div>'
+		document.body.innerHTML = '<div :el="myElement.target = el"></div>'
 		const app = prototy({
 			root: document.body,
 			params: {
-				myElement: null
+				myElement: {
+					target: null
+				}
 			}
 		})
 		await nextTick()
-		expect(document.body.firstElementChild).toBe(app.params.myElement)
+		expect(document.body.firstElementChild).toBe(app.params.myElement.target)
 	})
 
 	it('should handle syntax errors gracefully and log them', () => {

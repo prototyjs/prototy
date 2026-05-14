@@ -10,7 +10,12 @@ import { kebabToCamel } from '@/utils/kebabToCamel'
  */
 function prototy(options) {
 	const p = new Prototy(options)
-	return p.bus
+
+	return {
+		...p.bus,
+		update: p.update.bind(p),
+		destroy: () => p.destroy(p.bus.root)
+	}
 }
 export {
 	prototy,

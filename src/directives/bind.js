@@ -6,7 +6,7 @@ import { log } from '@/log'
  * @param { any } value
  * @param { string } property
  * @param { Array<string> } args
- * @param { Function } transform 
+ * @param { Function } transform
  * @param { string } code
  * @param { object } bus
  */
@@ -18,16 +18,8 @@ export function bind(element, value, property, args, transform, code, bus) {
 	const modifierName = modifiers.shift()
 	const modifierArgs = modifiers
 
-	const canWrite = code.startsWith('state.')
-
-	if (property === 'checked') {
-		if (element.checked !== Boolean(value)) {
-			element.checked = Boolean(value)
-		}
-	} else {
-		if (element[property] !== value && value !== undefined) {
-			element[property] = value ?? ''
-		}
+	if (element[property] !== value && value !== undefined) {
+		element[property] = value ?? ''
 	}
 
 	if (!element._bound) {
@@ -41,12 +33,9 @@ export function bind(element, value, property, args, transform, code, bus) {
 
 	if (!element._bound[eventName]) {
 		const handler = () => {
-			if (!canWrite) {
-				return
-			}
 
 			const result = transform(
-				property === 'checked' ? element.checked : element[property],
+				element[property],
 				modifierName,
 				modifierArgs
 			)

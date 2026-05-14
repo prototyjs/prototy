@@ -33,7 +33,7 @@ describe('Component Directive Complete Suite', () => {
 			prototy({
 				root,
 				components: {
-					greeting: '<h1 :text="state.message"></h1>'
+					greeting: '<h1 :text="message"></h1>'
 				},
 				state: { message: 'Welcome!' }
 			})
@@ -46,7 +46,7 @@ describe('Component Directive Complete Suite', () => {
 		})
 
 		it('should render component with props', async () => {
-			root.innerHTML = '<div :component="components.userCard" :props="{ name: state.userName, age: 25 }"></div>'
+			root.innerHTML = '<div :component="components.userCard" :props="{ name: userName, age: 25 }"></div>'
 
 			prototy({
 				root,
@@ -64,7 +64,7 @@ describe('Component Directive Complete Suite', () => {
 		})
 
 		it('should update component when props change', async () => {
-			root.innerHTML = '<div :component="components.display" :props="{ value: state.counter }"></div>'
+			root.innerHTML = '<div :component="components.display" :props="{ value: counter }"></div>'
 
 			const app = prototy({
 				root,
@@ -88,7 +88,7 @@ describe('Component Directive Complete Suite', () => {
 
 	describe('Conditional Rendering', () => {
 		it('should switch components based on state', async () => {
-			root.innerHTML = '<div :component="components[state.currentComponent]"></div>'
+			root.innerHTML = '<div :component="components[currentComponent]"></div>'
 
 			const app = prototy({
 				root,
@@ -111,7 +111,7 @@ describe('Component Directive Complete Suite', () => {
 		})
 
 		it('should handle falsy component (no render)', async () => {
-			root.innerHTML = '<div :component="state.show && components.comp"></div>'
+			root.innerHTML = '<div :component="show && components.comp"></div>'
 
 			const app = prototy({
 				root,
@@ -156,7 +156,7 @@ describe('Component Directive Complete Suite', () => {
 		})
 
 		it('should pass props to nested components', async () => {
-			root.innerHTML = '<div :component="components.parent" :props="{ message: state.msg }"></div>'
+			root.innerHTML = '<div :component="components.parent" :props="{ message: msg }"></div>'
 
 			prototy({
 				root,
@@ -174,7 +174,7 @@ describe('Component Directive Complete Suite', () => {
 		})
 
 		it('should update nested components when props change', async () => {
-			root.innerHTML = '<div :component="components.parent" :props="{ value: state.counter }"></div>'
+			root.innerHTML = '<div :component="components.parent" :props="{ value: counter }"></div>'
 
 			const app = prototy({
 				root,
@@ -200,7 +200,7 @@ describe('Component Directive Complete Suite', () => {
 
 	describe('Cleanup & Resource Management', () => {
 		it('should cleanup resources when component is destroyed', async () => {
-			document.body.innerHTML = '<div :component="state.show ? components.first : components.second"></div>'
+			document.body.innerHTML = '<div :component="show ? components.first : components.second"></div>'
 
 			const app = prototy({
 				root: document.body,
@@ -224,7 +224,7 @@ describe('Component Directive Complete Suite', () => {
 		})
 
 		it('should not recreate component when only props change', async () => {
-			root.innerHTML = '<div :component="components.counter" :props="{ value: state.count }"></div>'
+			root.innerHTML = '<div :component="components.counter" :props="{ value: count }"></div>'
 
 			let createCount = 0
 
@@ -284,7 +284,7 @@ describe('Component Directive Complete Suite', () => {
 		})
 
 		it('should reinitialize component when props object changes', async () => {
-			root.innerHTML = '<div :component="components.display" :props="state.props"></div>'
+			root.innerHTML = '<div :component="components.display" :props="props"></div>'
 
 			const app = prototy({
 				root,

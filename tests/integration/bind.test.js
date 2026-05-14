@@ -10,7 +10,7 @@ describe('Bind Directive Variations', () => {
 	})
 
 	it('should update DOM when state changes (State -> DOM)', async () => {
-		document.body.innerHTML = '<input :bind.value.input="state.text">'
+		document.body.innerHTML = '<input :bind.value.input="text">'
 		const app = prototy({
 			root: document.body,
 			state: { text: 'start' }
@@ -28,7 +28,7 @@ describe('Bind Directive Variations', () => {
 	})
 
 	it('should sync text input and apply trim', async () => {
-		document.body.innerHTML = '<input type="text" :bind.value.input.trim="state.username">'
+		document.body.innerHTML = '<input type="text" :bind.value.input.trim="username">'
 
 		const app = prototy({
 			root: document.body,
@@ -44,7 +44,7 @@ describe('Bind Directive Variations', () => {
 	})
 
 	it('should sync checkbox state via checked property', async () => {
-		document.body.innerHTML = '<input type="checkbox" :bind.checked.change="state.active">'
+		document.body.innerHTML = '<input type="checkbox" :bind.checked.change="active">'
 
 		const app = prototy({
 			root: document.body,
@@ -62,7 +62,7 @@ describe('Bind Directive Variations', () => {
 	})
 
 	it('should prevent overwriting oninput (Monopoly check)', async () => {
-		document.body.innerHTML = '<input :bind.value.input="state.text">'
+		document.body.innerHTML = '<input :bind.value.input="text">'
 		const app = prototy({ root: document.body, state: { text: 'val' } })
 		const input = document.body.firstElementChild
 
@@ -75,13 +75,13 @@ describe('Bind Directive Variations', () => {
 		await nextTick()
 
 		const lastLogMessage = consoleSpy.mock.lastCall[0]
-		expect(lastLogMessage).toContain('[PROTOTY] Channel "oninput" is occupied by bind "state.text".')
+		expect(lastLogMessage).toContain('[PROTOTY] Channel "oninput" is occupied by bind "text".')
 
 		expect(app.state.text).not.toBe('hacked')
 	})
 
 	it('should log error on conflicting bindings', async () => {
-		document.body.innerHTML = '<input :bind.value.input="state.a" :bind.checked.input="state.b">'
+		document.body.innerHTML = '<input :bind.value.input="a" :bind.checked.input="b">'
 
 		prototy({ root: document.body, state: { a: '', b: false } })
 
@@ -90,7 +90,7 @@ describe('Bind Directive Variations', () => {
 	})
 
 	it('should handle deep state paths', async () => {
-		document.body.innerHTML = '<input :bind.value.input="state.user.profile.name">'
+		document.body.innerHTML = '<input :bind.value.input="user.profile.name">'
 		const app = prototy({
 			root: document.body,
 			state: { user: { profile: { name: 'John' } } }
@@ -112,7 +112,7 @@ describe('Bind Directive with Props', () => {
 
 	it('should bind to props value (readonly)', async () => {
 		document.body.innerHTML = `
-			<div :component="components.card" :props="{ userName: state.name }"></div>`
+			<div :component="components.card" :props="{ userName: name }"></div>`
 
 		const app = prototy({
 			root: document.body,
@@ -136,7 +136,7 @@ describe('Bind Directive with Props', () => {
 	})
 
 	it('should NOT modify item in each (readonly)', async () => {
-		document.body.innerHTML = '<div :each="state.items" :component="components.item"></div>'
+		document.body.innerHTML = '<div :each="items" :component="components.item"></div>'
 
 		const app = prototy({
 			root: document.body,
@@ -161,7 +161,7 @@ describe('Bind Directive with Props', () => {
 	})
 
 	it('should bind to props and update when parent state changes', async () => {
-		document.body.innerHTML = '<div :component="components.card" :props="{ value: state.counter }"></div>'
+		document.body.innerHTML = '<div :component="components.card" :props="{ value: counter }"></div>'
 
 		const app = prototy({
 			root: document.body,

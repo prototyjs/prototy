@@ -4,7 +4,7 @@
  * @param { object } value
  * @param { string } modifier
  * @param { Array <string> } args
- * @param { Function } transform 
+ * @param { Function } transform
  * @param { string } directive
  */
 export function attr(element, value, modifier, args, transform, directive) {

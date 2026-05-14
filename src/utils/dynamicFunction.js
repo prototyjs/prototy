@@ -34,8 +34,28 @@ export function dynamicFunction(code, bus, key = '') {
 					return fromContext
 				}
 
-				if (prop in bus) {
-					return bus[prop]
+				if (prop in bus.state) {
+					return bus.state[prop]
+				}
+
+				if (prop in bus.methods) {
+					return bus.methods[prop]
+				}
+
+				if (prop in bus.params) {
+					return bus.params[prop]
+				}
+
+				if (prop === 'root') {
+					return bus.root
+				}
+
+				if (prop === 'components') {
+					return bus.components
+				}
+
+				if (prop === 'els') {
+					return bus.els
 				}
 
 				if (prop === Symbol.unscopables) {

@@ -4,7 +4,7 @@ import { prototy, nextTick } from '@'
 describe('Attr Directive', () => {
 
 	it('sets attribute when value is string', async () => {
-		document.body.innerHTML = '<div :dataTest="state.value"></div>'
+		document.body.innerHTML = '<div :dataTest="value"></div>'
 		prototy({
 			root: document.body,
 			state: { value: 'test-value' }
@@ -14,7 +14,7 @@ describe('Attr Directive', () => {
 	})
 
 	it('removes attribute when value is null', async () => {
-		document.body.innerHTML = '<div :dataTest="state.value"></div>'
+		document.body.innerHTML = '<div :dataTest="value"></div>'
 		prototy({
 			root: document.body,
 			state: { value: null }
@@ -24,7 +24,7 @@ describe('Attr Directive', () => {
 	})
 
 	it('removes attribute when value is false', async () => {
-		document.body.innerHTML = '<div :dataTest="state.value"></div>'
+		document.body.innerHTML = '<div :dataTest="value"></div>'
 		prototy({
 			root: document.body,
 			state: { value: false }
@@ -34,7 +34,7 @@ describe('Attr Directive', () => {
 	})
 
 	it('updates attribute when value changes', async () => {
-		document.body.innerHTML = '<div :dataTest="state.value"></div>'
+		document.body.innerHTML = '<div :dataTest="value"></div>'
 		const app = prototy({
 			root: document.body,
 			state: { value: 'initial' }
@@ -48,7 +48,7 @@ describe('Attr Directive', () => {
 	})
 
 	it('removes attribute when value changes to null', async () => {
-		document.body.innerHTML = '<div :dataTest="state.value"></div>'
+		document.body.innerHTML = '<div :dataTest="value"></div>'
 		const app = prototy({
 			root: document.body,
 			state: { value: 'exists' }
@@ -62,7 +62,7 @@ describe('Attr Directive', () => {
 	})
 
 	it('adds attribute when value changes from null to string', async () => {
-		document.body.innerHTML = '<div :dataTest="state.value"></div>'
+		document.body.innerHTML = '<div :dataTest="value"></div>'
 		const app = prototy({
 			root: document.body,
 			state: { value: null }

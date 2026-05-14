@@ -31,15 +31,19 @@ class Prototy {
 		root = document.body,
 		params = {},
 		methods = {},
+		computed = {},
 		directives = {},
 		modifiers = {},
 		components = {},
 		setters = {}
 	}) {
-		this.pendingTargets = new Map()
-		this.state = this.createProxy(state)
-
+		this.reactivity = new Reactivity()
+		this.listeners = new Listeners()
 		this.contextStorage = new WeakMap()
+		this.pendingTargets = new Map()
+
+		this.initComputed(state, computed)
+		this.state = this.createProxy(state)
 
 		this.methods = {}
 		this.setters = {}
@@ -56,8 +60,6 @@ class Prototy {
 		bindMethods(this.methods, methods, this.bus)
 		bindMethods(this.setters, setters, this.bus)
 
-		this.reactivity = new Reactivity()
-		this.listeners = new Listeners()
 		this.nodes = new Nodes({
 			listeners: (/** @type { HTMLElement } */ element, /** @type { string } */ key, /** @type { string } */ value) => {
 				const func = dynamicFunction(value, this.bus, 'event')
@@ -66,19 +68,7 @@ class Prototy {
 					return func(element, context, event)
 				})
 			},
-			destroy: (/** @type { HTMLElement } */ element) => {
-				if (!element) {
-					return
-				}
-				this.listeners.remove(element)
-				this.reactivity.removeEffects(element)
-				unbind(element)
-				if (element._el) {
-					if (this.bus.els[element._el] === element) {
-						delete this.bus.els[element._el]
-					}
-				}
-			},
+			destroy: this.destroy.bind(this),
 			attribute: (/** @type { HTMLElement } */ element, /** @type { string } */ key, /** @type { string } */ value) => {
 				if (key === 'el') {
 					const name = value
@@ -120,7 +110,7 @@ class Prototy {
 			context: this.updateContext.bind(this),
 			transform: this.modifiers.transform.bind(this.modifiers)
 		})
-		
+
 		this.setup(root)
 	}
 	/**
@@ -154,25 +144,99 @@ class Prototy {
 		})
 	}
 	/**
+	 * @param { object } rawState
+	 * @param { Record<string, Function> } computed
+	 */
+	initComputed(rawState, computed) {
+		if (!computed || Object.keys(computed).length === 0) {
+			return
+		}
+
+		Object.keys(computed).forEach(key => {
+			if (key in rawState) {
+				log.warn('Computed property "{0}" overrides existing property', key)
+			}
+
+			const getter = computed[key]
+			let cachedValue
+			let isDirty = true
+
+			const computedEffect = () => {
+				if (!isDirty) {
+					isDirty = true
+					this.schedule(rawState, key)
+				}
+			}
+			computedEffect.deps = new Set()
+
+			Object.defineProperty(rawState, key, {
+				get: () => {
+					if (this.reactivity.activeEffect === computedEffect) {
+						log.error('Circular dependency detected in computed property "{0}"', key)
+						return cachedValue
+					}
+
+					const activeEffect = this.reactivity.activeEffect
+					if (activeEffect && activeEffect !== computedEffect) {
+						this.reactivity.add(rawState, key, activeEffect)
+						activeEffect.deps.add({ target: rawState, property: key })
+					}
+
+					if (isDirty) {
+						const prevEffect = this.reactivity.activeEffect
+
+						if (computedEffect.deps.size > 0) {
+							this.reactivity.removeEffect(computedEffect, computedEffect.deps)
+							computedEffect.deps.clear()
+						}
+
+						this.reactivity.activeEffect = computedEffect
+
+						try {
+							cachedValue = getter.bind(this.bus)()
+						} catch (e) {
+							log.error('Error in computed property "{0}": {1}', key, e.message)
+							cachedValue = undefined
+						} finally {
+							this.reactivity.activeEffect = prevEffect
+						}
+						isDirty = false
+					}
+
+					return cachedValue
+				},
+				enumerable: true,
+				configurable: true
+			})
+		})
+	}
+	/**
 	 * @param { any } state
 	 * @param { string } path
+	 * @param { string } parent
 	 * @returns { object }
 	 */
-	createProxy(state, path = '') {
+	createProxy(state, path = '', parent= null) {
 		const self = this
 
 		if (isObject(state)) {
 	      Object.keys(state).forEach((key) => {
+		      const descriptor = Object.getOwnPropertyDescriptor(state, key)
+		      if (descriptor && typeof descriptor.get === 'function') {
+			      return
+		      }
 	        if (isObject(state[key])) {
 	          state[key] = this.createProxy(
 	            state[key],
-	            path ? `${path}.${key}` : key
+	            path ? `${path}.${key}` : key,
+		          state
 	          )
 	        }
 	      })
 	    }
 		if (path) {
 			state._path = path
+			state._parent = parent
 		}
 		state[IS_PROXY] = true
 
@@ -198,7 +262,11 @@ class Prototy {
 		    if (typeof property === 'symbol') {
 			    return Reflect.set(target, property, value, receiver)
 		    }
-
+		    const descriptor = Object.getOwnPropertyDescriptor(target, property)
+		    if (descriptor && typeof descriptor.get === 'function' && typeof descriptor.set !== 'function') {
+			    log.error('Computed property "{0}" is readonly.', property.toString())
+			    return false
+		    }
 		    const isArray = Array.isArray(target)
 		    const oldValue = Reflect.get(target, property)
 
@@ -218,10 +286,13 @@ class Prototy {
 		    if (typeof self.setters?.[fullPath] === 'function' && !self.activeSetters.has(fullPath)) {
 			    self.activeSetters.add(fullPath)
 			    try {
-				    newValue = self.setters[fullPath](newValue, oldValue)
+				    newValue = self.setters[fullPath](newValue, oldValue, 'internal') // v, old, origin
 				    if (Object.is(oldValue, newValue)) {
 							return true
 				    }
+			    } catch (e) {
+				    log.error('Error in setter for "{0}": {1}', fullPath, e.message)
+				    newValue = oldValue
 			    } finally {
 				    self.activeSetters.delete(fullPath)
 			    }
@@ -247,33 +318,79 @@ class Prototy {
 	 * @param { string } property
 	 */
 	schedule(target, property) {
-		if (!this.pendingTargets.has(target)) {
-			this.pendingTargets.set(target, new Set())
+		const addToPending = (obj, prop) => {
+			if (!this.pendingTargets.has(obj)) {
+				this.pendingTargets.set(obj, new Set())
 
-			queueMicrotask(() => {
-				const changedKeys = this.pendingTargets.get(target)
-				this.pendingTargets.delete(target)
+				queueMicrotask(() => {
+					const changedKeys = this.pendingTargets.get(obj)
+					this.pendingTargets.delete(obj)
 
-				const uniqueEffects = new Set()
-				changedKeys.forEach(key => {
-					const effects = this.reactivity.find(target, key)
-					effects.forEach(eff => uniqueEffects.add(eff))
+					const uniqueEffects = new Set()
+					changedKeys.forEach(key => {
+						const effects = this.reactivity.find(obj, key)
+						// eslint-disable-next-line sonarjs/no-nested-functions
+						effects.forEach(eff => uniqueEffects.add(eff))
 
-					const value = target[key]
-					if (value && value._path) {
-						const pathEffects = this.reactivity.find(target, value._path)
-						pathEffects.forEach(eff => uniqueEffects.add(eff))
-					}
+						const value = obj[key]
+						if (value && value._path) {
+							const pathEffects = this.reactivity.find(obj, value._path)
+							// eslint-disable-next-line sonarjs/no-nested-functions
+							pathEffects.forEach(eff => uniqueEffects.add(eff))
+						}
+					})
+
+					uniqueEffects.forEach(update => {
+						if (update !== this.reactivity.activeEffect) {
+							update()
+						}
+					})
 				})
-
-				uniqueEffects.forEach(update => {
-					if (update !== this.reactivity.activeEffect) {
-						update()
-					}
-				})
-			})
+			}
+			this.pendingTargets.get(obj).add(prop)
 		}
-		this.pendingTargets.get(target).add(property)
+
+		addToPending(target, property)
+
+		let current = target
+		while (current && current._parent) {
+			const parentProperty = current._path ? current._path.split('.').pop() : null
+			if (parentProperty) {
+				addToPending(current._parent, parentProperty)
+			}
+			current = current._parent
+		}
+	}
+	/**
+	 * @param { string } path
+	 * @param { any } value
+	 */
+	update(path, value) {
+		if (typeof path !== 'string') {
+			log.error('update() expects path to be a string, but received {0}', typeof path)
+			return
+		}
+		const segments = path.split('.')
+		const lastKey = segments.pop()
+		const target = segments.reduce((acc, k) => acc?.[k], this.state)
+		if (!target || typeof target !== 'object') {
+			log.error('Update error: path "{0}" is unreachable', path)
+			return
+		}
+		const setter = this.setters[path]
+		const oldValue = target[lastKey]
+		if (typeof setter === 'function') {
+			this.activeSetters.add(path)
+			try {
+				target[lastKey] = setter(value, oldValue, 'external')
+			} finally {
+				this.activeSetters.delete(path)
+			}
+		} else {
+			if (oldValue !== value) {
+				target[lastKey] = value
+			}
+		}
 	}
 	/**
 	 * @param { HTMLElement } element
@@ -330,6 +447,22 @@ class Prototy {
 						effect()
 					}
 				})
+			}
+		}
+	}
+	/**
+	 * @param { HTMLElement } element
+	 */
+	destroy(element) {
+		if (!element) {
+			return
+		}
+		this.listeners.remove(element)
+		this.reactivity.removeEffects(element)
+		unbind(element)
+		if (element._el) {
+			if (this.bus.els[element._el] === element) {
+				delete this.bus.els[element._el]
 			}
 		}
 	}

@@ -4,7 +4,7 @@ import { prototy } from '@'
 describe('Property Directive', () => {
 
 	it('sets the textContent(stroke)', async () => {
-		document.body.innerHTML = '<div :text="state.message"></div>'
+		document.body.innerHTML = '<div :text="message"></div>'
 
 		prototy({
 			root: document.body,
@@ -15,7 +15,7 @@ describe('Property Directive', () => {
 	})
 
 	it('sets the style (object).', async () => {
-		document.body.innerHTML = '<div :style="state.styles"></div>'
+		document.body.innerHTML = '<div :style="styles"></div>'
 
 		prototy({
 			root: document.body,
@@ -28,7 +28,7 @@ describe('Property Directive', () => {
 	})
 
 	it('sets the data-set (object)', async () => {
-		document.body.innerHTML = '<div :dataset="state.data"></div>'
+		document.body.innerHTML = '<div :dataset="data"></div>'
 
 		prototy({
 			root: document.body,
@@ -41,7 +41,7 @@ describe('Property Directive', () => {
 	})
 
 	it('sets the hidden (boolean)', async () => {
-		document.body.innerHTML = '<div :hidden="state.isHidden"></div>'
+		document.body.innerHTML = '<div :hidden="isHidden"></div>'
 
 		prototy({
 			root: document.body,

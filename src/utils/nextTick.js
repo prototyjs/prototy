@@ -3,8 +3,17 @@
  * @returns { Promise }
  */
 export function nextTick(callback) {
+	const wait = () => new Promise(resolve => {
+		queueMicrotask(() => {
+			// eslint-disable-next-line sonarjs/no-nested-functions
+			requestAnimationFrame(() => {
+				resolve()
+			})
+		})
+	})
+
 	if (callback) {
-		return Promise.resolve().then(callback)
+		return wait().then(callback)
 	}
-	return Promise.resolve()
+	return wait()
 }

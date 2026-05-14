@@ -25,33 +25,32 @@ export class Nodes {
 		const stack = [node]
 		while (stack.length) {
 			const current = stack.pop()
-			if (current.nodeType === 1) {
-				const attrs = Array.from(current.attributes)
-
-				attrs.sort((a, b) => (this.priority[a.name] || 99) - (this.priority[b.name] || 99))
-
+			if (current.nodeType === 1 || current.nodeType === 11) {
 				let hasDirectives = false
-				const toRemove = []
+				if (current.nodeType === 1) {
+					const attrs = Array.from(current.attributes)
+					attrs.sort((a, b) => (this.priority[a.name] || 99) - (this.priority[b.name] || 99))
+					const toRemove = []
 
-				for (let i = 0; i < attrs.length; i++) {
-					const attr = attrs[i]
-					this.attribute(current, attr.name, attr.value)
-					if (attr.name.charCodeAt(0) === 58) {
-						hasDirectives = true
-						this.directive(attr, current, handler, toRemove)
-					} else if (attr.name === 'el') {
-						hasDirectives = true
+					for (let i = 0; i < attrs.length; i++) {
+						const attr = attrs[i]
+						this.attribute(current, attr.name, attr.value)
+						if (attr.name.charCodeAt(0) === 58) {
+							hasDirectives = true
+							this.directive(attr, current, handler, toRemove)
+						} else if (attr.name === 'el') {
+							hasDirectives = true
+						}
+					}
+
+					for (const attrName of toRemove) {
+						current.removeAttribute(attrName)
+					}
+
+					if (hasDirectives) {
+						this.nodes.add(current)
 					}
 				}
-
-				for (const attrName of toRemove) {
-					current.removeAttribute(attrName)
-				}
-
-				if (hasDirectives) {
-					this.nodes.add(current)
-				}
-
 				let child = current.lastElementChild
 				while (child) {
 					stack.push(child)

@@ -33,7 +33,7 @@ export default {
 	 * @param { string } [u='px']
 	 * @returns { string }
 	 */
-	unit: (value, u = 'px') => Number(value) + u,
+	unit: (value, u = 'px') => value + u,
 	/**
 	 * @param { any } value
 	 * @returns { string }
