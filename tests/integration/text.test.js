@@ -26,7 +26,7 @@ describe('Text Directive', () => {
 	})
 
 	it('should handle null and undefined values', async () => {
-		document.body.innerHTML = '<div :text="state.value"></div>'
+		document.body.innerHTML = '<div :text="value"></div>'
 		const app = prototy({
 			root: document.body,
 			state: { value: 'hello' }
@@ -43,14 +43,14 @@ describe('Text Directive', () => {
 
 	describe('modifiers', () => {
 		it('should apply fixed modifier', async () => {
-			document.body.innerHTML = '<div :text.fixed.2="state.value"></div>'
+			document.body.innerHTML = '<div :text.fixed.2="value"></div>'
 			const app = prototy({
 				root: document.body,
 				state: { value: 42.5678 },
 			})
 			expect(document.body.firstElementChild.textContent).toBe('42.57')
 
-			document.body.innerHTML = '<div :text.fixed.3="state.value"></div>'
+			document.body.innerHTML = '<div :text.fixed.3="value"></div>'
 			const appWith3 = prototy({
 				root: document.body,
 				state: { value: 42.5678 },
@@ -59,7 +59,7 @@ describe('Text Directive', () => {
 		})
 
 		it('should apply upper modifier', async () => {
-			document.body.innerHTML = '<div :text.upper="state.value"></div>'
+			document.body.innerHTML = '<div :text.upper="value"></div>'
 			const app = prototy({
 				root: document.body,
 				state: { value: 'hello world' },
@@ -71,8 +71,8 @@ describe('Text Directive', () => {
 		})
 
 		it('should apply lower modifier', async () => {
-			document.body.innerHTML = '<div :text.lower="state.value"></div>'
-			const app = prototy({
+			document.body.innerHTML = '<div :text.lower="value"></div>'
+			prototy({
 				root: document.body,
 				state: { value: 'HELLO WORLD' }
 			})
@@ -80,7 +80,7 @@ describe('Text Directive', () => {
 		})
 
 		it('should apply trim modifier', async () => {
-			document.body.innerHTML = '<div :text.trim="state.value"></div>'
+			document.body.innerHTML = '<div :text.trim="value"></div>'
 			const app = prototy({
 				root: document.body,
 				state: { value: '  hello  ' }
@@ -89,7 +89,7 @@ describe('Text Directive', () => {
 		})
 
 		it('should apply capitalize modifier', async () => {
-			document.body.innerHTML = '<div :text.capitalize="state.value"></div>'
+			document.body.innerHTML = '<div :text.capitalize="value"></div>'
 			const app = prototy({
 				root: document.body,
 				state: { value: 'hello world' }
@@ -101,14 +101,14 @@ describe('Text Directive', () => {
 		})
 
 		it('should apply default modifier', async () => {
-			document.body.innerHTML = '<div :text.default="state.value"></div>'
+			document.body.innerHTML = '<div :text.default="value"></div>'
 			const app = prototy({
 				root: document.body,
 				state: { value: null }
 			})
 			expect(document.body.firstElementChild.textContent).toBe('-')
 
-			document.body.innerHTML = '<div :text.default.empty="state.value"></div>'
+			document.body.innerHTML = '<div :text.default.empty="value"></div>'
 			const appWithCustomDefault = prototy({
 				root: document.body,
 				state: { value: null }
@@ -117,7 +117,7 @@ describe('Text Directive', () => {
 		})
 
 		it('should apply json modifier', async () => {
-			document.body.innerHTML = '<div :text.json="state.value"></div>'
+			document.body.innerHTML = '<div :text.json="value"></div>'
 			const app = prototy({
 				root: document.body,
 				state: { value: { name: 'John', age: 30 } }
@@ -126,14 +126,14 @@ describe('Text Directive', () => {
 		})
 
 		it('should apply int modifier', async () => {
-			document.body.innerHTML = '<div :text.int="state.value"></div>'
+			document.body.innerHTML = '<div :text.int="value"></div>'
 			const app = prototy({
 				root: document.body,
 				state: { value: '42.7' }
 			})
 			expect(document.body.firstElementChild.textContent).toBe('42')
 
-			document.body.innerHTML = '<div :text.int.16="state.value"></div>'
+			document.body.innerHTML = '<div :text.int.16="value"></div>'
 			const appWithRadix = prototy({
 				root: document.body,
 				state: { value: 'FF' }
@@ -142,7 +142,7 @@ describe('Text Directive', () => {
 		})
 
 		it('should apply abs modifier', async () => {
-			document.body.innerHTML = '<div :text.abs="state.value"></div>'
+			document.body.innerHTML = '<div :text.abs="value"></div>'
 			const app = prototy({
 				root: document.body,
 				state: { value: -42 }
@@ -151,7 +151,7 @@ describe('Text Directive', () => {
 		})
 
 		it('should apply round modifier', async () => {
-			document.body.innerHTML = '<div :text.round="state.value"></div>'
+			document.body.innerHTML = '<div :text.round="value"></div>'
 			const app = prototy({
 				root: document.body,
 				state: { value: 42.7 }
@@ -160,14 +160,14 @@ describe('Text Directive', () => {
 		})
 
 		it('should apply clamp modifier', async () => {
-			document.body.innerHTML = '<div :text.clamp="state.value"></div>'
+			document.body.innerHTML = '<div :text.clamp="value"></div>'
 			const app = prototy({
 				root: document.body,
 				state: { value: 1.5 }
 			})
 			expect(document.body.firstElementChild.textContent).toBe('1')
 
-			document.body.innerHTML = '<div :text.clamp.0.100="state.value"></div>'
+			document.body.innerHTML = '<div :text.clamp.0.100="value"></div>'
 			const appWithBounds = prototy({
 				root: document.body,
 				state: { value: 150 }
@@ -176,14 +176,14 @@ describe('Text Directive', () => {
 		})
 
 		it('should apply unit modifier', async () => {
-			document.body.innerHTML = '<div :text.unit="state.value"></div>'
+			document.body.innerHTML = '<div :text.unit="value"></div>'
 			const app = prototy({
 				root: document.body,
 				state: { value: 42 }
 			})
 			expect(document.body.firstElementChild.textContent).toBe('42px')
 
-			document.body.innerHTML = '<div :text.unit.em="state.value"></div>'
+			document.body.innerHTML = '<div :text.unit.em="value"></div>'
 			const appWithUnit = prototy({
 				root: document.body,
 				state: { value: 42 }
@@ -191,7 +191,7 @@ describe('Text Directive', () => {
 			expect(document.body.firstElementChild.textContent).toBe('42em')
 		})
 		it('should convert numbers to strings', async () => {
-			document.body.innerHTML = '<div :text="state.value"></div>'
+			document.body.innerHTML = '<div :text="value"></div>'
 			const app = prototy({
 				root: document.body,
 				state: { value: 42 }
@@ -203,7 +203,7 @@ describe('Text Directive', () => {
 			expect(document.body.firstElementChild.textContent).toBe('0')
 		})
 		it('should handle false as string', async () => {
-			document.body.innerHTML = '<div :text="state.value"></div>'
+			document.body.innerHTML = '<div :text="value"></div>'
 			const app = prototy({
 				root: document.body,
 				state: { value: true }
@@ -215,7 +215,7 @@ describe('Text Directive', () => {
 		})
 
 		it('should handle 0 as string', async () => {
-			document.body.innerHTML = '<div :text="state.value"></div>'
+			document.body.innerHTML = '<div :text="value"></div>'
 			const app = prototy({
 				root: document.body,
 				state: { value: 42 }
@@ -224,6 +224,6 @@ describe('Text Directive', () => {
 			app.state.value = 0
 			await nextTick()
 			expect(document.body.firstElementChild.textContent).toBe('0')
-		})	
+		})
 	})
 })

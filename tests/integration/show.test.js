@@ -4,7 +4,7 @@ import { prototy, nextTick } from '@'
 describe('Show Directive', () => {
 
 	it('shows element when value is true', async () => {
-		document.body.innerHTML = '<div :show="state.isVisible"></div>'
+		document.body.innerHTML = '<div :show="isVisible"></div>'
 		prototy({
 			root: document.body,
 			state: { isVisible: true }
@@ -14,7 +14,7 @@ describe('Show Directive', () => {
 	})
 
 	it('hides element when value is false', async () => {
-		document.body.innerHTML = '<div :show="state.isVisible"></div>'
+		document.body.innerHTML = '<div :show="isVisible"></div>'
 		prototy({
 			root: document.body,
 			state: { isVisible: false }
@@ -24,7 +24,7 @@ describe('Show Directive', () => {
 	})
 
 	it('shows element when value changes from false to true', async () => {
-		document.body.innerHTML = '<div :show="state.isVisible"></div>'
+		document.body.innerHTML = '<div :show="isVisible"></div>'
 		const app = prototy({
 			root: document.body,
 			state: { isVisible: false }
@@ -38,7 +38,7 @@ describe('Show Directive', () => {
 	})
 
 	it('hides element when value changes from true to false', async () => {
-		document.body.innerHTML = '<div :show="state.isVisible"></div>'
+		document.body.innerHTML = '<div :show="isVisible"></div>'
 		const app = prototy({
 			root: document.body,
 			state: { isVisible: true }
