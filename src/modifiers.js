@@ -20,7 +20,7 @@ export class Modifiers {
 	 * @param  { Array<string> } args
 	 * @returns { any }
 	 */
-	transform(value, name, ...args) {
+	transform(value, name, args) {
 		if (!name) {
 			return value
 		}

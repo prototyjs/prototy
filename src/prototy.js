@@ -172,9 +172,19 @@ class Prototy {
 	      })
 	    }
 		if (path) {
-			state._path = path
+    	Object.defineProperty(state, '_path', {
+        	value: path,
+        	enumerable: false,
+        	writable: true,
+        	configurable: true
+    	})
 		}
-		state[IS_PROXY] = true
+		Object.defineProperty(state, IS_PROXY, {
+    		value: true,
+    		enumerable: false,
+    		writable: false,
+    		configurable: false
+		})
 
 		return new Proxy(state, {
 			get(target, property, receiver) {
