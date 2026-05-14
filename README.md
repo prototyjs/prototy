@@ -1,211 +1,337 @@
-<p align="center">
-<img src="https://github.com/user-attachments/assets/0f424573-860f-4b46-8ca5-903579593028" width="220px" alt="prototy">
-</p>
-<p align="center">
-A simple JS framework for rapid UI prototyping and hypothesis testing on the web. 💙
-</p>
-<p align="center">
-<i>Single-file prototyping for instant UI validation.</i>
-</p>
+# Документация Prototy Framework
 
-## Installation
+## Обзор
 
-Add this script to your HTML:
-```html
-<script src="https://cdn.jsdelivr.net/gh/prototyjs/prototy@latest/prototy.min.js"></script>
-```
+Легковесный реактивный фреймворк для интерфейсов без сборки.
 
-Or download and include locally:
-```html
-<script src="prototy.js"></script>
-```
+## Быстрый старт
+
+Просто скопируйте код и приступайте к работе!
 
 ```js
+import { prototy } from './prototy/index.js'
+
 const app = prototy({
-  static: {}, // non-reactive data
-  state: {
-    user: { name: "John", age: 30 },
-    items: []
+  root: document.getElementById('app'),
+  state: { count: 0, name: 'Иван' },
+  methods: {
+    increment() { this.state.count++ }
   },
-  handles: {
-    // Event handlers
-  },
-  components: {},
-  // hooks
-  created() {},
-  loaded() {},
-  pushed() {},
+  components: {
+    btn: '<button :onclick="methods.increment()" :text="count"></button>'
+  }
 })
 ```
-## State Management
+```html
+<div id="app">
+  <h1 :text="state.name"></h1>
+  <div :component="components.btn" :props="{ count: state.count }"></div>
+</div>
+```
+Объект `app` содержит поля: `state`, `methods`, `root`, `params`, `components`, `els`.
+
+## Состояния
+
+Состояние реактивно — любое изменение обновляет UI:
 ```js
-state: {
-  user: { name: "John Doe", email: "john@example.com" },
-  todos: [],
-  isVisible: true
+app.state.count = 10        // UI обновится
+app.state.name = 'Мария'    // UI обновится
+app.state.user = { age: 25 } // глубокие изменения тоже работают
+```
+
+## Сеттеры
+
+Перехватывают изменения для валидации:
+```js
+setters: {
+  age(newVal) { return Math.max(0, Math.min(120, newVal)) }
 }
 ```
-### Reactive Updates
-State changes automatically trigger UI updates:
-```js
-app.state.user.name = "Jane Doe"; // Triggers re-render
-app.state.todos.push({ text: "New task" }); // Triggers re-render
-```
-## Directives
 
-All attributes starting with `:` are reactive and automatically update when state changes.
+## Директивы
+Все директивы начинаются с `:`
 
-Use built-in directives `:text`, `:html`, `:show`, `:class`, `:style`, `:value` for common UI bindings.
-
-Any custom attribute starting with `:` also works reactively, including `:src`, `:href`, `:data-*`, and `:aria-*`.
-
-Handle events with `:on*` attributes like `:onclick`, `:oninput`, `:onchange` and etc.
-
-### Text Binding
+### `:text` — текстовое содержимое
 ```html
-<h1 :text="state.user.name"></h1>
-<span :text="'Hello, ' + state.user.name"></span>
+<span :text="state.name"></span>
+<span :text="`Привет, ${state.name}`"></span>
 ```
-### HTML Binding
+### `:html` — HTML-содержимое
 ```html
-<div :html="state.formattedContent"></div>
+<div :html="state.rawHtml"></div>
 ```
-### Conditional Display
+### `:show` — видимость (display: none)
 ```html
-<div :show="state.isVisible">Visible content</div>
-<div :show="state.user.isAdmin">Admin panel</div>
+<div :show="state.isVisible">Виден</div>
 ```
-### Class Binding
+### `:class` — условные классы
 ```html
-<div :class="state.cssClass"></div>
 <div :class="{ active: state.isActive, disabled: !state.isEnabled }"></div>
 ```
-### Style Binding
+### `:style` — инлайн-стили из объекта
 ```html
 <div :style="{ color: state.textColor, fontSize: state.fontSize + 'px' }"></div>
 ```
-### Event Handling
+### `:dataset` — data-атрибуты из объекта
 ```html
-<button :onclick="state.count++">Increment</button>
-<input :oninput="state.searchTerm = event.target.value">
-<button :onclick="handles.submitForm">Submit</button>
-```
-### Form Inputs
+<div :dataset="{ userId: 123, role: 'admin' }"></div>
+<!-- Результат: data-user-id="123" data-role="admin" -->
+ ```
+
+### `:hidden` — скрытие через hidden-атрибут
 ```html
-<input :value="state.username">
-```
-### Any Attribute Binding
-```html
-<img :src="state.imageUrl" :alt="state.altText">
-<a :href="state.linkUrl" :target="state.targetWindow"></a>
-<div :data-testid="state.testId" :aria-hidden="state.isHidden"></div>
+<div :hidden="state.isHidden"></div>
 ```
 
-## Components
-
-Use the `component` attribute on `<template>` elements to define components.
-
-Prototy supports native-like slot functionality with both default and named slots.
-
+### `:attr` — любой атрибут
 ```html
-<template component="user-card">
-  <div class="user-card">
-    <h3 :text="props.user.name"></h3>
-    <p :text="props.user.email"></p>
-    <!-- Default slot -->
-    <slot>Default content if no slot provided</slot>
-    <!-- Named slot -->
-    <slot name="actions"></slot>
-  </div>
-</template>
+<div :data-id="state.userId"></div>
 ```
-### Using Components
+Атрибут удаляется при `null` или `false`.
+
+### `:bind` — двусторонняя привязка
+Синтаксис: `:bind.свойство.событие="выражение"`
 ```html
-<user-card props="{ user: state.currentUser }">
-  <!-- Default slot content -->
-  <p>This goes into the default slot</p>
+<input :bind.value.input.trim="state.username">
+<input type="checkbox" :bind.checked.change="state.isActive">
+<textarea :bind.value.input="state.desc"></textarea>
+```
+Важно: нельзя привязать два `:bind` к одному событию на элементе.
+
+### `:each` — списки
+Перебирает массив, для каждого элемента создаёт компонент:
+```html
+<div :each="state.items" :component="components.item"></div>
+```
+Внутри компонента доступны:
+- `item` — текущий элемент
+- `index` — индекс (с 0)
+
+```js
+components: {
+  item: '<div><span :text="index"></span>: <span :text="item.name"></span></div>'
+}
+```
+Реактивность массива: `push`, `pop`, `shift`, `unshift`, `reverse`, `sort`, `splice`
+
+Важно: при `reverse()` и перестановках внутреннее состояние элементов (введённый текст, чекбоксы) сохраняется за своим элементом, а не за позицией.
+Пустой массив — ничего не отображается. При добавлении элементов отрисовка происходит автоматически.
+
+### `:component` — вставка компонента
+```html
+<div :component="components.header"></div>
+```
+#### Передача данных через `:props` (только для чтения внутри компонента):
+```html
+<div :component="components.card" :props="{ title: state.title, count: 5 }"></div>
+```
+```js
+components: {
+  card: '<div><h3 :text="title"></h3><span :text="count"></span></div>'
+}
+```
+Важно: изменение `:props` внутри компонента не синхронизируется обратно в родителя. Для двусторонней привязки используйте `state`.
+
+#### Динамический компонент
+```html
+<div :component="components[state.currentTab]"></div>
+```
+#### Условный рендеринг
+```html
+<div :component="state.isVisible && components.modal"></div>
+```
+#### Хук `created` (вызывается один раз при создании)
+```js
+components: {
+  counter: {
+    template: '<div :text="value"></div>',
+    created() {
+      console.log('Компонент создан')
+    }
+  }
+}
+```
+
+### `:el` — ссылка на элемент
+```html
+<div el="header">Заголовок</div>
+```
+```js
+console.log(app.els.header) // HTMLDivElement
+```
+Динамически: `:el="params.el = el"` — переменная `el` ссылается на текущий элемент.
+
+
+
+## Слоты (`<slot>`)
+Передача содержимого в компонент:
+```html
+<!-- Шаблон компонента -->
+<div class="card">
+  <slot name="header">Заголовок по умолчанию</slot>
+  <slot name="content">Текст по умолчанию</slot>
+</div>
+
+<!-- Использование -->
+<div :component="components.card">
+  <h1 slot="header">Мой заголовок</h1>
+  <p slot="content">Мой текст</p>
+</div>
+```
+Правила:
+
+- Слот можно заполнить только один раз
+
+- Непереданный слот показывает содержимое по умолчанию
+
+## Модификаторы
+Преобразуют значения перед применением. Работают с любой директивой.
+```html
+<span :text.upper="state.name"></span>
+<input :bind.value.input.trim="state.username">
+```
+| Модификатор | Описание | Пример |
+|-------------|-------------|-------------|
+| `fixed.N`    | Форматирует число до N знаков после запятой    | `:text.fixed.2="price"`    |
+| `int`    | Преобразует в целое число    | `:text.int="value"`    |
+| `abs`    | Абсолютное значение   | `:text.abs="number"`    |
+| `round`    | Округляет до ближайшего целого    | `:text.round="number"`    |
+| `clamp.min.max`    | Ограничивает значение между min и max    | `:text.clamp.0.100="value"`    |
+| `unit`    | Добавляет суффикс единицы измерения (по умолчанию 'px')    | `:text.unit.em="size"`    |
+| `trim`    | Удаляет пробелы в начале и конце строки    | `:text.trim="text"`    |
+| `upper`    | Преобразует в верхний регистр    | `:text.upper="text"`    |
+| `lower`    | Преобразует в нижний регистр    | `:text.lower="text"`    |
+| `capitalize`    | Делает первую букву заглавной    | `:text.capitalize="text"`    |
+| `default.X`    | Значение по умолчанию    | `:text.default.-="name"`    |
+| `json`    | Преобразует значение в JSON-строку    | `:text.json="state.user"`    |
+
+## События
+### Директивы `:on*`
+```html
+<button :onclick="state.count++">Нажать</button>
+<input :oninput="state.value = event.target.value">
+<form :onsubmit="methods.submit(event)">Отправить</form>
+```
+В обработчиках доступны: `el` (текущий элемент), `state`, `methods`, `event` (нативный объект события).
+
+### Модификаторы событий
+```html
+<button :onclick.stop="state.clicked = true">Без всплытия</button>
+<a :onclick.prevent="methods.navigate">Без перехода</a>
+<div :onclick.self="state.selected = true">Только клик по себе</div>
+<input :onkeydown.enter="methods.submit">Только Enter
+<button :onclick.stop.prevent="methods.save">Оба модификатора</button>
+```
+Доступны: `stop`, `prevent`, `self`, `enter`, `once`, `capture`, `passive`
+
+### Жизненный цикл
+```html
+<div 
+  :component="components.widget"
+  :oncreate="methods.onCreated"
+  :ondestroy="methods.onDestroyed">
+</div>
+```
+Асинхронный `:oncreate.async` — для операций, которые можно отменить:
+```html
+<div :component="components.widget" :oncreate.async="methods.init"></div>
+```
+```js
+methods: {
+  async init({ name, target, signal }) {
+    if (signal.aborted) return
+    await fetchData()
+  }
+}
+```
+
+## Вспомогательные функции
+```js
+import { nextTick, isObject, isEqual, kebabToCamel } from './prototy/index.js'
+```
+- `nextTick()` — дождаться обновления DOM
+
+- `isObject()` — проверка на объект
+
+- `isEqual(a, b)` — глубокое сравнение
+
+- `kebabToCamel()` — `user-name` → `userName`
+
+## Полный пример (Todo-лист) - не работает
+```html
+<div id="app">
+  <h1 :text="state.title"></h1>
   
-  <!-- Named slot content -->
-  <button slot="actions" :onclick="handles.editUser">Edit</button>
-</user-card>
-```
-### List Rendering
-In components with `eachItems`, the following variables are available in props:
-
-`item` - current array element
-
-`index` - current element index (0, 1, 2...)
-
-```html
-<template component="list-item">
-    <span :text="props.index + ': ' + props.item.name"></span>
-</template>
-
-<list-item 
-  eachItems="state.items" 
-  props="{ item: item, index: index }">
-</list-item>
-```
-
-## Screen Management
-
-Prototy includes a built-in screen system for emulating routing and managing different views:
-
-### Basic Screen Setup
-```html
-<!-- Define screens with [screen] attribute -->
-<div screen="home">
-  <h1>Home Screen</h1>
-  <button :onclick="screen.push('settings')">Go to Settings</button>
-</div>
-
-<div screen="settings">
-  <h1>Settings Screen</h1>
-  <button :onclick="screen.back()">Go Back</button>
+  <input 
+    :bind.value.input="state.newTodo"
+    :onkeydown.enter="methods.addTodo"
+    placeholder="Новая задача...">
+  
+  <div :each="state.todos" :component="components.todoItem"></div>
+  
+  <div>Осталось: <span :text="state.remaining"></span></div>
 </div>
 ```
-
-### Screen Methods
-```js
-// Navigate to a screen
-screen.push('screen-name')
-
-// Go back to previous screen
-screen.back()
-
-// Access current screen info
-console.log(screen.current.name) // Current screen name
-console.log(screen.prev) // Previous screen name
-```
-## Hooks
-### created
-The `created` hook executes before DOM is fully initialized:
 ```js
 const app = prototy({
-  created() {
-    // 'this' refers to the Prototy instance
+  root: document.getElementById('app'),
+  
+  state: {
+    title: 'Мои задачи',
+    newTodo: '',
+    todos: []
+  },
+  
+  methods: {
+    addTodo() {
+      if (this.state.newTodo.trim()) {
+        this.state.todos.push({
+          text: this.state.newTodo,
+          done: false
+        })
+        this.state.newTodo = ''
+        this.updateRemaining()
+      }
+    },
+    toggleTodo(index) {
+      this.state.todos[index].done = !this.state.todos[index].done
+      this.updateRemaining()
+    },
+    updateRemaining() {
+      this.state.remaining = this.state.todos.filter(t => !t.done).length
+    }
+  },
+  
+  components: {
+    todoItem: `
+      <div :class="{ done: item.done }">
+        <input 
+          type="checkbox" 
+          :bind.checked.change="item.done"
+          :onchange="methods.updateRemaining()">
+        <span :text="item.text"></span>
+      </div>
+    `
   }
 })
 ```
-### loaded
-The `loaded` hook executes after DOM is fully initialized:
-```js
-const app = prototy({
-  loaded() {
-    // 'this' refers to the Prototy instance
-    console.log('App loaded!')
-    this.screen.push('home') // Navigate to home screen
-    this.state.isReady = true // Update state
-  }
-})
+```css
+.done { text-decoration: line-through; opacity: 0.6; }
 ```
-### pushed
-The `pushed` hook is executed when the screen changes:
+
+## Пользовательские директивы (advanced)
 ```js
-const app = prototy({
-  pushed(name) {
-    // 'this' refers to the Prototy instance
-    console.log(name))
+directives: {
+  highlight(element, value) {
+    element.style.backgroundColor = value ? 'yellow' : ''
+  },
+  tooltip(element, value, modifier) {
+    element.title = value
+    if (modifier === 'top') element.setAttribute('data-position', 'top')
   }
-})
+}
+```
+```html
+<div :highlight="state.isActive"></div>
+<div :tooltip.top="'Подсказка'"></div>
 ```
