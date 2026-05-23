@@ -1,325 +1,389 @@
-# Документация Prototy Framework
+<p align="center">
+<img src="https://github.com/user-attachments/assets/0f424573-860f-4b46-8ca5-903579593028" width="220px" alt="prototy">
+</p>
+<p align="center">
+A simple directive-oriented JS framework for rapid UI prototyping and hypothesis testing on the web. 💙
+</p>
+<p align="center">
+<i>Single-file prototyping for instant UI validation.</i>
+</p>
 
-## Обзор
+## Installation
 
-Легковесный реактивный фреймворк для интерфейсов без сборки.
+Add this script to your HTML:
 
-## Быстрый старт
+```html
+<script src="path/to/prototy/index.js" type="module"></script>
+```
+Or import it in your JS code:
 
-Просто скопируйте код и приступайте к работе!
+```js
+import { prototy } from './path/to/prototy/index.js'
+```
+
+## Let's start!
+
+Prototy is a directive-oriented framework with declarative syntax and built-in reactivity.
+All directives start with `:`. You declare what the UI should look like based on your state, and the framework automatically updates the DOM when the state changes.
+
+Mount the framework on a root element — the directive syntax will work inside it.
+
+Just copy the code and start working!
 
 ```js
 import { prototy } from './prototy/index.js'
 
 const app = prototy({
   root: document.getElementById('app'),
-  state: { count: 0, name: 'Иван' },
-  methods: {
-    increment() { this.state.count++ }
-  },
-  components: {
-    btn: '<button :onclick="methods.increment()" :text="count"></button>'
-  }
+  state: { count: 0 }
 })
 ```
 ```html
 <div id="app">
-  <h1 :text="state.name"></h1>
-  <div :component="components.btn" :props="{ count: state.count }"></div>
+  <button :onclick="count++" :text="count"></button>
 </div>
 ```
-Объект `app` содержит поля: `state`, `methods`, `root`, `params`, `components`, `els`.
+The `app` object contains: `state`, `methods`, `root`, `params`, `components`, `els`.
 
-## Состояния
+## Configuration Options
 
-Состояние реактивно — любое изменение обновляет UI:
-```js
-app.state.count = 10        // UI обновится
-app.state.name = 'Мария'    // UI обновится
-app.state.user = { age: 25 } // глубокие изменения тоже работают
-```
+| Option | Type | Description |
+|--------|------|-------------|
+| `state` | `object` | Initial reactive state |
+| `root` | `HTMLElement` | Root element of the application (default: `document.body`) |
+| `params` | `object` | Static parameters passed to the application |
+| `methods` | `object` | Object with methods to bind to the bus |
+| `directives` | `object` | Custom directive implementations |
+| `components` | `object` | Component template definitions |
+| `setters` | `object` | Custom setter functions for state properties |
 
-## Сеттеры
 
-Перехватывают изменения для валидации:
-```js
-setters: {
-  age(newVal) { return Math.max(0, Math.min(120, newVal)) }
-}
-```
+## Directives
 
-## Директивы
-Все директивы начинаются с `:`
+All directives start with `:`
 
-### `:text` — текстовое содержимое
+### `:text` — sets the text content of an element
+
 ```html
-<span :text="state.name"></span>
-<span :text="`Привет, ${state.name}`"></span>
-```
-### `:html` — HTML-содержимое
-```html
-<div :html="state.rawHtml"></div>
-```
-### `:show` — видимость (display: none)
-```html
-<div :show="state.isVisible">Виден</div>
-```
-### `:class` — условные классы
-```html
-<div :class="{ active: state.isActive, disabled: !state.isEnabled }"></div>
-```
-### `:style` — инлайн-стили из объекта
-```html
-<div :style="{ color: state.textColor, fontSize: state.fontSize + 'px' }"></div>
-```
-### `:dataset` — data-атрибуты из объекта
-```html
-<div :dataset="{ userId: 123, role: 'admin' }"></div>
-<!-- Результат: data-user-id="123" data-role="admin" -->
- ```
-
-### `:hidden` — скрытие через hidden-атрибут
-```html
-<div :hidden="state.isHidden"></div>
+<span :text="name"></span>
+<span :text="`Hello, ${name}`"></span>
 ```
 
-### `:attr` — любой атрибут
-```html
-<div :data-id="state.userId"></div>
-```
-Атрибут удаляется при `null` или `false`.
+### `:bind` — binds an element's property to the state. State changes update the element, and user actions update the state
 
-### `:bind` — двусторонняя привязка
-Синтаксис: `:bind.свойство.событие="выражение"`
+Syntax: `:bind.property.event="expression"`
 ```html
-<input :bind.value.input.trim="state.username">
-<input type="checkbox" :bind.checked.change="state.isActive">
-<textarea :bind.value.input="state.desc"></textarea>
+<input :bind.value.input.trim="username">
+<input type="checkbox" :bind.checked.change="isActive">
+<textarea :bind.value.input="desc"></textarea>
 ```
-Важно: нельзя привязать два `:bind` к одному событию на элементе.
+> You cannot bind two `:bind` directives to the same event on one element.
 
-### `:each` — списки
-Перебирает массив, для каждого элемента создаёт компонент:
+### `:each` —  lists
+
+Iterates over an array, creates a component for each element:
 ```html
-<div :each="state.items" :component="components.item"></div>
+<div :each="items" :component="components.item"></div>
 ```
-Внутри компонента доступны:
-- `item` — текущий элемент
-- `index` — индекс (с 0)
-
+Inside the component, you have access to:
+- `item` — current element
+- `index` — index (starting from 0)
 ```js
 components: {
   item: '<div><span :text="index"></span>: <span :text="item.name"></span></div>'
 }
 ```
-Реактивность массива: `push`, `pop`, `shift`, `unshift`, `reverse`, `sort`, `splice`
+Array reactivity: `push`, `pop`, `shift`, `unshift`, `reverse`, `sort`, `splice`
 
-Важно: при `reverse()` и перестановках внутреннее состояние элементов (введённый текст, чекбоксы) сохраняется за своим элементом, а не за позицией.
-Пустой массив — ничего не отображается. При добавлении элементов отрисовка происходит автоматически.
+> When using `reverse()` or reordering, the internal state of elements (entered text, checkboxes) stays with their data item, not with the position.
+> An empty array renders nothing. When elements are added, rendering happens automatically.
 
-### `:component` — вставка компонента
+### `:component` — component insertion
+
 ```html
 <div :component="components.header"></div>
 ```
-#### Передача данных через `:props` (только для чтения внутри компонента):
+#### Passing data via `:props` (readonly inside component):
+
 ```html
-<div :component="components.card" :props="{ title: state.title, count: 5 }"></div>
+<div :component="components.card" :props="{ title: title, count: 5 }"></div>
 ```
 ```js
 components: {
   card: '<div><h3 :text="title"></h3><span :text="count"></span></div>'
 }
 ```
-Важно: изменение `:props` внутри компонента не синхронизируется обратно в родителя. Для двусторонней привязки используйте `state`.
+> Changing `:props` inside a component does NOT sync back to the parent. Use `state` for two-way binding.
 
-#### Динамический компонент
+#### Dynamic component
+
 ```html
-<div :component="components[state.currentTab]"></div>
+<div :component="components[currentTab]"></div>
 ```
-#### Условный рендеринг
+#### Conditional rendering
+
 ```html
-<div :component="state.isVisible && components.modal"></div>
-```
-#### Хук `created` (вызывается один раз при создании)
-```js
-components: {
-  counter: {
-    template: '<div :text="value"></div>',
-    created() {
-      console.log('Компонент создан')
-    }
-  }
-}
+<div :component="isVisible && modal"></div>
 ```
 
-### `:el` — ссылка на элемент
+### `:class` — dynamically applies CSS classes based on conditions in `state`
+
 ```html
-<div el="header">Заголовок</div>
+<div :class="{ active: isActive, disabled: !isEnabled }"></div>
+```
+### `:show` — conditionally shows or hides an element (sets display: none)
+
+```html
+<div :show="isVisible">Visible</div>
+```
+### `:attr` — binds the value of any HTML attribute to the state
+
+```html
+<div :data-id="userId"></div>
+```
+The attribute is removed when value is `null` or `false`.
+
+### `:style` — dynamically applies inline styles
+
+```html
+<div :style="{ color: textColor, fontSize: fontSize + 'px' }"></div>
+```
+### `:html` — sets the inner HTML of an element
+
+```html
+<div :html="rawHtml"></div>
+```
+### `:el` — element reference
+
+```html
+<div el="header">Header</div>
 ```
 ```js
 console.log(app.els.header) // HTMLDivElement
 ```
-Динамически: `:el="params.el = el"` — переменная `el` ссылается на текущий элемент.
+Dynamic: `:el="params.el = el"` — the `el` variable references the current element.
 
+### `:dataset` — data attributes from object
 
-
-## Слоты (`<slot>`)
-Передача содержимого в компонент:
 ```html
-<!-- Шаблон компонента -->
-<div class="card">
-  <slot name="header">Заголовок по умолчанию</slot>
-  <slot name="content">Текст по умолчанию</slot>
-</div>
+<div :dataset="{ userId: 123, role: 'admin' }"></div>
+<!-- Result: data-user-id="123" data-role="admin" -->
+ ```
+### `:hidden` —  hide via hidden attribute
 
-<!-- Использование -->
-<div :component="components.card">
-  <h1 slot="header">Мой заголовок</h1>
-  <p slot="content">Мой текст</p>
-</div>
-```
-Правила:
-
-- Слот можно заполнить только один раз
-
-- Непереданный слот показывает содержимое по умолчанию
-
-## Модификаторы
-Преобразуют значения перед применением. Работают с любой директивой.
 ```html
-<span :text.upper="state.name"></span>
-<input :bind.value.input.trim="state.username">
+<div :hidden="isHidden"></div>
 ```
-| Модификатор | Описание | Пример |
-|-------------|-------------|-------------|
-| `fixed.N`    | Форматирует число до N знаков после запятой    | `:text.fixed.2="price"`    |
-| `int`    | Преобразует в целое число    | `:text.int="value"`    |
-| `abs`    | Абсолютное значение   | `:text.abs="number"`    |
-| `round`    | Округляет до ближайшего целого    | `:text.round="number"`    |
-| `clamp.min.max`    | Ограничивает значение между min и max    | `:text.clamp.0.100="value"`    |
-| `unit`    | Добавляет суффикс единицы измерения (по умолчанию 'px')    | `:text.unit.em="size"`    |
-| `trim`    | Удаляет пробелы в начале и конце строки    | `:text.trim="text"`    |
-| `upper`    | Преобразует в верхний регистр    | `:text.upper="text"`    |
-| `lower`    | Преобразует в нижний регистр    | `:text.lower="text"`    |
-| `capitalize`    | Делает первую букву заглавной    | `:text.capitalize="text"`    |
-| `default.X`    | Значение по умолчанию    | `:text.default.-="name"`    |
-| `json`    | Преобразует значение в JSON-строку    | `:text.json="state.user"`    |
+## Events
 
-## События
-### Директивы `:on*`
+### Directives `:on*` handle DOM events.
+
 ```html
-<button :onclick="state.count++">Нажать</button>
-<input :oninput="state.value = event.target.value">
-<form :onsubmit="methods.submit(event)">Отправить</form>
+<button :onclick="count++">Click</button>
+<input :oninput="value = event.target.value">
+<form :onsubmit="submit(event)">Submit</form>
 ```
-В обработчиках доступны: `el` (текущий элемент), `state`, `methods`, `event` (нативный объект события).
+Inside event handlers you have access to:
 
-### Модификаторы событий
+- `el` — the current DOM element
+
+- `state` — reactive state
+
+- `methods` — bound methods
+
+- `event` — native event object
+
+
+### Event Modifiers
+
+Modifiers change how the event is handled.
+| Modifier | Effect | Example |
+|--------|------|-------------|
+| `stop` | Stops event propagation | `:onclick.stop` |
+| `prevent` | Prevents default behavior | `:onclick.prevent` |
+| `self` | Triggers only if target is the element itself | `:onclick.self` |
+| `enter` | Triggers only on Enter key | `:onkeydown.enter` |
+| `once` | Triggers only once | `:onclick.once` |
+| `capture` | Uses capture phase | `:onclick.capture` |
+| `passive` | Improves scroll performance | `:onscroll.passive` |
+
+
 ```html
-<button :onclick.stop="state.clicked = true">Без всплытия</button>
-<a :onclick.prevent="methods.navigate">Без перехода</a>
-<div :onclick.self="state.selected = true">Только клик по себе</div>
-<input :onkeydown.enter="methods.submit">Только Enter
-<button :onclick.stop.prevent="methods.save">Оба модификатора</button>
+<a :onclick.prevent="navigate">No page reload</a>
 ```
-Доступны: `stop`, `prevent`, `self`, `enter`, `once`, `capture`, `passive`
 
-### Жизненный цикл
+### Lifecycle Events
+
+#### `:oncreate`
+Fires when a component is created and mounted to the DOM.
+
 ```html
 <div 
-  :component="components.widget"
-  :oncreate="methods.onCreated"
-  :ondestroy="methods.onDestroyed">
+  :component="components.card"
+  :oncreate="onCardCreated">
 </div>
 ```
-Асинхронный `:oncreate.async` — для операций, которые можно отменить:
+The handler receives an object with:
+
+- `name` — component name
+
+- `target` — the DOM element
+
+
+#### `:oncreate.async`
+For async initialization. The component waits for the promise to resolve.
+
 ```html
-<div :component="components.widget" :oncreate.async="methods.init"></div>
+<div 
+  :component="components.card"
+  :oncreate.async="initCard">
+</div>
 ```
 ```js
 methods: {
-  async init({ name, target, signal }) {
-    if (signal.aborted) return
-    await fetchData()
+  async initCard({ name, target, signal }) {
+    // signal.aborted — true if component was destroyed before completion
+    await fetch(`/api/card/${name}`)
   }
 }
 ```
-
-## Вспомогательные функции
-```js
-import { nextTick, isObject, isEqual, kebabToCamel } from './prototy/index.js'
-```
-- `nextTick()` — дождаться обновления DOM
-
-- `isObject()` — проверка на объект
-
-- `isEqual(a, b)` — глубокое сравнение
-
-- `kebabToCamel()` — `user-name` → `userName`
-
-## Полный пример (Todo-лист) - не работает
+#### `:ondestroy`
+Fires when a component is removed from the DOM.
 ```html
-<div id="app">
-  <h1 :text="state.title"></h1>
-  
-  <input 
-    :bind.value.input="state.newTodo"
-    :onkeydown.enter="methods.addTodo"
-    placeholder="Новая задача...">
-  
-  <div :each="state.todos" :component="components.todoItem"></div>
-  
-  <div>Осталось: <span :text="state.remaining"></span></div>
+<div 
+  :component="components.card"
+  :ondestroy="onCardDestroyed">
 </div>
 ```
+The handler receives `{ name, target }` — component name and the DOM element being removed.
+
+## Public API
+
+The `prototy()` function returns an `app` object with the following properties and methods:
+
+| Property/Method | Type | Description |
+|----------------|------|-------------|
+| `app.state` | `object` | Reactive state. Changes trigger UI updates. |
+| `app.methods` | `object` | Bound methods from configuration. |
+| `app.root` | `HTMLElement` | Root element of the application. |
+| `app.params` | `object` | Static parameters from configuration. |
+| `app.components` | `object` | Registered component templates. |
+| `app.els` | `object` | Elements marked with `el` attribute. |
+| `app.update(path, value)` | `function` | Manually update nested state by dot-notation path. |
+| `app.destroy()` | `function` | Clean up and remove all reactivity from the application. |
+
+### `app.destroy()`
+
+Completely removes the application: cleans up all reactive effects, event listeners, and component references.
+
 ```js
+const app = prototy({ state: { count: 0 } })
+
+// Later, when you no longer need the app:
+app.destroy()
+```
+
+### `app.update(path, value)`
+
+Manually update a nested state property.
+```js
+app.update('user.profile.name', 'Alice') // Success
+app.update('user.z.x', 100)              // Error: path "user.z.x" is unreachable
+app.update(null, 10)                     // Error: update() expects path to be a string
+```
+
+### Accessing the internal bus
+
+Inside methods and event handlers, `this.bus` gives access to the same object:
+
+```js
+methods: {
+  logBus() {
+    console.log(this.bus)
+    // {
+    //   root: HTMLElement,
+    //   state: { ... },
+    //   methods: { ... },
+    //   params: { ... },
+    //   components: { ... },
+    //   els: { ... }
+    // }
+  }
+}
+```
+> Use `bus` to access the root element, registered components, or elements marked with `el` attribute.
+
+
+### Slots (`<slot>`)
+
+Slots allow you to pass HTML content into a component. You define a placeholder in the component template, and when using the component, you fill it with your own content.
+#### Named slots
+
+In the component template, declare `<slot name="name">`. When using the component, specify `slot="name"` on any element — it will be placed in the slot's position:
+```js
+// Component definition
 const app = prototy({
-  root: document.getElementById('app'),
-  
-  state: {
-    title: 'Мои задачи',
-    newTodo: '',
-    todos: []
-  },
-  
-  methods: {
-    addTodo() {
-      if (this.state.newTodo.trim()) {
-        this.state.todos.push({
-          text: this.state.newTodo,
-          done: false
-        })
-        this.state.newTodo = ''
-        this.updateRemaining()
-      }
-    },
-    toggleTodo(index) {
-      this.state.todos[index].done = !this.state.todos[index].done
-      this.updateRemaining()
-    },
-    updateRemaining() {
-      this.state.remaining = this.state.todos.filter(t => !t.done).length
-    }
-  },
-  
   components: {
-    todoItem: `
-      <div :class="{ done: item.done }">
-        <input 
-          type="checkbox" 
-          :bind.checked.change="item.done"
-          :onchange="methods.updateRemaining()">
-        <span :text="item.text"></span>
-      </div>
-    `
+    card: `<div class="card"><slot name="header"></slot></div>`
   }
 })
 ```
-```css
-.done { text-decoration: line-through; opacity: 0.6; }
+```html
+<!-- Using the component -->
+<div :component="components.card">
+  <h1 slot="header">Card header</h1>
+</div>
+```
+## Utility functions
+
+```js
+import { nextTick, isObject, isEqual, kebabToCamel } from './prototy/index.js'
+```
+- `nextTick()` — wait for DOM update
+
+- `isObject()` — check if value is an object
+
+- `isEqual(a, b)` — deep comparison
+
+- `kebabToCamel()` — `user-name` → `userName`
+
+## Modifiers
+
+Transform values before they are applied. Work with any directive.
+```html
+<span :text.upper="name"></span>
+<input :bind.value.input.trim="username">
+```
+| Modifier | Description | Example |
+|-------------|-------------|-------------|
+| `fixed.N`    |Formats a number to N decimal places    | `:text.fixed.2="price"`    |
+| `int`    | Converts to an integer    | `:text.int="value"`    |
+| `abs`    | Absolute value   | `:text.abs="number"`    |
+| `round`    | Rounds to the nearest integer    | `:text.round="number"`    |
+| `clamp.min.max`    | Clamps the value between min and max    | `:text.clamp.0.100="value"`    |
+| `unit`    | Appends a unit suffix (default 'px')    | `:text.unit.em="size"`    |
+| `trim`    | Removes whitespace from the beginning and end of a string    | `:text.trim="text"`    |
+| `upper`    | Converts to uppercase    | `:text.upper="text"`    |
+| `lower`    | Converts to lowercase    | `:text.lower="text"`    |
+| `capitalize`    | Capitalizes the first letter    | `:text.capitalize="text"`    |
+| `default.X`    | Default value    | `:text.default.-="name"`    |
+| `json`    | Converts the value to a JSON string    | `:text.json="user"`    |
+
+## Setters
+
+Intercept changes for validation:
+```js
+setters: {
+  age(newVal) { return Math.max(0, Math.min(120, newVal)) }
+}
 ```
 
-## Пользовательские директивы (advanced)
+
+## Custom directives (advanced)
+
+Create your own directives by adding them to the `directives` option.
+
+
 ```js
 directives: {
   highlight(element, value) {
@@ -332,6 +396,39 @@ directives: {
 }
 ```
 ```html
-<div :highlight="state.isActive"></div>
-<div :tooltip.top="'Подсказка'"></div>
+<div :highlight="isActive"></div>
+<div :tooltip.top="'Tooltip'"></div>
 ```
+
+### Parameters passed to a custom directive (directive function signature)
+
+When you create a custom directive, your function receives these parameters in order:
+
+```js
+function myDirective(element, value, modifier, args, transform, directive, code)
+```
+| Parameter | Description |
+|-------------|-------------|
+| `element`    |The DOM element    |
+| `value`    | The evaluated expression value   |
+| `modifier`    | The first modifier (e.g., `'top'` from `:my.top`)   | 
+| `args`    | Array of additional arguments (e.g., `['arg1', 'arg2']` from `:my.top.arg1.arg2`)    | 
+| `transform`    | Function to apply built-in modifiers    | 
+| `directive`    | Directive name (`'myDirective'`)   | 
+| `code`    | Original expression source code    | 
+
+### Using built-in modifiers in custom directives
+
+You can apply built-in modifiers to values inside your custom directive:
+```js
+directives: {
+  displayValue(element, value, modifier, args, transform) {
+    const transformed = transform(value, modifier, args)
+    element.textContent = transformed
+  }
+}
+```
+```html
+<div :displayValue.upper.trim="name"></div>
+<!-- Applies 'upper' and 'trim' before passing to the directive -->
+ ```
