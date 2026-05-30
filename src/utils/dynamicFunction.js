@@ -6,6 +6,8 @@ import { log } from '@/log'
  * @returns { Function }
  */
 export function dynamicFunction(code, bus, key = '') {
+	console.log('[dynamicFunction] code:', code)
+  	console.log('[dynamicFunction] key:', key)
 	const localDeclaration = key ? `const ${key} = local` : ''
 
 	// eslint-disable-next-line sonarjs/code-eval
@@ -22,6 +24,8 @@ export function dynamicFunction(code, bus, key = '') {
     `)
 
 	return (el, context, local) => {
+		console.log('[dynamicFunction] called with local:', local)
+
 		const scopeProxy = new Proxy({}, {
 			get(_, prop) {
 
@@ -70,7 +74,8 @@ export function dynamicFunction(code, bus, key = '') {
 				return prop !== key
 			}
 		})
-
-		return fn(el, scopeProxy, local)
+		const result = fn(el, scopeProxy, local)
+    	console.log('[dynamicFunction] result:', result)
+		return result
 	}
 }

@@ -36,6 +36,9 @@ export class Directives {
 	 * @param { string } code
 	 */
 	apply(element, key, value, code) {
+		console.log('[Directives.apply] key:', key)
+ 		 console.log('[Directives.apply] value:', value)
+ 		 console.log('[Directives.apply] code:', code)
 		const [directive, modifier, ...args] = key.split('.')
 
 		if (key === 'el') {
