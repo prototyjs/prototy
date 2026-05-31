@@ -11,10 +11,21 @@ import { kebabToCamel } from '@/utils/kebabToCamel'
 function prototy(options) {
 	const p = new Prototy(options)
 
+	let isDestroyed = false
+
 	return {
 		...p.bus,
 		update: p.update.bind(p),
-		destroy: () => p.destroy(p.bus.root)
+		destroy: () => {
+			if (isDestroyed) {
+				return
+			}
+			p.destroy(p.bus.root)
+			p.pendingTargets?.clear()
+			p.activeSetters?.clear()
+			p.bus = null
+			isDestroyed = true
+		}
 	}
 }
 export {

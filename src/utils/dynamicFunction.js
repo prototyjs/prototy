@@ -66,6 +66,18 @@ export function dynamicFunction(code, bus, key = '') {
 				}
 				log.error('ReferenceError: "{0}" is not defined', prop, el)
 			},
+			set(_, prop, value) {
+				if (prop in bus.state) {
+					bus.state[prop] = value
+					return true
+				}
+				if (context && typeof context === 'object' && prop in context) {
+					context[prop] = value
+					return true
+				}
+				log.error(`Cannot set "${prop}" - property does not exist in state or context`, el)
+				return false
+			},
 			has(_, prop) {
 				return prop !== key
 			}

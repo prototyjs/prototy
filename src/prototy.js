@@ -275,6 +275,7 @@ class Prototy {
 			},
 			// eslint-disable-next-line sonarjs/cognitive-complexity
 	    set(target, property, value, receiver) {
+				console.log('SET:', property, 'from:', target[property], 'to:', value)
 		    if (typeof property === 'symbol') {
 			    return Reflect.set(target, property, value, receiver)
 		    }
@@ -419,6 +420,7 @@ class Prototy {
 
 		return new Proxy({}, {
 			get(_, prop) {
+				console.log('GET context:', prop, 'from element:', element)
 				let current = element
 				while (current) {
 					const entry = self.contextStorage.get(current)
@@ -473,6 +475,9 @@ class Prototy {
 		if (!element) {
 			return
 		}
+		Array.from(element.children).forEach(child => {
+			this.destroy(child)
+		})
 		this.listeners.remove(element)
 		this.reactivity.removeEffects(element)
 		unbind(element)
