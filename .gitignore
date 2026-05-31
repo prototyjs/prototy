@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-demo/
 
 # Editor settings
 .idea/
@@ -10,10 +9,9 @@ demo/
 *.njsproj
 
 # Build outputs
+demo/
 dist/
-dist-demo/
 coverage/
-test-results.json
 
 # Logs
 *.log
