@@ -98,7 +98,7 @@ An empty array renders nothing. When elements are added, rendering happens autom
                 <tbody><tr><td><code>stop</code></td><td>Stops event propagation</td><td><code>:onclick.stop</code></td></tr><tr><td><code>prevent</code></td><td>Prevents default behavior</td><td><code>:onclick.prevent</code></td></tr><tr><td><code>self</code></td><td>Triggers only if target is the element itself</td><td><code>:onclick.self</code></td></tr><tr><td><code>enter</code></td><td>Triggers only on Enter key</td><td><code>:onkeydown.enter</code></td></tr><tr><td><code>once</code></td><td>Triggers only once</td><td><code>:onclick.once</code></td></tr><tr><td><code>capture</code></td><td>Uses capture phase</td><td><code>:onclick.capture</code></td></tr><tr><td><code>passive</code></td><td>Improves scroll performance</td><td><code>:onscroll.passive</code></td></tr></tbody>
                 </table>
             <pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">:onclick.prevent</span>=<span class="hljs-string">&quot;navigate&quot;</span>&gt;</span>No page reload<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></code></pre><h3 id="lifecycle-events">Lifecycle Events</h3><h4 id="-oncreate-">`:oncreate`</h4><p>Fires when a component is created and mounted to the DOM.</p>
-<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> 
+<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>
   <span class="hljs-attr">:component</span>=<span class="hljs-string">&quot;components.card&quot;</span>
   <span class="hljs-attr">:oncreate</span>=<span class="hljs-string">&quot;onCardCreated&quot;</span>&gt;</span>
 <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><p>The handler receives an object with:</p>
@@ -109,7 +109,7 @@ An empty array renders nothing. When elements are added, rendering happens autom
 </li>
 </ul>
 <h4 id="-oncreate-async-">`:oncreate.async`</h4><p>For async initialization. The component waits for the promise to resolve.</p>
-<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> 
+<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>
   <span class="hljs-attr">:component</span>=<span class="hljs-string">&quot;components.card&quot;</span>
   <span class="hljs-attr">:oncreate.async</span>=<span class="hljs-string">&quot;initCard&quot;</span>&gt;</span>
 <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><pre><code class="language-js"><span class="hljs-attr">methods</span>: {
@@ -118,7 +118,7 @@ An empty array renders nothing. When elements are added, rendering happens autom
     <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`/api/card/<span class="hljs-subst">${name}</span>`</span>)
   }
 }</code></pre><h4 id="-ondestroy-">`:ondestroy`</h4><p>Fires when a component is removed from the DOM.</p>
-<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> 
+<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span>
   <span class="hljs-attr">:component</span>=<span class="hljs-string">&quot;components.card&quot;</span>
   <span class="hljs-attr">:ondestroy</span>=<span class="hljs-string">&quot;onCardDestroyed&quot;</span>&gt;</span>
 <span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><p>The handler receives <code>{ name, target }</code> — component name and the DOM element being removed.</p>
