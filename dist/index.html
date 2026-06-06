@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="./reset.css">
+    <link rel="stylesheet" href="./general.css">
+    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/github.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/styles/stackoverflow-light.min.css">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net"/>
+    <script src="./main.js" defer></script>
+</head>
+<body>
+<div class="screen lstUI">
+    <div class="sidebar">
+        <div class="lstSidebar opened">
+            <div class="lstBackdrop"></div>
+            <div class="lstSidebarWr">
+                <div class="top"></div>
+                <div class="middle"></div>
+                <div class="bottom"></div>
+            </div>
+        </div>
+    </div>
+    <div class="main">
+        <div class="menu l-fx l-jc-sb"></div>
+        <div class="container txt">
+            <div class="tabs"></div>
+            <div class="content">
+                <p align="center">
+<img src="https://github.com/user-attachments/assets/0f424573-860f-4b46-8ca5-903579593028" width="220px" alt="prototy">
+</p>
+<p align="center">
+A simple directive-oriented JS framework for rapid UI prototyping and hypothesis testing on the web. 💙
+</p>
+<p align="center">
+<i>Single-file prototyping for instant UI validation.</i>
+</p><h2 id="installation">Installation</h2><p>Add this script to your HTML:</p>
+<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">src</span>=<span class="hljs-string">&quot;path/to/prototy/index.js&quot;</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;module&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></code></pre><p>Or import it in your JS code:</p>
+<pre><code class="language-js"><span class="hljs-keyword">import</span> { prototy } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./path/to/prototy/index.js&#x27;</span></code></pre><h2 id="let-s-start-">Let's start!</h2><p>Prototy is a directive-oriented framework with declarative syntax and built-in reactivity.
+All directives start with <code>:</code>. You declare what the UI should look like based on your state, and the framework automatically updates the DOM when the state changes.</p>
+<p>Mount the framework on a root element — the directive syntax will work inside it.</p>
+<p>Just copy the code and start working!</p>
+<pre><code class="language-js"><span class="hljs-keyword">import</span> { prototy } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./prototy/index.js&#x27;</span>
+
+<span class="hljs-keyword">const</span> app = <span class="hljs-title function_">prototy</span>({
+  <span class="hljs-attr">root</span>: <span class="hljs-variable language_">document</span>.<span class="hljs-title function_">getElementById</span>(<span class="hljs-string">&#x27;app&#x27;</span>),
+  <span class="hljs-attr">state</span>: { <span class="hljs-attr">count</span>: <span class="hljs-number">0</span> }
+})</code></pre><pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">id</span>=<span class="hljs-string">&quot;app&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">:onclick</span>=<span class="hljs-string">&quot;count++&quot;</span> <span class="hljs-attr">:text</span>=<span class="hljs-string">&quot;count&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><p>The <code>app</code> object contains: <code>state</code>, <code>methods</code>, <code>root</code>, <code>params</code>, <code>components</code>, <code>els</code>.</p>
+<h2 id="configuration-options">Configuration Options</h2>
+                <table class="table table-striped table-dark">
+                <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody><tr><td><code>state</code></td><td><code>object</code></td><td>Initial reactive state</td></tr><tr><td><code>root</code></td><td><code>HTMLElement</code></td><td>Root element of the application (default: <code>document.body</code>)</td></tr><tr><td><code>params</code></td><td><code>object</code></td><td>Static parameters passed to the application</td></tr><tr><td><code>methods</code></td><td><code>object</code></td><td>Object with methods to bind to the bus</td></tr><tr><td><code>directives</code></td><td><code>object</code></td><td>Custom directive implementations</td></tr><tr><td><code>components</code></td><td><code>object</code></td><td>Component template definitions</td></tr><tr><td><code>setters</code></td><td><code>object</code></td><td>Custom setter functions for state properties</td></tr></tbody>
+                </table>
+            <h2 id="directives">Directives</h2><p>All directives start with <code>:</code></p>
+<h3 id="-text-sets-the-text-content-of-an-element">`:text` — sets the text content of an element</h3><pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">:text</span>=<span class="hljs-string">&quot;name&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">:text</span>=<span class="hljs-string">&quot;`Hello, ${name}`&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span></code></pre><h3 id="-bind-binds-an-element-s-property-to-the-state-state-changes-update-the-element-and-user-actions-update-the-state">`:bind` — binds an element's property to the state. State changes update the element, and user actions update the state</h3><p>Syntax: <code>:bind.property.event=&quot;expression&quot;</code></p>
+<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">:bind.value.input.trim</span>=<span class="hljs-string">&quot;username&quot;</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">type</span>=<span class="hljs-string">&quot;checkbox&quot;</span> <span class="hljs-attr">:bind.checked.change</span>=<span class="hljs-string">&quot;isActive&quot;</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">textarea</span> <span class="hljs-attr">:bind.value.input</span>=<span class="hljs-string">&quot;desc&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">textarea</span>&gt;</span></code></pre><blockquote class="note"><p>You cannot bind two <code>:bind</code> directives to the same event on one element.</p>
+</blockquote><h3 id="-each-lists">`:each` —  lists</h3><p>Iterates over an array, creates a component for each element:</p>
+<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">:each</span>=<span class="hljs-string">&quot;items&quot;</span> <span class="hljs-attr">:component</span>=<span class="hljs-string">&quot;components.item&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><p>Inside the component, you have access to:</p>
+<ul>
+<li><code>item</code> — current element</li>
+<li><code>index</code> — index (starting from 0)</li>
+</ul>
+<pre><code class="language-js"><span class="hljs-attr">components</span>: {
+  <span class="hljs-attr">item</span>: <span class="hljs-string">&#x27;&lt;div&gt;&lt;span :text=&quot;index&quot;&gt;&lt;/span&gt;: &lt;span :text=&quot;item.name&quot;&gt;&lt;/span&gt;&lt;/div&gt;&#x27;</span>
+}</code></pre><p>Array reactivity: <code>push</code>, <code>pop</code>, <code>shift</code>, <code>unshift</code>, <code>reverse</code>, <code>sort</code>, <code>splice</code></p>
+<blockquote class="note"><p>When using <code>reverse()</code> or reordering, the internal state of elements (entered text, checkboxes) stays with their data item, not with the position.
+An empty array renders nothing. When elements are added, rendering happens automatically.</p>
+</blockquote><h3 id="-component-component-insertion">`:component` — component insertion</h3><pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">:component</span>=<span class="hljs-string">&quot;components.header&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><h4 id="passing-data-via-props-readonly-inside-component-">Passing data via `:props` (readonly inside component):</h4><pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">:component</span>=<span class="hljs-string">&quot;components.card&quot;</span> <span class="hljs-attr">:props</span>=<span class="hljs-string">&quot;{ title: title, count: 5 }&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><pre><code class="language-js"><span class="hljs-attr">components</span>: {
+  <span class="hljs-attr">card</span>: <span class="hljs-string">&#x27;&lt;div&gt;&lt;h3 :text=&quot;title&quot;&gt;&lt;/h3&gt;&lt;span :text=&quot;count&quot;&gt;&lt;/span&gt;&lt;/div&gt;&#x27;</span>
+}</code></pre><blockquote class="note"><p>Changing <code>:props</code> inside a component does NOT sync back to the parent. Use <code>state</code> for two-way binding.</p>
+</blockquote><h4 id="dynamic-component">Dynamic component</h4><pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">:component</span>=<span class="hljs-string">&quot;components[currentTab]&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><h4 id="conditional-rendering">Conditional rendering</h4><pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">:component</span>=<span class="hljs-string">&quot;isVisible &amp;&amp; modal&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><h3 id="-class-dynamically-applies-css-classes-based-on-conditions-in-state-">`:class` — dynamically applies CSS classes based on conditions in `state`</h3><pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">:class</span>=<span class="hljs-string">&quot;{ active: isActive, disabled: !isEnabled }&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><h3 id="-show-conditionally-shows-or-hides-an-element-sets-display-none-">`:show` — conditionally shows or hides an element (sets display: none)</h3><pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">:show</span>=<span class="hljs-string">&quot;isVisible&quot;</span>&gt;</span>Visible<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><h3 id="-attr-binds-the-value-of-any-html-attribute-to-the-state">`:attr` — binds the value of any HTML attribute to the state</h3><pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">:data-id</span>=<span class="hljs-string">&quot;userId&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><p>The attribute is removed when value is <code>null</code> or <code>false</code>.</p>
+<h3 id="-style-dynamically-applies-inline-styles">`:style` — dynamically applies inline styles</h3><pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">:style</span>=<span class="hljs-string">&quot;{ color: textColor, fontSize: fontSize + &#x27;px&#x27; }&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><h3 id="-html-sets-the-inner-html-of-an-element">`:html` — sets the inner HTML of an element</h3><pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">:html</span>=<span class="hljs-string">&quot;rawHtml&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><h3 id="-el-element-reference">`:el` — element reference</h3><pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">el</span>=<span class="hljs-string">&quot;header&quot;</span>&gt;</span>Header<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><pre><code class="language-js"><span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(app.<span class="hljs-property">els</span>.<span class="hljs-property">header</span>) <span class="hljs-comment">// HTMLDivElement</span></code></pre><p>Dynamic: <code>:el=&quot;params.el = el&quot;</code> — the <code>el</code> variable references the current element.</p>
+<h3 id="-dataset-data-attributes-from-object">`:dataset` — data attributes from object</h3><pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">:dataset</span>=<span class="hljs-string">&quot;{ userId: 123, role: &#x27;admin&#x27; }&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-comment">&lt;!-- Result: data-user-id=&quot;123&quot; data-role=&quot;admin&quot; --&gt;</span></code></pre><h3 id="-hidden-hide-via-hidden-attribute">`:hidden` —  hide via hidden attribute</h3><pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">:hidden</span>=<span class="hljs-string">&quot;isHidden&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><h2 id="events">Events</h2><h3 id="directives-on-handle-dom-events-">Directives `:on*` handle DOM events.</h3><pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">button</span> <span class="hljs-attr">:onclick</span>=<span class="hljs-string">&quot;count++&quot;</span>&gt;</span>Click<span class="hljs-tag">&lt;/<span class="hljs-name">button</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">:oninput</span>=<span class="hljs-string">&quot;value = event.target.value&quot;</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">form</span> <span class="hljs-attr">:onsubmit</span>=<span class="hljs-string">&quot;submit(event)&quot;</span>&gt;</span>Submit<span class="hljs-tag">&lt;/<span class="hljs-name">form</span>&gt;</span></code></pre><p>Inside event handlers you have access to:</p>
+<ul>
+<li><p><code>el</code> — the current DOM element</p>
+</li>
+<li><p><code>state</code> — reactive state</p>
+</li>
+<li><p><code>methods</code> — bound methods</p>
+</li>
+<li><p><code>event</code> — native event object</p>
+</li>
+</ul>
+<h3 id="event-modifiers">Event Modifiers</h3><p>Modifiers change how the event is handled.</p>
+
+                <table class="table table-striped table-dark">
+                <thead><tr><th>Modifier</th><th>Effect</th><th>Example</th></tr></thead>
+                <tbody><tr><td><code>stop</code></td><td>Stops event propagation</td><td><code>:onclick.stop</code></td></tr><tr><td><code>prevent</code></td><td>Prevents default behavior</td><td><code>:onclick.prevent</code></td></tr><tr><td><code>self</code></td><td>Triggers only if target is the element itself</td><td><code>:onclick.self</code></td></tr><tr><td><code>enter</code></td><td>Triggers only on Enter key</td><td><code>:onkeydown.enter</code></td></tr><tr><td><code>once</code></td><td>Triggers only once</td><td><code>:onclick.once</code></td></tr><tr><td><code>capture</code></td><td>Uses capture phase</td><td><code>:onclick.capture</code></td></tr><tr><td><code>passive</code></td><td>Improves scroll performance</td><td><code>:onscroll.passive</code></td></tr></tbody>
+                </table>
+            <pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">a</span> <span class="hljs-attr">:onclick.prevent</span>=<span class="hljs-string">&quot;navigate&quot;</span>&gt;</span>No page reload<span class="hljs-tag">&lt;/<span class="hljs-name">a</span>&gt;</span></code></pre><h3 id="lifecycle-events">Lifecycle Events</h3><h4 id="-oncreate-">`:oncreate`</h4><p>Fires when a component is created and mounted to the DOM.</p>
+<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> 
+  <span class="hljs-attr">:component</span>=<span class="hljs-string">&quot;components.card&quot;</span>
+  <span class="hljs-attr">:oncreate</span>=<span class="hljs-string">&quot;onCardCreated&quot;</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><p>The handler receives an object with:</p>
+<ul>
+<li><p><code>name</code> — component name</p>
+</li>
+<li><p><code>target</code> — the DOM element</p>
+</li>
+</ul>
+<h4 id="-oncreate-async-">`:oncreate.async`</h4><p>For async initialization. The component waits for the promise to resolve.</p>
+<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> 
+  <span class="hljs-attr">:component</span>=<span class="hljs-string">&quot;components.card&quot;</span>
+  <span class="hljs-attr">:oncreate.async</span>=<span class="hljs-string">&quot;initCard&quot;</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><pre><code class="language-js"><span class="hljs-attr">methods</span>: {
+  <span class="hljs-keyword">async</span> <span class="hljs-title function_">initCard</span>(<span class="hljs-params">{ name, target, signal }</span>) {
+    <span class="hljs-comment">// signal.aborted — true if component was destroyed before completion</span>
+    <span class="hljs-keyword">await</span> <span class="hljs-title function_">fetch</span>(<span class="hljs-string">`/api/card/<span class="hljs-subst">${name}</span>`</span>)
+  }
+}</code></pre><h4 id="-ondestroy-">`:ondestroy`</h4><p>Fires when a component is removed from the DOM.</p>
+<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> 
+  <span class="hljs-attr">:component</span>=<span class="hljs-string">&quot;components.card&quot;</span>
+  <span class="hljs-attr">:ondestroy</span>=<span class="hljs-string">&quot;onCardDestroyed&quot;</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><p>The handler receives <code>{ name, target }</code> — component name and the DOM element being removed.</p>
+<h2 id="public-api">Public API</h2><p>The <code>prototy()</code> function returns an <code>app</code> object with the following properties and methods:</p>
+
+                <table class="table table-striped table-dark">
+                <thead><tr><th>Property/Method</th><th>Type</th><th>Description</th></tr></thead>
+                <tbody><tr><td><code>app.state</code></td><td><code>object</code></td><td>Reactive state. Changes trigger UI updates.</td></tr><tr><td><code>app.methods</code></td><td><code>object</code></td><td>Bound methods from configuration.</td></tr><tr><td><code>app.root</code></td><td><code>HTMLElement</code></td><td>Root element of the application.</td></tr><tr><td><code>app.params</code></td><td><code>object</code></td><td>Static parameters from configuration.</td></tr><tr><td><code>app.components</code></td><td><code>object</code></td><td>Registered component templates.</td></tr><tr><td><code>app.els</code></td><td><code>object</code></td><td>Elements marked with <code>el</code> attribute.</td></tr><tr><td><code>app.update(path, value)</code></td><td><code>function</code></td><td>Manually update nested state by dot-notation path.</td></tr><tr><td><code>app.destroy()</code></td><td><code>function</code></td><td>Clean up and remove all reactivity from the application.</td></tr></tbody>
+                </table>
+            <h3 id="-app-destroy-">`app.destroy()`</h3><p>Completely removes the application: cleans up all reactive effects, event listeners, and component references.</p>
+<pre><code class="language-js"><span class="hljs-keyword">const</span> app = <span class="hljs-title function_">prototy</span>({ <span class="hljs-attr">state</span>: { <span class="hljs-attr">count</span>: <span class="hljs-number">0</span> } })
+
+<span class="hljs-comment">// Later, when you no longer need the app:</span>
+app.<span class="hljs-title function_">destroy</span>()</code></pre><h3 id="-app-update-path-value-">`app.update(path, value)`</h3><p>Manually update a nested state property.</p>
+<pre><code class="language-js">app.<span class="hljs-title function_">update</span>(<span class="hljs-string">&#x27;user.profile.name&#x27;</span>, <span class="hljs-string">&#x27;Alice&#x27;</span>) <span class="hljs-comment">// Success</span>
+app.<span class="hljs-title function_">update</span>(<span class="hljs-string">&#x27;user.z.x&#x27;</span>, <span class="hljs-number">100</span>)              <span class="hljs-comment">// Error: path &quot;user.z.x&quot; is unreachable</span>
+app.<span class="hljs-title function_">update</span>(<span class="hljs-literal">null</span>, <span class="hljs-number">10</span>)                     <span class="hljs-comment">// Error: update() expects path to be a string</span></code></pre><h3 id="accessing-the-internal-bus">Accessing the internal bus</h3><p>Inside methods and event handlers, <code>this.bus</code> gives access to the same object:</p>
+<pre><code class="language-js"><span class="hljs-attr">methods</span>: {
+  <span class="hljs-title function_">logBus</span>(<span class="hljs-params"></span>) {
+    <span class="hljs-variable language_">console</span>.<span class="hljs-title function_">log</span>(<span class="hljs-variable language_">this</span>.<span class="hljs-property">bus</span>)
+    <span class="hljs-comment">// {</span>
+    <span class="hljs-comment">//   root: HTMLElement,</span>
+    <span class="hljs-comment">//   state: { ... },</span>
+    <span class="hljs-comment">//   methods: { ... },</span>
+    <span class="hljs-comment">//   params: { ... },</span>
+    <span class="hljs-comment">//   components: { ... },</span>
+    <span class="hljs-comment">//   els: { ... }</span>
+    <span class="hljs-comment">// }</span>
+  }
+}</code></pre><blockquote class="note"><p>Use <code>bus</code> to access the root element, registered components, or elements marked with <code>el</code> attribute.</p>
+</blockquote><h3 id="slots-slot-">Slots (`<slot>`)</h3><p>Slots allow you to pass HTML content into a component. You define a placeholder in the component template, and when using the component, you fill it with your own content.</p>
+<h4 id="named-slots">Named slots</h4><p>In the component template, declare <code>&lt;slot name=&quot;name&quot;&gt;</code>. When using the component, specify <code>slot=&quot;name&quot;</code> on any element — it will be placed in the slot&#39;s position:</p>
+<pre><code class="language-js"><span class="hljs-comment">// Component definition</span>
+<span class="hljs-keyword">const</span> app = <span class="hljs-title function_">prototy</span>({
+  <span class="hljs-attr">components</span>: {
+    <span class="hljs-attr">card</span>: <span class="hljs-string">`&lt;div class=&quot;card&quot;&gt;&lt;slot name=&quot;header&quot;&gt;&lt;/slot&gt;&lt;/div&gt;`</span>
+  }
+})</code></pre><pre><code class="language-html"><span class="hljs-comment">&lt;!-- Using the component --&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">:component</span>=<span class="hljs-string">&quot;components.card&quot;</span>&gt;</span>
+  <span class="hljs-tag">&lt;<span class="hljs-name">h1</span> <span class="hljs-attr">slot</span>=<span class="hljs-string">&quot;header&quot;</span>&gt;</span>Card header<span class="hljs-tag">&lt;/<span class="hljs-name">h1</span>&gt;</span>
+<span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><h2 id="utility-functions">Utility functions</h2><pre><code class="language-js"><span class="hljs-keyword">import</span> { nextTick, isObject, isEqual, kebabToCamel } <span class="hljs-keyword">from</span> <span class="hljs-string">&#x27;./prototy/index.js&#x27;</span></code></pre><ul>
+<li><p><code>nextTick()</code> — wait for DOM update</p>
+</li>
+<li><p><code>isObject()</code> — check if value is an object</p>
+</li>
+<li><p><code>isEqual(a, b)</code> — deep comparison</p>
+</li>
+<li><p><code>kebabToCamel()</code> — <code>user-name</code> → <code>userName</code></p>
+</li>
+</ul>
+<h2 id="modifiers">Modifiers</h2><p>Transform values before they are applied. Work with any directive.</p>
+<pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">span</span> <span class="hljs-attr">:text.upper</span>=<span class="hljs-string">&quot;name&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">span</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">input</span> <span class="hljs-attr">:bind.value.input.trim</span>=<span class="hljs-string">&quot;username&quot;</span>&gt;</span></code></pre>
+                <table class="table table-striped table-dark">
+                <thead><tr><th>Modifier</th><th>Description</th><th>Example</th></tr></thead>
+                <tbody><tr><td><code>fixed.N</code></td><td>Formats a number to N decimal places</td><td><code>:text.fixed.2=&quot;price&quot;</code></td></tr><tr><td><code>int</code></td><td>Converts to an integer</td><td><code>:text.int=&quot;value&quot;</code></td></tr><tr><td><code>abs</code></td><td>Absolute value</td><td><code>:text.abs=&quot;number&quot;</code></td></tr><tr><td><code>round</code></td><td>Rounds to the nearest integer</td><td><code>:text.round=&quot;number&quot;</code></td></tr><tr><td><code>clamp.min.max</code></td><td>Clamps the value between min and max</td><td><code>:text.clamp.0.100=&quot;value&quot;</code></td></tr><tr><td><code>unit</code></td><td>Appends a unit suffix (default &#39;px&#39;)</td><td><code>:text.unit.em=&quot;size&quot;</code></td></tr><tr><td><code>trim</code></td><td>Removes whitespace from the beginning and end of a string</td><td><code>:text.trim=&quot;text&quot;</code></td></tr><tr><td><code>upper</code></td><td>Converts to uppercase</td><td><code>:text.upper=&quot;text&quot;</code></td></tr><tr><td><code>lower</code></td><td>Converts to lowercase</td><td><code>:text.lower=&quot;text&quot;</code></td></tr><tr><td><code>capitalize</code></td><td>Capitalizes the first letter</td><td><code>:text.capitalize=&quot;text&quot;</code></td></tr><tr><td><code>default.X</code></td><td>Default value</td><td><code>:text.default.-=&quot;name&quot;</code></td></tr><tr><td><code>json</code></td><td>Converts the value to a JSON string</td><td><code>:text.json=&quot;user&quot;</code></td></tr></tbody>
+                </table>
+            <h2 id="setters">Setters</h2><p>Intercept changes for validation:</p>
+<pre><code class="language-js"><span class="hljs-attr">setters</span>: {
+  <span class="hljs-title function_">age</span>(<span class="hljs-params">newVal</span>) { <span class="hljs-keyword">return</span> <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">max</span>(<span class="hljs-number">0</span>, <span class="hljs-title class_">Math</span>.<span class="hljs-title function_">min</span>(<span class="hljs-number">120</span>, newVal)) }
+}</code></pre><h2 id="custom-directives-advanced-">Custom directives (advanced)</h2><p>Create your own directives by adding them to the <code>directives</code> option.</p>
+<pre><code class="language-js"><span class="hljs-attr">directives</span>: {
+  <span class="hljs-title function_">highlight</span>(<span class="hljs-params">element, value</span>) {
+    element.<span class="hljs-property">style</span>.<span class="hljs-property">backgroundColor</span> = value ? <span class="hljs-string">&#x27;yellow&#x27;</span> : <span class="hljs-string">&#x27;&#x27;</span>
+  },
+  <span class="hljs-title function_">tooltip</span>(<span class="hljs-params">element, value, modifier</span>) {
+    element.<span class="hljs-property">title</span> = value
+    <span class="hljs-keyword">if</span> (modifier === <span class="hljs-string">&#x27;top&#x27;</span>) element.<span class="hljs-title function_">setAttribute</span>(<span class="hljs-string">&#x27;data-position&#x27;</span>, <span class="hljs-string">&#x27;top&#x27;</span>)
+  }
+}</code></pre><pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">:highlight</span>=<span class="hljs-string">&quot;isActive&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">:tooltip.top</span>=<span class="hljs-string">&quot;&#x27;Tooltip&#x27;&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span></code></pre><h3 id="parameters-passed-to-a-custom-directive-directive-function-signature-">Parameters passed to a custom directive (directive function signature)</h3><p>When you create a custom directive, your function receives these parameters in order:</p>
+<pre><code class="language-js"><span class="hljs-keyword">function</span> <span class="hljs-title function_">myDirective</span>(<span class="hljs-params">element, value, modifier, args, transform, directive, code</span>)</code></pre>
+                <table class="table table-striped table-dark">
+                <thead><tr><th>Parameter</th><th>Description</th></tr></thead>
+                <tbody><tr><td><code>element</code></td><td>The DOM element</td></tr><tr><td><code>value</code></td><td>The evaluated expression value</td></tr><tr><td><code>modifier</code></td><td>The first modifier (e.g., <code>&#39;top&#39;</code> from <code>:my.top</code>)</td></tr><tr><td><code>args</code></td><td>Array of additional arguments (e.g., <code>[&#39;arg1&#39;, &#39;arg2&#39;]</code> from <code>:my.top.arg1.arg2</code>)</td></tr><tr><td><code>transform</code></td><td>Function to apply built-in modifiers</td></tr><tr><td><code>directive</code></td><td>Directive name (<code>&#39;myDirective&#39;</code>)</td></tr><tr><td><code>code</code></td><td>Original expression source code</td></tr></tbody>
+                </table>
+            <h3 id="using-built-in-modifiers-in-custom-directives">Using built-in modifiers in custom directives</h3><p>You can apply built-in modifiers to values inside your custom directive:</p>
+<pre><code class="language-js"><span class="hljs-attr">directives</span>: {
+  <span class="hljs-title function_">displayValue</span>(<span class="hljs-params">element, value, modifier, args, transform</span>) {
+    <span class="hljs-keyword">const</span> transformed = <span class="hljs-title function_">transform</span>(value, modifier, args)
+    element.<span class="hljs-property">textContent</span> = transformed
+  }
+}</code></pre><pre><code class="language-html"><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">:displayValue.upper.trim</span>=<span class="hljs-string">&quot;name&quot;</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-comment">&lt;!-- Applies &#x27;upper&#x27; and &#x27;trim&#x27; before passing to the directive --&gt;</span></code></pre>
+            </div>
+        </div>
+        <div class="more l-fx l-jc-sb l-ai-b">
+            <a class="edit l-fx l-ai-c" href="/" title="Edit On GitHub" target="_blank">
+                <span>Edit On GitHub</span>
+                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 100 100" style="enable-background:new 0 0 100 100;" xml:space="preserve" fill="#101010">
+                <path d="M69.3,23.2L69.3,23.2l7.1,7.1L33.5,73.1l-7.9,1.1l0.9-8.2L69.3,23.2C69.3,23.2,69.3,23.2,69.3,23.2 M69.3,18.2c-1.3,0-2.6,0.5-3.5,1.5l-44,44L20,80l15.9-2.2l44-44c2-2,2-5.1,0-7.1l-7.1-7.1C71.9,18.7,70.6,18.2,69.3,18.2L69.3,18.2z"/>
+            </svg>
+            </a>
+            <div class="socialMenu"></div>
+        </div>
+    </div>
+</div>`
+</body>
+</html>
