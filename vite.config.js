@@ -11,7 +11,7 @@ export default defineConfig({
 			formats: ['es'],
 			fileName: 'prototy'
 		},
-		sourcemap: true,
+		sourcemap: false,
 		minify: 'esbuild',
 		rollupOptions: {
 			output: {
