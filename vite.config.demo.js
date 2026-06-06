@@ -1,8 +1,7 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
 
-export default defineConfig(({ command, mode }) => {
-	const isProduction = mode === 'production'
+export default defineConfig(({ command }) => {
 	const isDev = command === 'serve'
 
 	return {
@@ -15,15 +14,6 @@ export default defineConfig(({ command, mode }) => {
 					: resolve(__dirname, 'dist/prototy.js'),
 				'@': resolve(__dirname, 'src')
 			}
-		},
-		build: {
-			outDir: resolve(__dirname, 'dist-demo'),
-			emptyOutDir: true,
-			rollupOptions: {
-				input: resolve(__dirname, 'demo/index.html')
-			},
-			minify: isProduction ? 'esbuild' : false,
-			sourcemap: !isProduction
 		},
 		server: {
 			port: 5173,
