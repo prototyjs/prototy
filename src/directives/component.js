@@ -29,11 +29,10 @@ export function component(element, value = {}, methods) {
 		return
 	}
 
-	const isEach = element.hasAttribute(':each')
 	const node = render(value.template)
 	element._component = value.name
 
-	if (isEach) {
+	if (element._hasEach) {
 		slots(element, node, methods.setup)
 		const template = node.firstElementChild
 

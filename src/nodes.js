@@ -14,7 +14,7 @@ export class Nodes {
 		this.destroy = destroy
 		this.attribute = attribute
 		this.nodes = new WeakSet()
-		this.priority = { ':props': 1, ':component': 2, ':each': 3 }
+		this.priority = { ':props': 1, ':component': 2, ':component.async': 3, ':each': 4, ':each.once': 5  }
 	}
 	/**
 	 * @param { HTMLElement } node

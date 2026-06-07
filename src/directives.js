@@ -2,7 +2,7 @@ import innerDirectives from './directives/index'
 import { bind } from './directives/bind'
 import { attr } from './directives/attr'
 import { each } from './directives/each'
-import { component } from './directives/component.js'
+import { component } from './directives/component'
 import { property } from './directives/property'
 
 /**
@@ -23,7 +23,7 @@ export class Directives {
 		this.directives = {
 			...clientDirectives,
 			...innerDirectives,
-			each: (element, value) => each(element, value, methods),
+			each: (element, value, modifier) => each(element, value, methods, modifier),
 			component: (element, value) => component(element, value, methods),
 			bind: (element, value, modifier, args, transform, directive, code) => bind(element, value, modifier, args, transform, code, bus)
 		}
@@ -42,7 +42,7 @@ export class Directives {
 			return
 		}
 		if (Object.hasOwn(this.directives, directive)) {
-			
+
 			this.directives[directive](element, value, modifier, args, this.methods.transform, directive, code)
 			return
 		}
