@@ -1,5 +1,7 @@
 /**
- *
+ * @param { HTMLElement } container
+ * @param { Array } array
+ * @param { object } methods
  */
 export function renderStaticList(container, array, methods) {
 
