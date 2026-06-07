@@ -75,6 +75,9 @@ class Prototy {
 					element._el = name
 					this.bus.els[name] = element
 				}
+				if (key === 'component') {
+					this.bus.components[value] = { name: value, template: element.innerHTML.trim() }
+				}
 				if (key.startsWith(':each')) {
 					const hasContent = element.firstElementChild || element.textContent.trim() !== ''
 					if (hasContent) {
