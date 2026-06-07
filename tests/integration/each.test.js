@@ -367,4 +367,169 @@ describe('Each Directive Complete Suite', () => {
 			expect(container.children[1].textContent).toBe('2')
 		})
 	})
+	describe('Static Lists with :each.once modifier', () => {
+		it('should render simple array as static list', async () => {
+			root.innerHTML = '<div id="list" :each.once="items" :component="components.item"></div>'
+			prototy({
+				root,
+				state: { items: ['Apple', 'Banana', 'Cherry'] },
+				components: { item: '<div :text="item"></div>' }
+			})
+
+			await nextTick()
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children.length).toBe(3)
+			expect(container.children[0].textContent).toBe('Apple')
+			expect(container.children[2].textContent).toBe('Cherry')
+		})
+
+		it('should NOT update static list when data changes', async () => {
+			root.innerHTML = '<div id="list" :each.once="items" :component="components.item"></div>'
+			const app = prototy({
+				root,
+				state: { items: ['Apple', 'Banana', 'Cherry'] },
+				components: { item: '<div :text="item"></div>' }
+			})
+
+			await nextTick()
+
+			app.state.items = ['New1', 'New2']
+			await nextTick()
+
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children.length).toBe(3)
+			expect(container.children[0].textContent).toBe('Apple')
+			expect(container.children[1].textContent).toBe('Banana')
+		})
+
+		it('should render array of objects as static with once modifier', async () => {
+			root.innerHTML = '<div id="list" :each.once="items" :component="components.item"></div>'
+			const app = prototy({
+				root,
+				state: { items: [{ n: 1 }, { n: 2 }, { n: 3 }] },
+				components: { item: '<div :text="item.n"></div>' }
+			})
+
+			await nextTick()
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children.length).toBe(3)
+			expect(container.children[0].textContent).toBe('1')
+			expect(container.children[2].textContent).toBe('3')
+
+			app.state.items.push({ n: 4 })
+			await nextTick()
+
+			expect(container.children.length).toBe(3)
+		})
+
+		it('should handle index in static list', async () => {
+			root.innerHTML = '<div id="list" :each.once="items" :component="components.item"></div>'
+			prototy({
+				root,
+				state: { items: ['A', 'B', 'C'] },
+				components: {
+					item: '<div><span class="idx" :text="index"></span>:<span :text="item"></span></div>'
+				}
+			})
+
+			await nextTick()
+
+			const indices = root.querySelectorAll('.idx')
+			expect(indices[0].textContent).toBe('0')
+			expect(indices[1].textContent).toBe('1')
+			expect(indices[2].textContent).toBe('2')
+
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children[0].textContent).toContain('A')
+			expect(container.children[1].textContent).toContain('B')
+			expect(container.children[2].textContent).toContain('C')
+		})
+
+		it('should handle empty array with once modifier', async () => {
+			root.innerHTML = '<div id="list" :each.once="items" :component="components.item"></div>'
+			const app = prototy({
+				root,
+				state: { items: [] },
+				components: { item: '<div :text="item"></div>' }
+			})
+
+			await nextTick()
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children.length).toBe(0)
+
+			app.state.items = ['New']
+			await nextTick()
+
+			expect(container.children.length).toBe(0)
+		})
+
+		it('should render nested static lists', async () => {
+			root.innerHTML = `
+			<div id="outer" :each.once="groups" :component="components.group"></div>
+		`
+
+			prototy({
+				root,
+				state: {
+					groups: [
+						{ name: 'Group A', items: ['A1', 'A2'] },
+						{ name: 'Group B', items: ['B1'] }
+					]
+				},
+				components: {
+					group: `
+					<div class="group">
+						<h3 :text="item.name"></h3>
+						<div :each="item.items" :component="components.cell"></div>
+					</div>
+				`,
+					cell: '<div class="cell"><span :text="item"></span></div>'
+				}
+			})
+
+			await nextTick()
+
+			const cells = root.querySelectorAll('.cell')
+			expect(cells.length).toBe(3)
+			expect(cells[0].textContent).toBe('A1')
+			expect(cells[1].textContent).toBe('A2')
+			expect(cells[2].textContent).toBe('B1')
+		})
+
+		it('should NOT react to changes in nested static lists', async () => {
+			root.innerHTML = `
+			<div id="outer" :each.once="groups" :component="components.group"></div>
+		`
+
+			const app = prototy({
+				root,
+				state: {
+					groups: [
+						{ name: 'Group A', items: ['A1', 'A2'] }
+					]
+				},
+				components: {
+					group: `
+					<div class="group">
+						<h3 :text="item.name"></h3>
+						<div :each="item.items" :component="components.cell"></div>
+					</div>
+				`,
+					cell: '<div class="cell"><span :text="item"></span></div>'
+				}
+			})
+
+			await nextTick()
+
+			let cells = root.querySelectorAll('.cell')
+			expect(cells.length).toBe(2)
+
+			app.state.groups[0].items.push('A3')
+			await nextTick()
+
+			cells = root.querySelectorAll('.cell')
+			expect(cells.length).toBe(2)
+			expect(cells[0].textContent).toBe('A1')
+		})
+	})
 })

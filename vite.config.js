@@ -1,9 +1,9 @@
 import { defineConfig } from 'vite'
 import { resolve } from 'path'
 
-export default defineConfig({
-	define: {
-		'process.env.NODE_ENV': JSON.stringify('production')
+export default defineConfig(({ mode }) => ({
+	esbuild: {
+		drop: mode === 'production' ? ['console', 'debugger'] : []
 	},
 	build: {
 		lib: {
@@ -15,7 +15,8 @@ export default defineConfig({
 		minify: 'esbuild',
 		rollupOptions: {
 			output: {
-				compact: true
+				compact: true,
+				freeze: false
 			},
 			external: []
 		},
@@ -27,4 +28,4 @@ export default defineConfig({
 			'@': resolve(__dirname, 'src')
 		}
 	}
-})
+}))

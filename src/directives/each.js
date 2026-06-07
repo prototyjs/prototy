@@ -1,9 +1,24 @@
+import { isObject } from '@/utils/isObject'
+import { renderStaticList } from '@/utils/renderStaticList'
 /**
  * @param { HTMLElement } container
- * @param { Array<Record<string, any>> } array
+ * @param { Array } array
  * @param { object } methods
+ * @param { string } modifier
  */
-export function each(container, array, methods) {
+// eslint-disable-next-line sonarjs/cognitive-complexity
+export function each(container, array, methods, modifier) {
+	const isStatic = modifier === 'once' || (array?.length > 0 && !isObject(array[0]))
+
+	if (isStatic) {
+		if (container._onceRendered) {
+			return
+		}
+		renderStaticList(container, array, methods)
+		container._onceRendered = true
+		return
+	}
+
 	const nodeMap = container._nodeMap || (container._nodeMap = new WeakMap())
 	const children = container.children
 	const arrLength = array?.length || 0

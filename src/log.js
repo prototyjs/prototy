@@ -1,19 +1,17 @@
 import { isObject } from '@/utils/isObject'
 
-const isDev = process.env.NODE_ENV !== 'production'
-
 export const log = {
 	/**
 	 * @param { string } text
 	 * @param { Array } [args=[]]
 	 */
 	error(text, ...args) {
-		if (isDev) {
+		if (!import.meta.env.PROD) {
 			console.error(`[PROTOTY] ${format(text, args)}`, ...args)
 		}
 	},
 	warn(text, ...args) {
-		if (isDev) {
+		if (!import.meta.env.PROD) {
 			console.warn(`[PROTOTY] ${format(text, args)}`, ...args)
 		}
 	}

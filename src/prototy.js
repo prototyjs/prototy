@@ -75,13 +75,14 @@ class Prototy {
 					element._el = name
 					this.bus.els[name] = element
 				}
-				if (key === ':each') {
+				if (key.startsWith(':each')) {
 					const hasContent = element.firstElementChild || element.textContent.trim() !== ''
 					if (hasContent) {
 						log.error('Content (slots) is not allowed inside the :each directive.', element)
 					}
 				}
-				if (key === ':component') {
+				if (key.startsWith(':component')) {
+					element._hasEach = element.hasAttribute(':each') || element.hasAttribute(':each.once')
 					if (element._slots) {
 						return
 					}
