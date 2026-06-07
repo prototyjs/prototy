@@ -263,7 +263,6 @@ describe('Each Directive Complete Suite', () => {
 			checkCell(cells[1], '1: A2 [parent idx: 0]')
 			checkCell(cells[2], '0: B1 [parent idx: 1]')
 
-			// Реверс групп
 			app.state.groups.reverse()
 			await nextTick()
 
@@ -367,9 +366,9 @@ describe('Each Directive Complete Suite', () => {
 			expect(container.children[1].textContent).toBe('2')
 		})
 	})
-	describe('Static Lists with :each.once modifier', () => {
+	describe('Static Lists', () => {
 		it('should render simple array as static list', async () => {
-			root.innerHTML = '<div id="list" :each.once="items" :component="components.item"></div>'
+			root.innerHTML = '<div id="list" :each="items" :component="components.item"></div>'
 			prototy({
 				root,
 				state: { items: ['Apple', 'Banana', 'Cherry'] },

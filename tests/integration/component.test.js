@@ -310,4 +310,77 @@ describe('Component Directive Complete Suite', () => {
 			expect(spans[1].textContent).toBe('25')
 		})
 	})
+	describe('Auto-registration from template tags', () => {
+		it('should register component from template component attribute', async () => {
+			root.innerHTML = `
+			<template component="button">
+				<button>Click</button>
+			</template>
+			<div :component="components.button"></div>
+		`
+
+			const app = prototy({ root })
+
+			await nextTick()
+
+			expect(app.components.button).toBeDefined()
+			expect(app.components.button.name).toBe('button')
+			expect(app.components.button.template).toBe('<button>Click</button>')
+		})
+
+		it('should register multiple components from templates', async () => {
+			root.innerHTML = `
+			<template component="header">
+				<header>Header</header>
+			</template>
+			<template component="footer">
+				<footer>Footer</footer>
+			</template>
+		`
+
+			const app = prototy({ root })
+
+			await nextTick()
+
+			expect(app.components.header).toBeDefined()
+			expect(app.components.footer).toBeDefined()
+			expect(app.components.header.template).toBe('<header>Header</header>')
+			expect(app.components.footer.template).toBe('<footer>Footer</footer>')
+		})
+
+		it('should override manually registered component with template', async () => {
+			root.innerHTML = `
+			<template component="message">
+				<div>From Template</div>
+			</template>
+		`
+
+			const app = prototy({
+				root,
+				components: {
+					message: '<div>From Manual</div>'
+				}
+			})
+
+			await nextTick()
+
+			expect(app.components.message.template).toBe('<div>From Template</div>')
+		})
+
+		it('should preserve template tags in DOM after registration', async () => {
+			root.innerHTML = `
+			<template component="test">
+				<div>Test</div>
+			</template>
+		`
+
+			prototy({ root })
+
+			await nextTick()
+
+			const templates = root.querySelectorAll('template')
+			expect(templates.length).toBe(1)
+			expect(templates[0].getAttribute('component')).toBe('test')
+		})
+	})
 })
