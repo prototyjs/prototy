@@ -3,8 +3,8 @@ var O = (e) => {
   throw TypeError(e);
 };
 var $ = (e, t, i) => t in e ? D(e, t, { enumerable: !0, configurable: !0, writable: !0, value: i }) : e[t] = i;
-var E = (e, t, i) => $(e, typeof t != "symbol" ? t + "" : t, i), A = (e, t, i) => t.has(e) || O("Cannot " + i);
-var y = (e, t, i) => (A(e, t, "read from private field"), i ? i.call(e) : t.get(e)), w = (e, t, i) => t.has(e) ? O("Cannot add the same private member more than once") : t instanceof WeakSet ? t.add(e) : t.set(e, i), M = (e, t, i, r) => (A(e, t, "write to private field"), r ? r.call(e, i) : t.set(e, i), i);
+var E = (e, t, i) => $(e, typeof t != "symbol" ? t + "" : t, i), M = (e, t, i) => t.has(e) || O("Cannot " + i);
+var y = (e, t, i) => (M(e, t, "read from private field"), i ? i.call(e) : t.get(e)), w = (e, t, i) => t.has(e) ? O("Cannot add the same private member more than once") : t instanceof WeakSet ? t.add(e) : t.set(e, i), A = (e, t, i, r) => (M(e, t, "write to private field"), r ? r.call(e, i) : t.set(e, i), i);
 function _(e) {
   return typeof e == "object" && e !== null;
 }
@@ -15,7 +15,7 @@ function W(e) {
     delete e._bound;
   }
 }
-const p = {
+const g = {
   /**
    * @param { string } text
    * @param { Array } [args=[]]
@@ -60,11 +60,11 @@ function P(e, t, i = "") {
         if (c !== Symbol.unscopables) {
           if (c in window)
             return window[c];
-          p.error('ReferenceError: "{0}" is not defined', c, n);
+          g.error('ReferenceError: "{0}" is not defined', c, n);
         }
       },
       set(d, c, h) {
-        return c in t.state ? (t.state[c] = h, !0) : o && typeof o == "object" && c in o ? (o[c] = h, !0) : (p.error(`Cannot set "${c}" - property does not exist in state or context`, n), !1);
+        return c in t.state ? (t.state[c] = h, !0) : o && typeof o == "object" && c in o ? (o[c] = h, !0) : (g.error(`Cannot set "${c}" - property does not exist in state or context`, n), !1);
       },
       has(d, c) {
         return c !== i;
@@ -157,18 +157,18 @@ function L(e, t, i, r, s, n) {
   const o = s(t, i, r);
   o != null && o !== !1 ? e.setAttribute(n, o) : e.removeAttribute(n);
 }
-function K(e, t, i, r, s) {
+function H(e, t, i, r, s) {
   e.innerHTML = s(t, i, r) ?? "";
 }
-function U(e, t) {
+function K(e, t) {
   e.style.display = t ? "" : "none";
 }
-const H = {
+const U = {
   class: F,
   text: V,
   each: j,
-  html: K,
-  show: U,
+  html: H,
+  show: K,
   attr: L
 };
 function I(e, t, i) {
@@ -178,11 +178,11 @@ function I(e, t, i) {
 function B(e, t, i, r, s, n, o) {
   const a = [...r], f = a.shift() || "input", d = "on" + f, c = a.shift(), h = a;
   if (e[i] !== t && t !== void 0 && (e[i] = t ?? ""), e._bound || (e._bound = {}), e._bound[d] && e._bound[d] !== i) {
-    p.error('Conflict "{0}" already taken by "{1}".', d, e._bound[d], e);
+    g.error('Conflict "{0}" already taken by "{1}".', d, e._bound[d], e);
     return;
   }
   if (!e._bound[d]) {
-    const g = () => {
+    const l = () => {
       const u = s(
         e[i],
         c,
@@ -190,10 +190,10 @@ function B(e, t, i, r, s, n, o) {
       );
       I(o.state, n, u);
     };
-    e.addEventListener(f, g), Object.defineProperty(e, d, {
-      get: () => g,
+    e.addEventListener(f, l), Object.defineProperty(e, d, {
+      get: () => l,
       set: () => {
-        p.error('Channel "{0}" is occupied by bind "{1}".', d, n, e);
+        g.error('Channel "{0}" is occupied by bind "{1}".', d, n, e);
       },
       configurable: !0,
       enumerable: !0
@@ -264,7 +264,7 @@ class G {
   constructor(t = {}, i, r) {
     this.methods = r, this.directives = {
       ...t,
-      ...H,
+      ...U,
       each: (s, n, o) => j(s, n, r, o),
       component: (s, n) => X(s, n, r),
       bind: (s, n, o, a, f, d, c) => B(s, n, o, a, f, c, i)
@@ -376,7 +376,7 @@ class Z {
    * @returns { any }
    */
   transform(t, i, r) {
-    return i ? Object.hasOwn(this.modifiers, i) ? this.modifiers[i](t, ...r) : (p.error(`Unknown modifier '${i}'`), t) : t;
+    return i ? Object.hasOwn(this.modifiers, i) ? this.modifiers[i](t, ...r) : (g.error(`Unknown modifier '${i}'`), t) : t;
   }
 }
 var b;
@@ -439,7 +439,7 @@ class tt {
    */
   constructor() {
     w(this, v);
-    M(this, v, /* @__PURE__ */ new Map());
+    A(this, v, /* @__PURE__ */ new Map());
   }
   /**
    * @param { HTMLElement } element
@@ -457,16 +457,16 @@ class tt {
       n.includes("stop") && d.stopPropagation(), n.includes("prevent") && d.preventDefault(), !(n.includes("self") && d.target !== t) && (n.includes("enter") && d.key !== "Enter" || r(d));
     };
     s === "create" ? (n.includes("async") && (t._async = !0), a = async (d) => {
-      var l;
-      const { detail: c, timestamp: h, done: g } = d, u = r({ name: c.name, target: t, timestamp: h, signal: c.signal });
+      var p;
+      const { detail: c, timestamp: h, done: l } = d, u = r({ name: c.name, target: t, timestamp: h, signal: c.signal });
       try {
         t._async && await u;
       } catch (m) {
-        if ((l = c.signal) != null && l.aborted)
+        if ((p = c.signal) != null && p.aborted)
           return;
-        throw p.error('Failed to execute "{0}" listener in component <{1}>.', ":oncreate", c.name), m;
+        throw g.error('Failed to execute "{0}" listener in component <{1}>.', ":oncreate", c.name), m;
       } finally {
-        g();
+        l();
       }
     }) : s === "destroy" && (a = (d) => {
       const { detail: c } = d;
@@ -582,20 +582,20 @@ class st {
       components: q(f),
       els: {}
     }, N(this.methods, s, this.bus), N(this.setters, d, this.bus), this.nodes = new it({
-      listeners: (c, h, g) => {
-        const u = P(g, this.bus, "event");
-        this.listeners.add(c, h, (l) => {
+      listeners: (c, h, l) => {
+        const u = P(l, this.bus, "event");
+        this.listeners.add(c, h, (p) => {
           const m = this.getContext(c);
-          return u(c, m, l);
+          return u(c, m, p);
         });
       },
       destroy: this.destroy.bind(this),
-      attribute: (c, h, g) => {
+      attribute: (c, h, l) => {
         if (h === "el") {
-          const u = g;
+          const u = l;
           c._el = u, this.bus.els[u] = c;
         }
-        if (h.startsWith(":each") && (c.firstElementChild || c.textContent.trim() !== "") && p.error("Content (slots) is not allowed inside the :each directive.", c), h.startsWith(":component")) {
+        if (h === "component" && (this.bus.components[l] = { name: l, template: c.innerHTML.trim() }), h.startsWith(":each") && (c.firstElementChild || c.textContent.trim() !== "") && g.error("Content (slots) is not allowed inside the :each directive.", c), h.startsWith(":component")) {
           if (c._hasEach = c.hasAttribute(":each") || c.hasAttribute(":each.once"), c._slots)
             return;
           c._slots = {}, Array.from(c.childNodes).forEach((u) => {
@@ -603,12 +603,12 @@ class st {
               u.remove();
               return;
             }
-            const l = u.nodeType === 1 && u.getAttribute("slot") || "default";
-            if (c._slots[l]) {
-              p.error('Slot "{0}" is already occupied in component', l, c);
+            const p = u.nodeType === 1 && u.getAttribute("slot") || "default";
+            if (c._slots[p]) {
+              g.error('Slot "{0}" is already occupied in component', p, c);
               return;
             }
-            u._keep = !0, c._slots[l] = u, u.remove();
+            u._keep = !0, c._slots[p] = u, u.remove();
           });
         }
       }
@@ -642,7 +642,7 @@ class st {
    */
   initComputed(t, i) {
     !i || Object.keys(i).length === 0 || Object.keys(i).forEach((r) => {
-      r in t && p.warn('Computed property "{0}" overrides existing property', r);
+      r in t && g.warn('Computed property "{0}" overrides existing property', r);
       const s = i[r];
       let n, o = !0;
       const a = () => {
@@ -651,7 +651,7 @@ class st {
       a.deps = /* @__PURE__ */ new Set(), Object.defineProperty(t, r, {
         get: () => {
           if (this.reactivity.activeEffect === a)
-            return p.error('Circular dependency detected in computed property "{0}"', r), n;
+            return g.error('Circular dependency detected in computed property "{0}"', r), n;
           const f = this.reactivity.activeEffect;
           if (f && f !== a && (this.reactivity.add(t, r, f), f.deps.add({ target: t, property: r })), o) {
             const d = this.reactivity.activeEffect;
@@ -659,7 +659,7 @@ class st {
             try {
               n = s.bind(this.bus)();
             } catch (c) {
-              p.error('Error in computed property "{0}": {1}', r, c.message), n = void 0;
+              g.error('Error in computed property "{0}": {1}', r, c.message), n = void 0;
             } finally {
               this.reactivity.activeEffect = d;
             }
@@ -716,25 +716,25 @@ class st {
           return Reflect.set(n, o, a, f);
         const d = Object.getOwnPropertyDescriptor(n, o);
         if (d && typeof d.get == "function" && typeof d.set != "function")
-          return p.error('Computed property "{0}" is readonly.', o.toString()), !1;
-        const c = Array.isArray(n), h = Reflect.get(n, o), g = c && o === "length";
-        if (!g && Object.is(h, a))
+          return g.error('Computed property "{0}" is readonly.', o.toString()), !1;
+        const c = Array.isArray(n), h = Reflect.get(n, o), l = c && o === "length";
+        if (!l && Object.is(h, a))
           return !0;
         const u = i ? `${i}.${o.toString()}` : o.toString();
-        let l = a;
-        if (_(a) && !a[C] && (l = s.createProxy(a, u)), typeof ((S = s.setters) == null ? void 0 : S[u]) == "function" && !s.activeSetters.has(u)) {
+        let p = a;
+        if (_(a) && !a[C] && (p = s.createProxy(a, u)), typeof ((S = s.setters) == null ? void 0 : S[u]) == "function" && !s.activeSetters.has(u)) {
           s.activeSetters.add(u);
           try {
-            if (l = s.setters[u](l, h), Object.is(h, l))
+            if (p = s.setters[u](p, h), Object.is(h, p))
               return !0;
           } catch (R) {
-            p.error('Error in setter for "{0}": {1}', u, R.message), l = h;
+            g.error('Error in setter for "{0}": {1}', u, R.message), p = h;
           } finally {
             s.activeSetters.delete(u);
           }
         }
-        const m = Reflect.set(n, o, l, f);
-        return m && (s.schedule(n, o), c && !g && s.schedule(n, "length")), m;
+        const m = Reflect.set(n, o, p, f);
+        return m && (s.schedule(n, o), c && !l && s.schedule(n, "length")), m;
       }
     });
   }
@@ -749,7 +749,7 @@ class st {
         this.pendingTargets.delete(n);
         const f = /* @__PURE__ */ new Set();
         a.forEach((d) => {
-          this.reactivity.find(n, d).forEach((g) => f.add(g));
+          this.reactivity.find(n, d).forEach((l) => f.add(l));
           const h = n[d];
           h && h._path && this.reactivity.find(n, h._path).forEach((u) => f.add(u));
         }), f.forEach((d) => {
@@ -770,12 +770,12 @@ class st {
    */
   update(t, i) {
     if (typeof t != "string") {
-      p.error("update() expects path to be a string, but received {0}", typeof t);
+      g.error("update() expects path to be a string, but received {0}", typeof t);
       return;
     }
     const r = t.split("."), s = r.pop(), n = r.reduce((f, d) => f == null ? void 0 : f[d], this.state);
     if (!n || typeof n != "object") {
-      p.error('Update error: path "{0}" is unreachable', t);
+      g.error('Update error: path "{0}" is unreachable', t);
       return;
     }
     const o = this.setters[t], a = n[s];
