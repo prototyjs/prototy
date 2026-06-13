@@ -8,15 +8,17 @@ export default defineConfig(({ mode }) => ({
 	build: {
 		lib: {
 			entry: resolve(__dirname, 'src/index.js'),
-			formats: ['es'],
-			fileName: 'prototy'
+			formats: ['es', 'umd'],
+			name: 'Prototy',
+			fileName: (format) => `prototy.${format}.js`
 		},
 		sourcemap: false,
 		minify: 'esbuild',
 		rollupOptions: {
 			output: {
 				compact: true,
-				freeze: false
+				freeze: false,
+				exports: 'named'
 			},
 			external: []
 		},

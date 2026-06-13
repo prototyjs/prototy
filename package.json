@@ -2,7 +2,6 @@
   "name": "prototy",
   "version": "1.0.0",
   "description": "A simple JS framework for rapid UI prototyping on the web.",
-  "main": "./dist/prototy.js",
   "scripts": {
     "dev": "vite --config vite.config.demo.js",
     "lint": "eslint ./src --format table",
@@ -47,10 +46,16 @@
     "vitest": "^4.1.2"
   },
   "type": "module",
-  "module": "./dist/prototy.js",
-  "files": [
-    "dist"
-  ],
+  "main": "./dist/prototy.umd.js",
+  "module": "./dist/prototy.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/prototy.es.js",
+      "require": "./dist/prototy.umd.js",
+      "default": "./dist/prototy.umd.js"
+    }
+  },
+  "files": ["dist"],
   "lint-staged": {
     "src/**/*.js": [
       "eslint --no-fix --format table",
