@@ -46,13 +46,13 @@
     "vitest": "^4.1.2"
   },
   "type": "module",
-  "main": "./dist/prototy.umd.js",
+  "main": "./dist/prototy.global.js",
   "module": "./dist/prototy.es.js",
   "exports": {
     ".": {
       "import": "./dist/prototy.es.js",
-      "require": "./dist/prototy.umd.js",
-      "default": "./dist/prototy.umd.js"
+      "require": "./dist/prototy.global.js",
+      "default": "./dist/prototy.global.js"
     }
   },
   "files": ["dist"],
