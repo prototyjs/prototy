@@ -8,9 +8,9 @@ export default defineConfig(({ mode }) => ({
 	build: {
 		lib: {
 			entry: resolve(__dirname, 'src/index.js'),
-			formats: ['es', 'umd'],
+			formats: ['es', 'iife'],
 			name: 'Prototy',
-			fileName: (format) => `prototy.${format}.js`
+			fileName: (format) => `prototy.${format === 'es' ? 'es' : 'global'}.js`
 		},
 		sourcemap: false,
 		minify: 'esbuild',
