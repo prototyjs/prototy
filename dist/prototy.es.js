@@ -1,11 +1,11 @@
 var D = Object.defineProperty;
-var O = (e) => {
+var M = (e) => {
   throw TypeError(e);
 };
 var $ = (e, t, i) => t in e ? D(e, t, { enumerable: !0, configurable: !0, writable: !0, value: i }) : e[t] = i;
-var w = (e, t, i) => $(e, typeof t != "symbol" ? t + "" : t, i), M = (e, t, i) => t.has(e) || O("Cannot " + i);
-var b = (e, t, i) => (M(e, t, "read from private field"), i ? i.call(e) : t.get(e)), x = (e, t, i) => t.has(e) ? O("Cannot add the same private member more than once") : t instanceof WeakSet ? t.add(e) : t.set(e, i), T = (e, t, i, r) => (M(e, t, "write to private field"), r ? r.call(e, i) : t.set(e, i), i);
-function _(e) {
+var x = (e, t, i) => $(e, typeof t != "symbol" ? t + "" : t, i), T = (e, t, i) => t.has(e) || M("Cannot " + i);
+var y = (e, t, i) => (T(e, t, "read from private field"), i ? i.call(e) : t.get(e)), C = (e, t, i) => t.has(e) ? M("Cannot add the same private member more than once") : t instanceof WeakSet ? t.add(e) : t.set(e, i), A = (e, t, i, r) => (T(e, t, "write to private field"), r ? r.call(e, i) : t.set(e, i), i);
+function E(e) {
   return typeof e == "object" && e !== null;
 }
 function W(e) {
@@ -15,7 +15,7 @@ function W(e) {
     delete e._bound;
   }
 }
-const g = {
+const b = {
   /**
    * @param { string } text
    * @param { Array } [args=[]]
@@ -25,7 +25,7 @@ const g = {
   warn(e, ...t) {
   }
 };
-function A(e, t, i = "") {
+function P(e, t, i = "") {
   const r = i ? `const ${i} = local` : "", s = new Function("el", "scope", "local", `
         ${r}
         with(scope) {
@@ -42,9 +42,9 @@ function A(e, t, i = "") {
       get(d, c) {
         if (c === "el")
           return n;
-        const u = o[c];
-        if (u !== void 0)
-          return u;
+        const h = o[c];
+        if (h !== void 0)
+          return h;
         if (c in t.state)
           return t.state[c];
         if (c in t.methods)
@@ -60,11 +60,11 @@ function A(e, t, i = "") {
         if (c !== Symbol.unscopables) {
           if (c in window)
             return window[c];
-          g.error('ReferenceError: "{0}" is not defined', c, n);
+          b.error('ReferenceError: "{0}" is not defined', c, n);
         }
       },
-      set(d, c, u) {
-        return c in t.state ? (t.state[c] = u, !0) : o && typeof o == "object" && c in o ? (o[c] = u, !0) : (g.error(`Cannot set "${c}" - property does not exist in state or context`, n), !1);
+      set(d, c, h) {
+        return c in t.state ? (t.state[c] = h, !0) : o && typeof o == "object" && c in o ? (o[c] = h, !0) : (b.error(`Cannot set "${c}" - property does not exist in state or context`, n), !1);
       },
       has(d, c) {
         return c !== i;
@@ -79,7 +79,7 @@ function H(e = {}) {
   );
 }
 function q(e, t) {
-  _(t) && Object.entries(t).forEach(([i, r]) => {
+  E(t) && Object.entries(t).forEach(([i, r]) => {
     e.classList.toggle(i, !!r);
   });
 }
@@ -93,8 +93,8 @@ function V(e, t, i) {
     i.context(o, { item: s, index: n }), i.setup(o), r.appendChild(o);
   }), e.appendChild(r);
 }
-function L(e, t, i, r) {
-  if (r === "once" || (t == null ? void 0 : t.length) > 0 && !_(t[0])) {
+function j(e, t, i, r) {
+  if (r === "once" || (t == null ? void 0 : t.length) > 0 && !E(t[0])) {
     if (e._onceRendered)
       return;
     V(e, t, i), e._onceRendered = !0;
@@ -129,12 +129,12 @@ function L(e, t, i, r) {
       })), i.setup(c);
     else {
       o[f] !== c && e.insertBefore(c, o[f] || null);
-      const u = c._index;
-      c._item = d, c._index = f, i.context(c, { item: d, index: f }), u !== f && e.dispatchEvent(new CustomEvent("update", {
+      const h = c._index;
+      c._item = d, c._index = f, i.context(c, { item: d, index: f }), h !== f && e.dispatchEvent(new CustomEvent("update", {
         detail: {
           node: c,
           item: d,
-          oldIndex: u,
+          oldIndex: h,
           newIndex: f,
           type: "each-item"
         }
@@ -153,7 +153,7 @@ function L(e, t, i, r) {
     })), i.unprocess(f), f.remove();
   }
 }
-function j(e, t, i, r, s, n) {
+function R(e, t, i, r, s, n) {
   const o = s(t, i, r);
   o != null && o !== !1 ? e.setAttribute(n, o) : e.removeAttribute(n);
 }
@@ -166,34 +166,34 @@ function K(e, t) {
 const U = {
   class: q,
   text: F,
-  each: L,
+  each: j,
   html: z,
   show: K,
-  attr: j
+  attr: R
 };
 function I(e, t, i) {
   const r = t.split("."), s = r.pop(), n = r.reduce((o, a) => o && o[a] ? o[a] : o, e);
   n && n[s] !== i && (n[s] = i);
 }
 function B(e, t, i, r, s, n, o) {
-  const a = [...r], f = a.shift() || "input", d = "on" + f, c = a.shift(), u = a;
+  const a = [...r], f = a.shift() || "input", d = "on" + f, c = a.shift(), h = a;
   if (e[i] !== t && t !== void 0 && (e[i] = t ?? ""), e._bound || (e._bound = {}), e._bound[d] && e._bound[d] !== i) {
-    g.error('Conflict "{0}" already taken by "{1}".', d, e._bound[d], e);
+    b.error('Conflict "{0}" already taken by "{1}".', d, e._bound[d], e);
     return;
   }
   if (!e._bound[d]) {
-    const p = () => {
+    const u = () => {
       const l = s(
         e[i],
         c,
-        u
+        h
       );
       I(o.state, n, l);
     };
-    e.addEventListener(f, p), Object.defineProperty(e, d, {
-      get: () => p,
+    e.addEventListener(f, u), Object.defineProperty(e, d, {
+      get: () => u,
       set: () => {
-        g.error('Channel "{0}" is occupied by bind "{1}".', d, n, e);
+        b.error('Channel "{0}" is occupied by bind "{1}".', d, n, e);
       },
       configurable: !0,
       enumerable: !0
@@ -204,7 +204,7 @@ function J(e) {
   const t = document.createElement("template");
   return t.innerHTML = e, t.content;
 }
-function P(e, t, i) {
+function N(e, t, i) {
   e._slots && t.querySelectorAll("slot").forEach((r) => {
     const s = r.getAttribute("name") || "default", n = e._slots[s];
     if (n) {
@@ -214,7 +214,7 @@ function P(e, t, i) {
       r.childNodes.length === 0 ? r.remove() : r.replaceWith(...r.childNodes);
   });
 }
-function C(e, t, i, r) {
+function S(e, t, i, r) {
   const s = new CustomEvent(t, { detail: i });
   s.done = r, e.dispatchEvent(s);
 }
@@ -222,7 +222,7 @@ function X(e, t = {}, i) {
   e._abortController && e._abortController.abort();
   const r = new AbortController();
   if (e._abortController = r, e._component)
-    for (C(e, "destroy", { name: e._component }); e.firstChild; )
+    for (S(e, "destroy", { name: e._component }); e.firstChild; )
       i.unprocess && i.unprocess(e.firstChild), e.firstChild.remove();
   if (!t || !t.template) {
     e.innerHTML = "";
@@ -230,24 +230,24 @@ function X(e, t = {}, i) {
   }
   const s = J(t.template);
   if (e._component = t.name, e._hasEach) {
-    P(e, s, i.setup);
+    N(e, s, i.setup);
     const o = s.firstElementChild;
     o && (e._template = o, e.innerHTML = "");
     return;
   }
   const n = () => {
     if (!r.signal.aborted) {
-      for (P(e, s, i); e.firstChild; )
+      for (N(e, s, i); e.firstChild; )
         i.unprocess(e.firstChild), e.firstChild.remove();
       e.appendChild(s), Array.from(e.children).forEach((o) => {
         i.setup(o);
       });
     }
   };
-  e._async ? C(e, "create", { name: t.name, signal: r.signal }, n) : (n(), C(e, "create", { name: t.name }));
+  e._async ? S(e, "create", { name: t.name, signal: r.signal }, n) : (n(), S(e, "create", { name: t.name }));
 }
 function Y(e, t, i, r, s, n) {
-  if (_(t)) {
+  if (E(t)) {
     Object.assign(e[n], t);
     return;
   }
@@ -265,7 +265,7 @@ class G {
     this.methods = r, this.directives = {
       ...t,
       ...U,
-      each: (s, n, o) => L(s, n, r, o),
+      each: (s, n, o) => j(s, n, r, o),
       component: (s, n) => X(s, n, r),
       bind: (s, n, o, a, f, d, c) => B(s, n, o, a, f, c, i)
     };
@@ -288,7 +288,7 @@ class G {
         Y(t, r, o, a, this.methods.transform, n);
         return;
       }
-      j(t, r, o, a, this.methods.transform, n);
+      R(t, r, o, a, this.methods.transform, n);
     }
   }
 }
@@ -366,7 +366,7 @@ class Z {
    */
   constructor(t = {}) {
     /** @type { Record<string, Function> } */
-    w(this, "modifiers");
+    x(this, "modifiers");
     this.modifiers = { ...Q, ...t };
   }
   /**
@@ -376,14 +376,14 @@ class Z {
    * @returns { any }
    */
   transform(t, i, r) {
-    return i ? Object.hasOwn(this.modifiers, i) ? this.modifiers[i](t, ...r) : (g.error(`Unknown modifier '${i}'`), t) : t;
+    return i ? Object.hasOwn(this.modifiers, i) ? this.modifiers[i](t, ...r) : (b.error(`Unknown modifier '${i}'`), t) : t;
   }
 }
 var v;
 class k {
   constructor() {
-    w(this, "activeEffect", null);
-    x(this, v, /* @__PURE__ */ new WeakMap());
+    x(this, "activeEffect", null);
+    C(this, v, /* @__PURE__ */ new WeakMap());
   }
   /**
    * @param { object } target
@@ -391,8 +391,8 @@ class k {
    * @param { Function } effect
    */
   add(t, i, r) {
-    b(this, v).has(t) || b(this, v).set(t, /* @__PURE__ */ new Map());
-    const s = b(this, v).get(t);
+    y(this, v).has(t) || y(this, v).set(t, /* @__PURE__ */ new Map());
+    const s = y(this, v).get(t);
     s.has(i) || s.set(i, /* @__PURE__ */ new Set()), s.get(i).add(r);
   }
   /**
@@ -401,7 +401,7 @@ class k {
    * @returns { Array<{el: HTMLElement, attr: string, update: Function}> }
    */
   find(t, i) {
-    const r = b(this, v).get(t), s = r == null ? void 0 : r.get(i);
+    const r = y(this, v).get(t), s = r == null ? void 0 : r.get(i);
     return s ? Array.from(s) : [];
   }
   /**
@@ -411,10 +411,10 @@ class k {
   removeEffect(t, i) {
     if (i) {
       for (const r of i) {
-        const { target: s, property: n } = r, o = b(this, v).get(s);
+        const { target: s, property: n } = r, o = y(this, v).get(s);
         if (o) {
           const a = o.get(n);
-          a && (a.delete(t), a.size === 0 && o.delete(n)), o.size === 0 && b(this, v).delete(s);
+          a && (a.delete(t), a.size === 0 && o.delete(n)), o.size === 0 && y(this, v).delete(s);
         }
       }
       i.clear();
@@ -438,8 +438,8 @@ class tt {
    *
    */
   constructor() {
-    x(this, m);
-    T(this, m, /* @__PURE__ */ new Map());
+    C(this, m);
+    A(this, m, /* @__PURE__ */ new Map());
   }
   /**
    * @param { HTMLElement } element
@@ -447,7 +447,7 @@ class tt {
    * @param { Function } handle
    */
   add(t, i, r) {
-    b(this, m).has(t) || b(this, m).set(t, []);
+    y(this, m).has(t) || y(this, m).set(t, []);
     const [s, ...n] = i.split("."), o = {
       once: n.includes("once"),
       capture: n.includes("capture"),
@@ -457,32 +457,32 @@ class tt {
       n.includes("stop") && d.stopPropagation(), n.includes("prevent") && d.preventDefault(), !(n.includes("self") && d.target !== t) && (n.includes("enter") && d.key !== "Enter" || r(d));
     };
     s === "create" ? (n.includes("async") && (t._async = !0), a = async (d) => {
-      var h;
-      const { detail: c, timestamp: u, done: p } = d, l = r({ name: c.name, target: t, timestamp: u, signal: c.signal });
+      var g;
+      const { detail: c, timestamp: h, done: u } = d, l = r({ name: c.name, target: t, timestamp: h, signal: c.signal });
       try {
         t._async && await l;
-      } catch (y) {
-        if ((h = c.signal) != null && h.aborted)
+      } catch (p) {
+        if ((g = c.signal) != null && g.aborted)
           return;
-        throw g.error('Failed to execute "{0}" listener in component <{1}>.', ":oncreate", c.name), y;
+        throw b.error('Failed to execute "{0}" listener in component <{1}>.', ":oncreate", c.name), p;
       } finally {
-        p();
+        u();
       }
     }) : s === "destroy" && (a = (d) => {
       const { detail: c } = d;
       r({ name: c.name, target: t });
     });
     const f = { name: s, handler: a, options: o };
-    b(this, m).get(t).push(f), t.addEventListener(s, a, o);
+    y(this, m).get(t).push(f), t.addEventListener(s, a, o);
   }
   /**
    * @param { HTMLElement } element
    */
   remove(t) {
-    const i = b(this, m).get(t);
+    const i = y(this, m).get(t);
     i && (i.forEach(({ name: r, handler: s, options: n }) => {
       t.removeEventListener(r, s, n);
-    }), b(this, m).delete(t));
+    }), y(this, m).delete(t));
   }
 }
 m = new WeakMap();
@@ -553,12 +553,12 @@ class it {
     }
   }
 }
-function N(e, t, i) {
+function L(e, t, i) {
   if (t)
     for (const [r, s] of Object.entries(t))
       typeof s == "function" && (e[r] = s.bind(i));
 }
-const S = Symbol("is_proxy");
+const O = Symbol("is_proxy");
 class st {
   /**
    * @param { PrototyOptions } options
@@ -573,7 +573,8 @@ class st {
     modifiers: a = {},
     components: f = {},
     setters: d = {},
-    created: c
+    created: c,
+    ready: h
   }) {
     this.reactivity = new k(), this.listeners = new tt(), this.contextStorage = /* @__PURE__ */ new WeakMap(), this.pendingTargets = /* @__PURE__ */ new Map(), this.initComputed(t, n), this.state = this.createProxy(t), this.methods = {}, this.setters = {}, this.activeSetters = /* @__PURE__ */ new Set(), this.bus = {
       root: i,
@@ -582,34 +583,34 @@ class st {
       params: r,
       components: H(f),
       els: {}
-    }, N(this.methods, s, this.bus), N(this.setters, d, this.bus), this.nodes = new it({
-      listeners: (u, p, l) => {
-        const h = A(l, this.bus, "event");
-        this.listeners.add(u, p, (y) => {
-          const E = this.getContext(u);
-          return h(u, E, y);
+    }, L(this.methods, s, this.bus), L(this.setters, d, this.bus), this.nodes = new it({
+      listeners: (u, l, g) => {
+        const p = P(g, this.bus, "event");
+        this.listeners.add(u, l, (_) => {
+          const w = this.getContext(u);
+          return p(u, w, _);
         });
       },
       destroy: this.destroy.bind(this),
-      attribute: (u, p, l) => {
-        if (p === "el") {
-          const h = l;
-          u._el = h, this.bus.els[h] = u;
+      attribute: (u, l, g) => {
+        if (l === "el") {
+          const p = g;
+          u._el = p, this.bus.els[p] = u;
         }
-        if (p === "component" && (this.bus.components[l] = { name: l, template: u.tagName === "TEMPLATE" ? u.innerHTML.trim() : u.outerHTML, element: u }), p.startsWith(":each") && (u.firstElementChild || u.textContent.trim() !== "") && (u.hasAttribute(":component") ? g.error("Content (slots) is not allowed inside the :each directive.", u) : (u._template = u.firstElementChild.cloneNode(!0), u.innerHTML = "")), p.startsWith(":component")) {
+        if (l === "component" && (this.bus.components[g] = { name: g, template: u.tagName === "TEMPLATE" ? u.innerHTML.trim() : u.outerHTML, element: u }), l.startsWith(":each") && (u.firstElementChild || u.textContent.trim() !== "") && (u.hasAttribute(":component") ? b.error("Content (slots) is not allowed inside the :each directive.", u) : (u._template = u.firstElementChild.cloneNode(!0), u.innerHTML = "")), l.startsWith(":component")) {
           if (u._hasEach = u.hasAttribute(":each") || u.hasAttribute(":each.once"), u._slots)
             return;
-          u._slots = {}, Array.from(u.childNodes).forEach((h) => {
-            if (h.nodeType === 3 && !h.textContent.trim()) {
-              h.remove();
+          u._slots = {}, Array.from(u.childNodes).forEach((p) => {
+            if (p.nodeType === 3 && !p.textContent.trim()) {
+              p.remove();
               return;
             }
-            const y = h.nodeType === 1 && h.getAttribute("slot") || "default";
-            if (u._slots[y]) {
-              g.error('Slot "{0}" is already occupied in component', y, u);
+            const _ = p.nodeType === 1 && p.getAttribute("slot") || "default";
+            if (u._slots[_]) {
+              b.error('Slot "{0}" is already occupied in component', _, u);
               return;
             }
-            h._keep = !0, u._slots[y] = h, h.remove();
+            p._keep = !0, u._slots[_] = p, p.remove();
           });
         }
       }
@@ -618,14 +619,14 @@ class st {
       unprocess: this.nodes.unprocess.bind(this.nodes),
       context: this.updateContext.bind(this),
       transform: this.modifiers.transform.bind(this.modifiers)
-    }), c == null || c.call(this), this.setup(i);
+    }), c == null || c.call(this.bus), this.setup(i), h == null || h.call(this.bus);
   }
   /**
    * @param { HTMLElement } node
    */
   setup(t) {
     this.nodes.process(t, (i, r, s) => {
-      const n = A(s, this.bus), o = () => {
+      const n = P(s, this.bus), o = () => {
         this.reactivity.removeEffect(o, o.deps), this.reactivity.activeEffect = o;
         try {
           const a = this.getContext(i), f = n(i, a);
@@ -643,7 +644,7 @@ class st {
    */
   initComputed(t, i) {
     !i || Object.keys(i).length === 0 || Object.keys(i).forEach((r) => {
-      r in t && g.warn('Computed property "{0}" overrides existing property', r);
+      r in t && b.warn('Computed property "{0}" overrides existing property', r);
       const s = i[r];
       let n, o = !0;
       const a = () => {
@@ -652,7 +653,7 @@ class st {
       a.deps = /* @__PURE__ */ new Set(), Object.defineProperty(t, r, {
         get: () => {
           if (this.reactivity.activeEffect === a)
-            return g.error('Circular dependency detected in computed property "{0}"', r), n;
+            return b.error('Circular dependency detected in computed property "{0}"', r), n;
           const f = this.reactivity.activeEffect;
           if (f && f !== a && (this.reactivity.add(t, r, f), f.deps.add({ target: t, property: r })), o) {
             const d = this.reactivity.activeEffect;
@@ -660,7 +661,7 @@ class st {
             try {
               n = s.bind(this.bus)();
             } catch (c) {
-              g.error('Error in computed property "{0}": {1}', r, c.message), n = void 0;
+              b.error('Error in computed property "{0}": {1}', r, c.message), n = void 0;
             } finally {
               this.reactivity.activeEffect = d;
             }
@@ -681,9 +682,9 @@ class st {
    */
   createProxy(t, i = "", r = null) {
     const s = this;
-    return _(t) && Object.keys(t).forEach((n) => {
+    return E(t) && Object.keys(t).forEach((n) => {
       const o = Object.getOwnPropertyDescriptor(t, n);
-      o && typeof o.get == "function" || _(t[n]) && (t[n] = this.createProxy(
+      o && typeof o.get == "function" || E(t[n]) && (t[n] = this.createProxy(
         t[n],
         i ? `${i}.${n}` : n,
         t
@@ -698,44 +699,44 @@ class st {
       enumerable: !1,
       writable: !0,
       configurable: !0
-    })), Object.defineProperty(t, S, {
+    })), Object.defineProperty(t, O, {
       value: !0,
       enumerable: !1,
       writable: !1,
       configurable: !1
     }), new Proxy(t, {
       get(n, o, a) {
-        if (o === S)
+        if (o === O)
           return !0;
         const f = Reflect.get(n, o, a), d = typeof o != "symbol" && o in n && typeof f != "function", c = s.reactivity.activeEffect;
         return d && c && (s.reactivity.add(n, o, c), c.deps.add({ target: n, property: o })), f;
       },
       // eslint-disable-next-line sonarjs/cognitive-complexity
       set(n, o, a, f) {
-        var E;
+        var _;
         if (typeof o == "symbol")
           return Reflect.set(n, o, a, f);
         const d = Object.getOwnPropertyDescriptor(n, o);
         if (d && typeof d.get == "function" && typeof d.set != "function")
-          return g.error('Computed property "{0}" is readonly.', o.toString()), !1;
-        const c = Array.isArray(n), u = Reflect.get(n, o), p = c && o === "length";
-        if (!p && Object.is(u, a))
+          return b.error('Computed property "{0}" is readonly.', o.toString()), !1;
+        const c = Array.isArray(n), h = Reflect.get(n, o), u = c && o === "length";
+        if (!u && Object.is(h, a))
           return !0;
         const l = i ? `${i}.${o.toString()}` : o.toString();
-        let h = a;
-        if (_(a) && !a[S] && (h = s.createProxy(a, l)), typeof ((E = s.setters) == null ? void 0 : E[l]) == "function" && !s.activeSetters.has(l)) {
+        let g = a;
+        if (E(a) && !a[O] && (g = s.createProxy(a, l)), typeof ((_ = s.setters) == null ? void 0 : _[l]) == "function" && !s.activeSetters.has(l)) {
           s.activeSetters.add(l);
           try {
-            if (h = s.setters[l](h, u), Object.is(u, h))
+            if (g = s.setters[l](g, h), Object.is(h, g))
               return !0;
-          } catch (R) {
-            g.error('Error in setter for "{0}": {1}', l, R.message), h = u;
+          } catch (w) {
+            b.error('Error in setter for "{0}": {1}', l, w.message), g = h;
           } finally {
             s.activeSetters.delete(l);
           }
         }
-        const y = Reflect.set(n, o, h, f);
-        return y && (s.schedule(n, o), c && !p && s.schedule(n, "length")), y;
+        const p = Reflect.set(n, o, g, f);
+        return p && (s.schedule(n, o), c && !u && s.schedule(n, "length")), p;
       }
     });
   }
@@ -750,9 +751,9 @@ class st {
         this.pendingTargets.delete(n);
         const f = /* @__PURE__ */ new Set();
         a.forEach((d) => {
-          this.reactivity.find(n, d).forEach((p) => f.add(p));
-          const u = n[d];
-          u && u._path && this.reactivity.find(n, u._path).forEach((l) => f.add(l));
+          this.reactivity.find(n, d).forEach((u) => f.add(u));
+          const h = n[d];
+          h && h._path && this.reactivity.find(n, h._path).forEach((l) => f.add(l));
         }), f.forEach((d) => {
           d !== this.reactivity.activeEffect && d();
         });
@@ -771,12 +772,12 @@ class st {
    */
   update(t, i) {
     if (typeof t != "string") {
-      g.error("update() expects path to be a string, but received {0}", typeof t);
+      b.error("update() expects path to be a string, but received {0}", typeof t);
       return;
     }
     const r = t.split("."), s = r.pop(), n = r.reduce((f, d) => f == null ? void 0 : f[d], this.state);
     if (!n || typeof n != "object") {
-      g.error('Update error: path "{0}" is unreachable', t);
+      b.error('Update error: path "{0}" is unreachable', t);
       return;
     }
     const o = this.setters[t], a = n[s];
@@ -869,7 +870,7 @@ function ct(e) {
 }
 export {
   ot as isEqual,
-  _ as isObject,
+  E as isObject,
   et as kebabToCamel,
   rt as nextTick,
   ct as prototy
