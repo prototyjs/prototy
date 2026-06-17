@@ -21,6 +21,7 @@ const IS_PROXY = Symbol('is_proxy')
  * @property { Record<string, Function> } modifiers
  * @property { object } components
  * @property { Record<string, Function> } setters
+ * @property { Function } created
  */
 class Prototy {
 	/**
@@ -35,7 +36,8 @@ class Prototy {
 		directives = {},
 		modifiers = {},
 		components = {},
-		setters = {}
+		setters = {},
+		created
 	}) {
 		this.reactivity = new Reactivity()
 		this.listeners = new Listeners()
@@ -76,12 +78,17 @@ class Prototy {
 					this.bus.els[name] = element
 				}
 				if (key === 'component') {
-					this.bus.components[value] = { name: value, template: element.innerHTML.trim() }
+					this.bus.components[value] = { name: value, template: element.tagName === 'TEMPLATE' ? element.innerHTML.trim() : element.outerHTML, element }
 				}
 				if (key.startsWith(':each')) {
 					const hasContent = element.firstElementChild || element.textContent.trim() !== ''
 					if (hasContent) {
-						log.error('Content (slots) is not allowed inside the :each directive.', element)
+						if (!element.hasAttribute(':component')) {
+							element._template = element.firstElementChild.cloneNode(true)
+							element.innerHTML = ''
+						} else {
+							log.error('Content (slots) is not allowed inside the :each directive.', element)
+						}
 					}
 				}
 				if (key.startsWith(':component')) {
@@ -114,7 +121,7 @@ class Prototy {
 			context: this.updateContext.bind(this),
 			transform: this.modifiers.transform.bind(this.modifiers)
 		})
-
+		created?.call(this)
 		this.setup(root)
 	}
 	/**

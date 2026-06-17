@@ -530,5 +530,18 @@ describe('Each Directive Complete Suite', () => {
 			expect(cells.length).toBe(2)
 			expect(cells[0].textContent).toBe('A1')
 		})
+		it('should render array without component', async () => {
+			root.innerHTML = '<div id="list" :each="items"><div :text="item"></div></div>'
+			prototy({
+				root,
+				state: { items: ['Apple', 'Banana', 'Cherry'] }
+			})
+
+			await nextTick()
+			const container = root.querySelector('[id="list"]') || root.children[0]
+			expect(container.children.length).toBe(3)
+			expect(container.children[0].textContent).toBe('Apple')
+			expect(container.children[2].textContent).toBe('Cherry')
+		})
 	})
 })
