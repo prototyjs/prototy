@@ -126,7 +126,6 @@ class Prototy {
 		created?.call(this.bus)
 		this.setup(root)
 		ready?.call(this.bus)
-
 	}
 	/**
 	 * @param { HTMLElement } node
