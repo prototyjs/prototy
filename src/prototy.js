@@ -22,6 +22,7 @@ const IS_PROXY = Symbol('is_proxy')
  * @property { object } components
  * @property { Record<string, Function> } setters
  * @property { Function } created
+ * @property { Function } ready
  */
 class Prototy {
 	/**
@@ -37,7 +38,8 @@ class Prototy {
 		modifiers = {},
 		components = {},
 		setters = {},
-		created
+		created,
+		ready
 	}) {
 		this.reactivity = new Reactivity()
 		this.listeners = new Listeners()
@@ -121,8 +123,10 @@ class Prototy {
 			context: this.updateContext.bind(this),
 			transform: this.modifiers.transform.bind(this.modifiers)
 		})
-		created?.call(this)
+		created?.call(this.bus)
 		this.setup(root)
+		ready?.call(this.bus)
+
 	}
 	/**
 	 * @param { HTMLElement } node
