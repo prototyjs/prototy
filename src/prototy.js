@@ -268,6 +268,12 @@ class Prototy {
     		writable: false,
     		configurable: false
 		})
+		Object.defineProperty(state, '_lastSegment', {
+			value: path ? path.split('.').pop() : null,
+			enumerable: false,
+			writable: false,
+			configurable: false
+		})
 
 		return new Proxy(state, {
 			get(target, property, receiver) {
@@ -384,42 +390,11 @@ class Prototy {
 
 		let current = target
 		while (current && current._parent) {
-			const parentProperty = current._path ? current._path.split('.').pop() : null
+			const parentProperty = current._lastSegment
 			if (parentProperty) {
 				addToPending(current._parent, parentProperty)
 			}
 			current = current._parent
-		}
-	}
-	/**
-	 * @param { string } path
-	 * @param { any } value
-	 */
-	update(path, value) {
-		if (typeof path !== 'string') {
-			log.error('update() expects path to be a string, but received {0}', typeof path)
-			return
-		}
-		const segments = path.split('.')
-		const lastKey = segments.pop()
-		const target = segments.reduce((acc, k) => acc?.[k], this.state)
-		if (!target || typeof target !== 'object') {
-			log.error('Update error: path "{0}" is unreachable', path)
-			return
-		}
-		const setter = this.setters[path]
-		const oldValue = target[lastKey]
-		if (typeof setter === 'function') {
-			this.activeSetters.add(path)
-			try {
-				target[lastKey] = setter(value, oldValue, 'external')
-			} finally {
-				this.activeSetters.delete(path)
-			}
-		} else {
-			if (oldValue !== value) {
-				target[lastKey] = value
-			}
 		}
 	}
 	/**
