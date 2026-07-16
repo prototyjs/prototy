@@ -11,8 +11,8 @@ describe('mapComponents', () => {
 		const result = mapComponents(input)
 
 		expect(result).toEqual({
-			MyButton: { name: 'MyButton', template: '<button>Click</button>', els: {} },
-			MyInput: { name: 'MyInput', template: '<input />', els: {} }
+			MyButton: { name: 'MyButton', template: '<button>Click</button>' },
+			MyInput: { name: 'MyInput', template: '<input />' }
 		})
 	})
 

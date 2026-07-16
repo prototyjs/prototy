@@ -3,7 +3,7 @@
 A Seamless JavaScript Framework 🧶
 </p>
 <p align="center">
-<img src="./logo-prototy.svg" width="76px" height="76px" alt="logo-prototy">
+<img src="./logo-prototy.svg" width="80px" height="80px" alt="logo-prototy">
 </p>
 <p align="center">
   <a href="https://prototy.dev/">prototy.dev</a>
@@ -99,9 +99,12 @@ Sets the text content of an element.
 > Value modifiers for the following directives: `text`, `html`, `property`, `attribute`, `bind`.
 
 ### el
-- Inside directives, the variable `el` is always available as a reference to the element itself.
-- `el` with `:` makes it possible to process the element dynamically.
-- `el` without `:` allows obtaining a reference to the element and makes it available for adding directives in `elements`.
+The `el` attribute establishes a link between the HTML markup and your JavaScript configuration.
+
+* The variable `el` is always exposed inside inline expressions as a native reference to the current DOM element itself.
+* Using `:el="expression"` runs code dynamically during rendering with direct access to the element reference.
+* Using plain `el="..."` names the element, registering it for centralized JS tracking inside the `elements` block and caching it in `<element>.els`.
+* Names declared in **kebab-case** within the HTML template are automatically converted to **camelCase** in JavaScript.
 
 ```html
 <div :text.lower="el.tagName"></div>
@@ -110,19 +113,19 @@ Sets the text content of an element.
 ```
 Or Functions Directives:
 ```html
-<div el="myEl"></div>
+<div el="my-custom-element"></div>
 <!-- <div>div</div> -->
 ```
 ```js
 const app = prototy({
   // ...
   elements: {
-    myEl: {
-      'text.lower'({ el }) { return el.tagName }
+    myCustomElement: {
+      'text.lower'({ el, els }) { return el.tagName }
     }
   }
 })
-console.log(app.els.myEl) // HTMLElement
+console.log(app.root.els.myCustomElement) // HTMLElement
 ```
 
 ### property
@@ -244,27 +247,17 @@ form: {
 ### bind (Two-way Data Binding)
 Binds an element's property to a state path. UI inputs automatically update the data, and data mutations instantly refresh the UI.
 
-* **Syntax:** `:bind.property.eventType.modifier="statePath"`
-* **Static Paths:** Can be declared directly in HTML templates or as strings in `elements`.
-* **Dynamic Paths:** Dynamic expressions (such as bracket notation) are prohibited in HTML templates. Use functions inside the `elements` block to access the local scope context and return flat, computed path strings.
+**Syntax:** `:bind.property.eventType.modifier="statePath"`
 
 ```html
 <textarea :bind.value.input.trim="product.desc" el="desc"></textarea>
 <input type="checkbox" :bind.checked.change="isActive">
-<ul :each="todos"><li><input el="todoInput"></li></ul>
 ```
 Or in elements:
 ```js
 desc: {
   'bind.value.input.trim'() {
     return 'product.desc'
-  }
-},
-// Dynamic path
-todoInput: {
-  'bind.value.input'({ index }) {
-	// Return a global state path string so Prototy knows exactly where to write changes
-    return `todos.${index}.text` // Evaluates to "todos.0.text"
   }
 }
 ```
@@ -348,7 +341,7 @@ Or in elements:
 ```js
 asyncCard: {
   component() { return this.components.card },
-  async oncreate({ name, target, signal }) {
+  'oncreate.async'({ name, target, signal }) {
     // signal.aborted is true if the component was destroyed mid-fetch
     await fetch(`/api/card/${name}`)
   },
@@ -542,48 +535,62 @@ setters: {
 ```
 
 ### elements
-An alternative way to manage directives from JavaScript instead of HTML. Inside `elements`, you can use any instance property to power template attributes.
+An alternative, centralized way to manage directives from JavaScript instead of cluttering the HTML template.
 
-* **JS:** Defines directives inside named element blocks.
-* **Templates:** Binds the block to an HTML tag using the `el` attribute.
+* **Syntax:** Every directive must be a standard method to preserve `this`.
+* **Kebab-to-Camel:** HTML `el="main-title"` automatically maps to `mainTitle` in JS.
+* **Arguments:** Every directive method receives a `{ el, index, item, props, event }` context object as its first parameter.
 
-```js
-elements: {
-  mainTitle: {
-    text: () => this.state.username
-  },
-  submitBtn: {
-    onclick: () => this.methods.submitForm()
-  }
-}
-```
 ```html
 <div el="main-title"></div>
 <button el="submit-btn">submit</button>
 ```
+```js
+elements: {
+  mainTitle: {
+    text() {
+      return this.state.username
+    }
+  },
+  submitBtn: {
+    'onclick.stop.prevent'({ el, event }) {
+      console.log('Clicked element:', el)
+    }
+  }
+}
+```
 
 ### components
-Reusable UI blocks. They define their own markup and local element logic while sharing the global reactive state.
+Reusable UI blocks that define their own markup, parameters, methods, and element behaviors while sharing the single global reactive state.
 
-* **Full Syntax:** An object with a `template` string and optional `elements` definitions.
-* **Shorthand Syntax:** A direct string definition for simple, element-free templates.
+* **Full Syntax:** An object with a `template` string, along with optional `elements`, `params`, and `methods`.
+* **Shorthand Syntax:** A direct string definition for simple, logic-free templates.
+* **Context Merging (`this`):** Component-specific `params` and `methods` are merged into the instance context.
 * **DOM Access:** Rendered DOM elements are cached and exposed via the `els` property.
 
 ```js
 components: {
   userCard: {
     template: `
-      <div class="card" el="card">
+      <div class="card">
         <h3 class="user-name"></h3>
-        <button class="btn-reset">Reset</button>
+        <button class="btn-reset" el="reset-btn">Reset</button>
       </div>`,
     elements: {
-      card: { ... }
+      resetBtn: {
+        onclick() {
+          this.methods.reset()
+		}
+      }
+    },
+    params: { ... },
+    methods: {
+      reset() { ... }
     }
   },
   head: `<h1 :text="head"></h1>`
 }
-console.log(app.components.userCard.els.card)
+console.log(app.components.userCard.els.resetBtn)
 // Returns the <div> DOM element
 ```
 

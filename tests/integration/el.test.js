@@ -14,7 +14,7 @@ describe('El Directive', () => {
 		document.body.innerHTML = '<div el="staticElement"></div>'
 		const app = prototy({ root: document.body })
 
-		expect(app.els.staticElement).toBe(document.body.firstElementChild)
+		expect(app.root.els.staticElement).toBe(document.body.firstElementChild)
 	})
 
 	it('should execute expression and provide el as local variable', async () => {

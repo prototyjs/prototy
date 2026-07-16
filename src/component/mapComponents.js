@@ -8,12 +8,12 @@ export function mapComponents(components = {}) {
 	return Object.fromEntries(
 		Object.entries(components).map(([key, value]) => {
 			if (typeof value === 'string') {
-				return [key, { name: key, template: value, els: {} }]
+				return [key, { name: key, template: value }]
 			}
 			if (isObject(value)) {
 				return [key, { name: key, ...value }]
 			}
-			return [key, { name: key, template: '', els: {} }]
+			return [key, { name: key, template: '' }]
 		})
 	)
 }

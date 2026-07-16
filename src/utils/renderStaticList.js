@@ -1,16 +1,16 @@
 /**
  * @param { HTMLElement } container
  * @param { Array } array
- * @param { object } methods
+ * @param { object } api
  */
-export function renderStaticList(container, array, methods) {
+export function renderStaticList(container, array, api) {
 
 	const fragment = document.createDocumentFragment()
 
 	array.forEach((item, index) => {
 		const node = container._template.cloneNode(true)
-		methods.context(node, { item, index })
-		methods.setup(node)
+		api.context(node, { item, index })
+		api.setup(node)
 		fragment.appendChild(node)
 	})
 

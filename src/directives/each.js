@@ -1,20 +1,43 @@
 import { isObject } from '@/utils/isObject'
 import { renderStaticList } from '@/utils/renderStaticList'
+import {bindMethods} from "@/utils/bindMethods.js";
 /**
  * @param { HTMLElement } container
  * @param { Array } array
- * @param { object } methods
+ * @param { object } api
+ * @param { object } bus
  * @param { string } modifier
  */
 // eslint-disable-next-line sonarjs/cognitive-complexity
-export function each(container, array, methods, modifier) {
+export function each(container, array, api, bus, modifier) {
 	const isStatic = modifier === 'once' || (array?.length > 0 && !isObject(array[0]))
+	const component = bus.components[container._component]
+	let componentBus = bus
+
+	if (component) {
+		componentBus = {
+			...bus,
+			params: {
+				...bus.params,
+				...component.params
+			},
+			methods: {
+				...bus.methods
+			}
+		}
+		bindMethods(componentBus.methods, component.methods, componentBus)
+	}
+
+	const setup = (node) => {
+		node.els = {}
+		api.setup(node, componentBus, node.els)
+	}
 
 	if (isStatic) {
 		if (container._onceRendered) {
 			return
 		}
-		renderStaticList(container, array, methods)
+		renderStaticList(container, array, { context: api.context, setup })
 		container._onceRendered = true
 		return
 	}
@@ -34,7 +57,7 @@ export function each(container, array, methods, modifier) {
 					type: 'each-item'
 				}
 			}))
-			methods.unprocess(node)
+			api.unprocess(node)
 			node.remove()
 		}
 		return
@@ -52,7 +75,7 @@ export function each(container, array, methods, modifier) {
 			node._item = item
 			node._index = i
 
-			methods.context(node, { item, index: i })
+			api.context(node, { item, index: i })
 
 			container.dispatchEvent(new CustomEvent('create', {
 				detail: {
@@ -62,8 +85,7 @@ export function each(container, array, methods, modifier) {
 					type: 'each-item'
 				}
 			}))
-
-			methods.setup(node)
+			setup(node)
 		} else {
 			if (children[i] !== node) {
 				container.insertBefore(node, children[i] || null)
@@ -73,7 +95,7 @@ export function each(container, array, methods, modifier) {
 			node._item = item
 			node._index = i
 
-			methods.context(node, { item, index: i })
+			api.context(node, { item, index: i })
 
 			if (oldIndex !== i) {
 				container.dispatchEvent(new CustomEvent('update', {
@@ -99,7 +121,7 @@ export function each(container, array, methods, modifier) {
 				type: 'each-item'
 			}
 		}))
-		methods.unprocess(nodeToRemove)
+		api.unprocess(nodeToRemove)
 		nodeToRemove.remove()
 	}
 }

@@ -1,5 +1,5 @@
 import { kebabToCamel } from '@/utils/kebabToCamel'
-
+import { priority } from '@/utils/priority'
 /**
  *
  */
@@ -14,14 +14,15 @@ export class Nodes {
 		this.destroy = destroy
 		this.attribute = attribute
 		this.nodes = new WeakSet()
-		this.priority = { ':props': 1, ':component': 2, ':component.async': 3, ':each': 4, ':each.once': 5  }
 	}
 	/**
 	 * @param { HTMLElement } node
+	 * @param { object } bus
+	 * @param { object } els
 	 * @param { Function } handler
 	 */
 	// eslint-disable-next-line sonarjs/cognitive-complexity
-	process(node, handler) {
+	process(node, bus, els, handler) {
 		const stack = [node]
 		while (stack.length) {
 			const current = stack.pop()
@@ -29,15 +30,17 @@ export class Nodes {
 				let hasDirectives = false
 				if (current.nodeType === 1) {
 					const attrs = Array.from(current.attributes)
-					attrs.sort((a, b) => (this.priority[a.name] || 99) - (this.priority[b.name] || 99))
+					attrs.sort((a, b) => {
+						return priority(a.name) - priority(b.name)
+					})
 					const toRemove = []
 
 					for (let i = 0; i < attrs.length; i++) {
 						const attr = attrs[i]
-						this.attribute(current, attr.name, attr.value)
+						this.attribute(current, attr.name, attr.value, bus, els)
 						if (attr.name.charCodeAt(0) === 58) {
 							hasDirectives = true
-							this.directive(attr, current, handler, toRemove)
+							this.directive(attr, current, handler, toRemove, bus)
 						} else if (attr.name === 'el') {
 							hasDirectives = true
 						}
@@ -64,13 +67,14 @@ export class Nodes {
 	 * @param { HTMLElement } node
 	 * @param { Function } handler
 	 * @param { Array } toRemove
+	 * @param { object } bus
 	 */
-	directive(attr, node, handler, toRemove) {
+	directive(attr, node, handler, toRemove, bus) {
 		const name = attr.name.slice(1)
 		const key = kebabToCamel(name)
 
 		if (key.charCodeAt(0) === 111 && key.charCodeAt(1) === 110) {
-			this.listeners(node, key.slice(2).toLowerCase(), attr.value)
+			this.listeners(node, key.slice(2).toLowerCase(), attr.value, bus)
 		} else {
 			handler(node, key, attr.value)
 		}
@@ -78,8 +82,9 @@ export class Nodes {
 	}
 	/**
 	 * @param { HTMLElement } node
+	 * @param { object } els
 	 */
-	unprocess(node) {
+	unprocess(node, els) {
 		const stack = [node]
 		while (stack.length) {
 			const current = stack.pop()
@@ -88,7 +93,7 @@ export class Nodes {
 			}
 
 			if (this.nodes.has(current)) {
-				this.destroy(current)
+				this.destroy(current, els)
 				this.nodes.delete(current)
 			}
 

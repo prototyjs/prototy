@@ -544,4 +544,42 @@ describe('Each Directive Complete Suite', () => {
 			expect(container.children[2].textContent).toBe('Cherry')
 		})
 	})
+	it('should cleanup component els when items are removed', async () => {
+		root.innerHTML = '<div id="list" :each="items" :component="components.item" el="listEl"></div>'
+		const app = prototy({
+			root,
+			state: {
+				items: [
+					{ id: 1, name: 'First' },
+					{ id: 2, name: 'Second' },
+					{ id: 3, name: 'Third' }
+				]
+			},
+			components: {
+				item: {
+					template: `
+                    <div el="itemEl">
+                        <span el="nameSpan" :text="item.name"></span>
+                        <span el="indexSpan" :text="index"></span>
+                    </div>
+                `
+				}
+			}
+		})
+
+		await nextTick()
+		const listEl = root.els.listEl
+
+		expect(listEl.children[0].els.nameSpan.textContent).toBe('First')
+		expect(listEl.children[1].els.nameSpan.textContent).toBe('Second')
+		expect(listEl.children[2].els.nameSpan.textContent).toBe('Third')
+
+		app.state.items.splice(1, 1)
+		await nextTick()
+
+		expect(listEl.children.length).toBe(2)
+		expect(listEl.children[0].els.nameSpan.textContent).toBe('First')
+		expect(listEl.children[1].els.nameSpan.textContent).toBe('Third')
+		expect(listEl.children[1].els.nameSpan.textContent).not.toBe('Second')
+	})
 })

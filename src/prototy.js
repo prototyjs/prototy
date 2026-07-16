@@ -8,7 +8,10 @@ import { Reactivity } from '@/reactivity'
 import { Listeners } from '@/listeners'
 import { Nodes } from '@/nodes'
 import { bindMethods } from '@/utils/bindMethods'
+import { priority } from '@/utils/priority'
+import { kebabToCamel } from '@/utils/kebabToCamel'
 import { log } from '@/log'
+import { prepareElement } from '@/component/prepareElement'
 
 const IS_PROXY = Symbol('is_proxy')
 /**
@@ -20,6 +23,7 @@ const IS_PROXY = Symbol('is_proxy')
  * @property { Record<string, Function> } directives
  * @property { Record<string, Function> } modifiers
  * @property { object } components
+ * @property { object } elements
  * @property { Record<string, Function> } setters
  * @property { Function } created
  * @property { Function } ready
@@ -36,6 +40,7 @@ class Prototy {
 		computed = {},
 		directives = {},
 		modifiers = {},
+		elements = {},
 		components = {},
 		setters = {},
 		created,
@@ -45,10 +50,9 @@ class Prototy {
 		this.listeners = new Listeners()
 		this.contextStorage = new WeakMap()
 		this.pendingTargets = new Map()
-
 		this.initComputed(state, computed)
 		this.state = this.createProxy(state)
-
+		this.elements = elements
 		this.methods = {}
 		this.setters = {}
 		this.activeSetters = new Set()
@@ -57,62 +61,33 @@ class Prototy {
 			state: this.state,
 			methods: this.methods,
 			params,
-			components: mapComponents(components),
-			els: {}
+			components: mapComponents(components)
 		}
-
+		root.els = {}
 		bindMethods(this.methods, methods, this.bus)
 		bindMethods(this.setters, setters, this.bus)
-
 		this.nodes = new Nodes({
-			listeners: (/** @type { HTMLElement } */ element, /** @type { string } */ key, /** @type { string } */ value) => {
-				const func = dynamicFunction(value, this.bus, 'event')
+			listeners: (/** @type { HTMLElement } */ element, /** @type { string } */ key, /** @type { string } */ value, /** @type { object } */ bus) => {
+				const func = dynamicFunction(value, bus, 'event')
 				this.listeners.add(element, key, (event) => {
-					const context = this.getContext(element)
-					return func(element, context, event)
+					const ctx = this.getContext(element)
+					return func(element, ctx, event)
 				})
 			},
 			destroy: this.destroy.bind(this),
-			attribute: (/** @type { HTMLElement } */ element, /** @type { string } */ key, /** @type { string } */ value) => {
+			attribute: (/** @type { HTMLElement } */ element, /** @type { string } */ key, /** @type { string } */ value, /** @type { object } */ bus, /** @type { object } */ els) => {
+				if (key.startsWith(':')) {
+					const cleanKey = key.slice(1)
+					prepareElement(element, cleanKey)
+				}
 				if (key === 'el') {
-					const name = value
-					element._el = name
-					this.bus.els[name] = element
+					const camelName = kebabToCamel(value)
+					element._el = camelName
+					els[camelName] = element
+					this.functionality(element, this.elements[camelName], bus, els)
 				}
 				if (key === 'component') {
 					this.bus.components[value] = { name: value, template: element.tagName === 'TEMPLATE' ? element.innerHTML.trim() : element.outerHTML, element }
-				}
-				if (key.startsWith(':each')) {
-					const hasContent = element.firstElementChild || element.textContent.trim() !== ''
-					if (hasContent) {
-						if (!element.hasAttribute(':component')) {
-							element._template = element.firstElementChild.cloneNode(true)
-							element.innerHTML = ''
-						} else {
-							log.error('Content (slots) is not allowed inside the :each directive.', element)
-						}
-					}
-				}
-				if (key.startsWith(':component')) {
-					element._hasEach = element.hasAttribute(':each') || element.hasAttribute(':each.once')
-					if (element._slots) {
-						return
-					}
-					element._slots = {}
-					Array.from(element.childNodes).forEach(node => {
-						if (node.nodeType === 3 && !node.textContent.trim()) {
-							node.remove()
-							return
-						}
-						const name = (node.nodeType === 1 && node.getAttribute('slot')) || 'default'
-						if (element._slots[name]) {
-							log.error('Slot "{0}" is already occupied in component', name, element)
-							return
-						}
-						node._keep = true
-						element._slots[name] = node
-						node.remove()
-					})
 				}
 			}
 		})
@@ -124,21 +99,75 @@ class Prototy {
 			transform: this.modifiers.transform.bind(this.modifiers)
 		})
 		created?.call(this.bus)
-		this.setup(root)
+		this.setup(root, this.bus, root.els)
 		ready?.call(this.bus)
 	}
 	/**
-	 * @param { HTMLElement } node
+	 * @param { HTMLElement } element
+	 * @param { object } directives
+	 * @param { object } bus
+	 * @param { object } els
 	 */
-	setup(node) {
-		this.nodes.process(node, (/** @type {HTMLElement} */  element, /** @type {string} */ key, /** @type {string} */ code) => {
-			const func = dynamicFunction(code, this.bus)
+	functionality(element, directives, bus, els) {
+		if (!directives) {
+			return
+		}
+		const props = this.getContext(element, true)
+		const sortedKeys = Object.keys(directives).sort((a, b) => {
+			return priority(a) - priority(b)
+		})
+		for (const key of sortedKeys) {
+			const fn = directives[key]
+			if (typeof fn !== 'function') {
+				continue
+			}
+			prepareElement(element, key, directives)
+			try {
+				const args = {
+					el: element,
+					index: element._index,
+					item: element._item,
+					els,
+					props
+				}
+				const result = fn.call(bus, args)
+				if (key === 'props') {
+					this.updateContext(element, result)
+				} else if (key.startsWith('on')) {
+					this.listeners.add(element, key, (event) => {
+						fn.call(bus, { ...args, event })
+					})
+				} else {
+					const code = key.startsWith('bind') ? result : ''
+					this.directive.apply(element, key, result, code)
+				}
+				if (!element._applied) {
+					element._applied = new Set()
+				}
+				element._applied.add(key.split('.')[0])
+			} catch {
+				log.error('Error applying directive "{0}" in elements', key, element)
+			}
+		}
+	}
+	/**
+	 * @param { HTMLElement } node
+	 * @param { object } bus
+	 * @param { object } els
+	 */
+	setup(node, bus, els) {
+		this.nodes.process(node, bus, els, (/** @type {HTMLElement} */  element, /** @type {string} */ key, /** @type {string} */ code) => {
+			if (element._applied && element._applied.has(key.split('.')[0])) {
+				log.warn('Directive "{0}" on element "{1}" is already defined in elements. HTML directive will be ignored.', key, element._el)
+				return
+			}
+			const func = dynamicFunction(code, bus)
 			const update = () => {
 				this.reactivity.removeEffect(update, update.deps)
 				this.reactivity.activeEffect = update
 				try {
-					const context = this.getContext(element)
-					const res = func(element, context)
+					const ctx= this.getContext(element)
+					const res = func(element, ctx)
 					if (key === 'props') {
 						this.updateContext(element, res)
 					} else {
@@ -152,7 +181,6 @@ class Prototy {
 				element._effects = new Set()
 			}
 			element._effects.add(update)
-
 			update.deps = new Set()
 			update()
 		})
@@ -165,16 +193,13 @@ class Prototy {
 		if (!computed || Object.keys(computed).length === 0) {
 			return
 		}
-
 		Object.keys(computed).forEach(key => {
 			if (key in rawState) {
 				log.warn('Computed property "{0}" overrides existing property', key)
 			}
-
 			const getter = computed[key]
 			let cachedValue
 			let isDirty = true
-
 			const computedEffect = () => {
 				if (!isDirty) {
 					isDirty = true
@@ -182,30 +207,24 @@ class Prototy {
 				}
 			}
 			computedEffect.deps = new Set()
-
 			Object.defineProperty(rawState, key, {
 				get: () => {
 					if (this.reactivity.activeEffect === computedEffect) {
 						log.error('Circular dependency detected in computed property "{0}"', key)
 						return cachedValue
 					}
-
 					const activeEffect = this.reactivity.activeEffect
 					if (activeEffect && activeEffect !== computedEffect) {
 						this.reactivity.add(rawState, key, activeEffect)
 						activeEffect.deps.add({ target: rawState, property: key })
 					}
-
 					if (isDirty) {
 						const prevEffect = this.reactivity.activeEffect
-
 						if (computedEffect.deps.size > 0) {
 							this.reactivity.removeEffect(computedEffect, computedEffect.deps)
 							computedEffect.deps.clear()
 						}
-
 						this.reactivity.activeEffect = computedEffect
-
 						try {
 							cachedValue = getter.bind(this.bus)()
 						} catch (e) {
@@ -232,7 +251,6 @@ class Prototy {
 	 */
 	createProxy(state, path = '', parent= null) {
 		const self = this
-
 		if (isObject(state)) {
 	      Object.keys(state).forEach((key) => {
 		      const descriptor = Object.getOwnPropertyDescriptor(state, key)
@@ -274,18 +292,15 @@ class Prototy {
 			writable: false,
 			configurable: false
 		})
-
 		return new Proxy(state, {
 			get(target, property, receiver) {
 	      if (property === IS_PROXY) {
 		      return true
 	      }
 				const value = Reflect.get(target, property, receiver)
-
 	      const isObservable = typeof property !== 'symbol' &&
 		      (property in target) &&
 		      typeof value !== 'function'
-
 	      const activeEffect = self.reactivity.activeEffect
 	      if (isObservable && activeEffect) {
 		      self.reactivity.add(target, property, activeEffect)
@@ -305,20 +320,15 @@ class Prototy {
 		    }
 		    const isArray = Array.isArray(target)
 		    const oldValue = Reflect.get(target, property)
-
 		    const isLength = isArray && property === 'length'
-
 		    if (!isLength && Object.is(oldValue, value)) {
 			    return true
 		    }
-
 		    const fullPath = path ? `${path}.${property.toString()}` : property.toString()
 		    let newValue = value
-
 		    if (isObject(value) && !value[IS_PROXY]) {
 					newValue = self.createProxy(value, fullPath)
 		    }
-
 		    if (typeof self.setters?.[fullPath] === 'function' && !self.activeSetters.has(fullPath)) {
 			    self.activeSetters.add(fullPath)
 			    try {
@@ -333,18 +343,13 @@ class Prototy {
 				    self.activeSetters.delete(fullPath)
 			    }
 		    }
-
 		    const success = Reflect.set(target, property, newValue, receiver)
-
 		    if (success) {
-
 			    self.schedule(target, property)
-
 			    if (isArray && !isLength) {
 				    self.schedule(target, 'length')
 			    }
 		    }
-
 		    return success
 	    }
 		})
@@ -357,17 +362,14 @@ class Prototy {
 		const addToPending = (obj, prop) => {
 			if (!this.pendingTargets.has(obj)) {
 				this.pendingTargets.set(obj, new Set())
-
 				queueMicrotask(() => {
 					const changedKeys = this.pendingTargets.get(obj)
 					this.pendingTargets.delete(obj)
-
 					const uniqueEffects = new Set()
 					changedKeys.forEach(key => {
 						const effects = this.reactivity.find(obj, key)
 						// eslint-disable-next-line sonarjs/no-nested-functions
 						effects.forEach(eff => uniqueEffects.add(eff))
-
 						const value = obj[key]
 						if (value && value._path) {
 							const pathEffects = this.reactivity.find(obj, value._path)
@@ -375,7 +377,6 @@ class Prototy {
 							pathEffects.forEach(eff => uniqueEffects.add(eff))
 						}
 					})
-
 					uniqueEffects.forEach(update => {
 						if (update !== this.reactivity.activeEffect) {
 							update()
@@ -385,9 +386,7 @@ class Prototy {
 			}
 			this.pendingTargets.get(obj).add(prop)
 		}
-
 		addToPending(target, property)
-
 		let current = target
 		while (current && current._parent) {
 			const parentProperty = current._lastSegment
@@ -405,7 +404,6 @@ class Prototy {
 	getContext(element, reactive = true) {
 		const self = this
 		const activeEffect = reactive ? this.reactivity.activeEffect : null
-
 		return new Proxy({}, {
 			get(_, prop) {
 				let current = element
@@ -436,17 +434,13 @@ class Prototy {
 			entry = { data: {}, isScope: false }
 			this.contextStorage.set(element, entry)
 		}
-
 		for (const key in newValue) {
 			const val = newValue[key]
 			const oldVal = entry.data[key]
-
 			if (oldVal !== val) {
 				entry.data[key] = val
-
 				const contextKey = `ctx:${key}`
 				const effects = this.reactivity.find(element, contextKey)
-
 				effects.forEach(effect => {
 					if (effect !== this.reactivity.activeEffect) {
 						effect()
@@ -457,21 +451,20 @@ class Prototy {
 	}
 	/**
 	 * @param { HTMLElement } element
+	 * @param { object } els
 	 */
-	destroy(element) {
-		if (!element) {
-			return
+	destroy(element, els = null) {
+		if (element._el && els) {
+			delete els[element._el]
 		}
-		Array.from(element.children).forEach(child => {
-			this.destroy(child)
-		})
+		for (const child of Array.from(element.children)) {
+			this.destroy(child, element.els || null)
+		}
 		this.listeners.remove(element)
 		this.reactivity.removeEffects(element)
 		unbind(element)
-		if (element._el) {
-			if (this.bus.els[element._el] === element) {
-				delete this.bus.els[element._el]
-			}
+		if (element.els) {
+			element.els = {}
 		}
 	}
 }
