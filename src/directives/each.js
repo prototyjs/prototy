@@ -1,6 +1,6 @@
 import { isObject } from '@/utils/isObject'
 import { renderStaticList } from '@/utils/renderStaticList'
-import {bindMethods} from "@/utils/bindMethods.js";
+import { bindMethods } from '@/utils/bindMethods'
 /**
  * @param { HTMLElement } container
  * @param { Array } array
