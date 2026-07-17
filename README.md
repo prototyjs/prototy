@@ -101,9 +101,10 @@ Sets the text content of an element.
 ### el
 The `el` attribute establishes a link between the HTML markup and your JavaScript configuration.
 
-* The variable `el` is always exposed inside inline expressions as a native reference to the current DOM element itself.
 * Using `:el="expression"` runs code dynamically during rendering with direct access to the element reference.
 * Using plain `el="..."` names the element, registering it for centralized JS tracking inside the `elements` block and caching it in `<element>.els`.
+* The variable `el` is always exposed inside inline expressions as a native reference to the current DOM element itself.
+* The variable `els` provides access to all DOM elements marked with the `el` attribute within the current component scope.
 * Names declared in **kebab-case** within the HTML template are automatically converted to **camelCase** in JavaScript.
 
 ```html
@@ -120,12 +121,12 @@ Or Functions Directives:
 const app = prototy({
   // ...
   elements: {
-    myCustomElement: {
+    myCustomElement: {  // els.myCustomElement
       'text.lower'({ el, els }) { return el.tagName }
     }
   }
 })
-console.log(app.root.els.myCustomElement) // HTMLElement
+console.log(app.els.myCustomElement) // HTMLElement
 ```
 
 ### property
@@ -256,8 +257,11 @@ Binds an element's property to a state path. UI inputs automatically update the 
 Or in elements:
 ```js
 desc: {
-  'bind.value.input.trim'() {
-    return 'product.desc'
+  'bind.value.input.trim'({ props }) {
+    return {
+      get: () => this.state.product.desc,
+      set: (val) => this.state.product.desc = val
+    }
   }
 }
 ```
@@ -274,22 +278,30 @@ const app = prototy({
   root: document.body,
   components: {
     // Shorthand HTML string definition
-    header: '<header><h1>My App</h1></header>',
+    header: '<header><h1 el="head">My App</h1></header>',
     // Detailed component placeholder used below
     card: '<div><h3 :text="title"></h3><span :text="count"></span></div>'
   }
 })
+console.log(app.els.header.els.head)
 ```
 
 ```html
 <!-- Basic rendering -->
-<div :component="components.header"></div>
+<div :component="components.header" el="header"></div>
 <!-- Dynamic component switching -->
 <div :component="components[currentTab]"></div>
 <!-- Falsy fallback (renders nothing if 'show' is false) -->
 <div :component="show && components.card"></div>
 ```
-
+Or in elements:
+```js
+header: {
+  component() {
+    return this.components.header
+  }
+}
+```
 
 ### Declaring Components in HTML
 You can define templates directly in your markup using the `<template component="...">` tag. Prototy automatically parses and exposes them inside the `components` scope.
@@ -303,10 +315,7 @@ You can define templates directly in your markup using the `<template component=
 ```
 
 ### props
-Data passed to a component via `props` is read-only inside that component. Parent updates flow down automatically, but mutations inside the component do not sync back to the parent.
-
-* **Templates:** Passed via the `:props` directive.
-* **Elements (JS):** Returned as an object inside the component directive key.
+Properties passed to a component are injected directly into its local reactive scope. Child elements can read and mutate them just like standard state variables.
 
 ```html
 <!-- Template Approach -->
@@ -317,7 +326,9 @@ Data passed to a component via `props` is read-only inside that component. Paren
 Or in elements:
 ```js
 cardPlaceholder: {
-  component() { return this.components.card },
+  component() {
+    return this.components.card
+  },
   props() {
     return { title: this.state.pageTitle, count: 5 }
   }
@@ -340,7 +351,9 @@ Handle component state changes directly via event directives or centralize them 
 Or in elements:
 ```js
 asyncCard: {
-  component() { return this.components.card },
+  component() {
+    return this.components.card
+  },
   'oncreate.async'({ name, target, signal }) {
     // signal.aborted is true if the component was destroyed mid-fetch
     await fetch(`/api/card/${name}`)
@@ -383,6 +396,7 @@ Renders a list of items based on an array. It patches the DOM dynamically and in
 * **Arrays of Primitives** (strings, numbers) are **always static** by default.
 * **Arrays of Objects** are **dynamic** and react to mutations. To force an array of objects to be static, use the `.once` modifier (`:each.once`).
 * **Scope Injections:** Injects `item` (current data) and `index` (current position) into the loop context.
+* **Component Access:** The current loop data (props.item) and position (props.index) are automatically passed into the child component and can be accessed within its elements.
 
 ```html
 <!-- Always static by default (array of strings) -->
@@ -402,7 +416,7 @@ const app = prototy({
     forcedStaticItems: [{ name: 'A' }, { name: 'B' }] // Static via .once
   },
   components: {
-    todoItem: '<div><span :text="index"></span>: <span :text="item"></span></div>',
+    todoItem: '<div el="itemEl"><span :text="index"></span>: <span :text="item"></span></div>',
   }
 })
 ```
@@ -414,7 +428,20 @@ todoItems: {
   }
 }
 ```
-
+```js
+components: {
+  todoItem: {
+    tempate: '...',
+    elements: {
+      itemEl: {
+        title({ props }) {
+          return props.item.name + props.index
+        }
+      }
+    }
+  }
+}
+```
 ## Configuration Options
 
 Prototy core configurations are defined inside a single schema object. It unifies your global state, static variables, methods, and component definitions into a predictable, centralized ecosystem.
@@ -539,7 +566,7 @@ An alternative, centralized way to manage directives from JavaScript instead of 
 
 * **Syntax:** Every directive must be a standard method to preserve `this`.
 * **Kebab-to-Camel:** HTML `el="main-title"` automatically maps to `mainTitle` in JS.
-* **Arguments:** Every directive method receives a `{ el, index, item, props, event }` context object as its first parameter.
+* **Arguments:** Every directive method receives a `{ el, els, props, event }` context object as its first parameter.
 
 ```html
 <div el="main-title"></div>
@@ -566,7 +593,6 @@ Reusable UI blocks that define their own markup, parameters, methods, and elemen
 * **Full Syntax:** An object with a `template` string, along with optional `elements`, `params`, and `methods`.
 * **Shorthand Syntax:** A direct string definition for simple, logic-free templates.
 * **Context Merging (`this`):** Component-specific `params` and `methods` are merged into the instance context.
-* **DOM Access:** Rendered DOM elements are cached and exposed via the `els` property.
 
 ```js
 components: {
@@ -590,8 +616,6 @@ components: {
   },
   head: `<h1 :text="head"></h1>`
 }
-console.log(app.components.userCard.els.resetBtn)
-// Returns the <div> DOM element
 ```
 
 ### created & ready
@@ -656,7 +680,6 @@ The `prototy()` constructor returns an `app` instance with the following interfa
 const app = prototy({ root: '#app', state: { count: 0 } })
 
 app.state.count++            // Mutates state and schedules UI update
-console.log(app.els.counter) // Directly accesses a cached DOM element
 app.destroy()                // Cleans up the instance
 ```
 

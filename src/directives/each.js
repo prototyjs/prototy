@@ -30,7 +30,7 @@ export function each(container, array, api, bus, modifier) {
 
 	const setup = (node) => {
 		node.els = {}
-		api.setup(node, componentBus, node.els)
+		api.setup(node, { bus: componentBus, els: node.els, elements: component?.elements })
 	}
 
 	if (isStatic) {

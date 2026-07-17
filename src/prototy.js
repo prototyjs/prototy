@@ -12,6 +12,7 @@ import { priority } from '@/utils/priority'
 import { kebabToCamel } from '@/utils/kebabToCamel'
 import { log } from '@/log'
 import { prepareElement } from '@/component/prepareElement'
+import { bindAdvanced } from '@/directives/bindAdvanced.js'
 
 const IS_PROXY = Symbol('is_proxy')
 /**
@@ -52,7 +53,6 @@ class Prototy {
 		this.pendingTargets = new Map()
 		this.initComputed(state, computed)
 		this.state = this.createProxy(state)
-		this.elements = elements
 		this.methods = {}
 		this.setters = {}
 		this.activeSetters = new Set()
@@ -61,21 +61,21 @@ class Prototy {
 			state: this.state,
 			methods: this.methods,
 			params,
-			components: mapComponents(components)
+			components: mapComponents(components),
+			els: {}
 		}
-		root.els = {}
 		bindMethods(this.methods, methods, this.bus)
 		bindMethods(this.setters, setters, this.bus)
 		this.nodes = new Nodes({
-			listeners: (/** @type { HTMLElement } */ element, /** @type { string } */ key, /** @type { string } */ value, /** @type { object } */ bus) => {
-				const func = dynamicFunction(value, bus, 'event')
+			listeners: (/** @type { HTMLElement } */ element, /** @type { string } */ key, /** @type { string } */ value, /** @type { object } */ component) => {
+				const func = dynamicFunction(value, component.bus, component.els, 'event')
 				this.listeners.add(element, key, (event) => {
 					const ctx = this.getContext(element)
 					return func(element, ctx, event)
 				})
 			},
 			destroy: this.destroy.bind(this),
-			attribute: (/** @type { HTMLElement } */ element, /** @type { string } */ key, /** @type { string } */ value, /** @type { object } */ bus, /** @type { object } */ els) => {
+			attribute: (/** @type { HTMLElement } */ element, /** @type { string } */ key, /** @type { string } */ value, /** @type { object } */ component) => {
 				if (key.startsWith(':')) {
 					const cleanKey = key.slice(1)
 					prepareElement(element, cleanKey)
@@ -83,8 +83,8 @@ class Prototy {
 				if (key === 'el') {
 					const camelName = kebabToCamel(value)
 					element._el = camelName
-					els[camelName] = element
-					this.functionality(element, this.elements[camelName], bus, els)
+					component.els[camelName] = element
+					this.functionality(element, component.elements?.[camelName], component)
 				}
 				if (key === 'component') {
 					this.bus.components[value] = { name: value, template: element.tagName === 'TEMPLATE' ? element.innerHTML.trim() : element.outerHTML, element }
@@ -99,69 +99,126 @@ class Prototy {
 			transform: this.modifiers.transform.bind(this.modifiers)
 		})
 		created?.call(this.bus)
-		this.setup(root, this.bus, root.els)
+		this.setup(root, { bus: this.bus, els: this.bus.els, elements })
 		ready?.call(this.bus)
 	}
 	/**
 	 * @param { HTMLElement } element
 	 * @param { object } directives
-	 * @param { object } bus
-	 * @param { object } els
+	 * @param { object } component
 	 */
-	functionality(element, directives, bus, els) {
+	functionality(element, directives, component) {
 		if (!directives) {
 			return
 		}
-		const props = this.getContext(element, true)
+
+		const ctx = this.getContext(element, true)
 		const sortedKeys = Object.keys(directives).sort((a, b) => {
 			return priority(a) - priority(b)
 		})
+
 		for (const key of sortedKeys) {
 			const fn = directives[key]
 			if (typeof fn !== 'function') {
 				continue
 			}
+
 			prepareElement(element, key, directives)
-			try {
-				const args = {
-					el: element,
-					index: element._index,
-					item: element._item,
-					els,
-					props
-				}
-				const result = fn.call(bus, args)
-				if (key === 'props') {
-					this.updateContext(element, result)
-				} else if (key.startsWith('on')) {
-					this.listeners.add(element, key, (event) => {
-						fn.call(bus, { ...args, event })
-					})
-				} else {
-					const code = key.startsWith('bind') ? result : ''
-					this.directive.apply(element, key, result, code)
-				}
-				if (!element._applied) {
-					element._applied = new Set()
-				}
-				element._applied.add(key.split('.')[0])
-			} catch {
-				log.error('Error applying directive "{0}" in elements', key, element)
+
+			const args = {
+				el: element,
+				els: component.els,
+				props: ctx
 			}
+
+			if (key === 'props') {
+				const updateProps = () => {
+					this.reactivity.removeEffect(updateProps, updateProps.deps)
+					this.reactivity.activeEffect = updateProps
+					try {
+						const freshCtx = this.getContext(element, true)
+						const freshArgs = {
+							el: element,
+							els: component.els,
+							props: freshCtx
+						}
+						const result = fn.call(component.bus, freshArgs)
+						this.updateContext(element, result)
+					} catch {
+						log.error('Error applying props in elements', key, element)
+					} finally {
+						this.reactivity.activeEffect = null
+					}
+				}
+
+				updateProps.deps = new Set()
+				updateProps()
+
+				if (!element._effects) {
+					element._effects = new Set()
+				}
+				element._effects.add(updateProps)
+				continue
+			}
+
+			if (key.startsWith('on')) {
+				const eventName = key.slice(2)
+				this.listeners.add(element, eventName, (event) => {
+					try {
+						fn.call(component.bus, { ...args, event })
+					} catch {
+						log.error('Error in event handler', key, element)
+					}
+				})
+				continue
+			}
+
+			const update = () => {
+				this.reactivity.removeEffect(update, update.deps)
+				this.reactivity.activeEffect = update
+				try {
+					const freshCtx = this.getContext(element, true)
+					const freshArgs = {
+						el: element,
+						els: component.els,
+						props: freshCtx
+					}
+					const result = fn.call(component.bus, freshArgs)
+					if (result && typeof result === 'object' && 'get' in result && 'set' in result) {
+						bindAdvanced(element, key, result, freshArgs, this.directive.api.transform)
+					} else {
+						this.directive.apply(element, key, result, result)
+					}
+				} finally {
+					this.reactivity.activeEffect = null
+				}
+			}
+
+			update.deps = new Set()
+			update()
+
+			if (!element._effects) {
+				element._effects = new Set()
+			}
+			element._effects.add(update)
+
+			if (!element._applied) {
+				element._applied = new Set()
+			}
+			element._applied.add(key.split('.')[0])
 		}
 	}
 	/**
 	 * @param { HTMLElement } node
-	 * @param { object } bus
-	 * @param { object } els
+	 * @param { object } component
 	 */
-	setup(node, bus, els) {
-		this.nodes.process(node, bus, els, (/** @type {HTMLElement} */  element, /** @type {string} */ key, /** @type {string} */ code) => {
+	setup(node, component) {
+		this.nodes.process(node, component, (/** @type {HTMLElement} */  element, /** @type {string} */ key, /** @type {string} */ code) => {
 			if (element._applied && element._applied.has(key.split('.')[0])) {
 				log.warn('Directive "{0}" on element "{1}" is already defined in elements. HTML directive will be ignored.', key, element._el)
 				return
 			}
-			const func = dynamicFunction(code, bus)
+			const func = dynamicFunction(code, component.bus, component.els)
 			const update = () => {
 				this.reactivity.removeEffect(update, update.deps)
 				this.reactivity.activeEffect = update

@@ -45,7 +45,7 @@ export function component(element, value = {}, api, bus) {
 	bindMethods(componentBus.methods, value.methods, componentBus)
 
 	const setup = (node) => {
-		api.setup(node, componentBus, element.els)
+		api.setup(node, { bus: componentBus, els: element.els, elements: value.elements })
 	}
 
 	const node = render(value.template)

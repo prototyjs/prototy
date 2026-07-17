@@ -17,12 +17,11 @@ export class Nodes {
 	}
 	/**
 	 * @param { HTMLElement } node
-	 * @param { object } bus
-	 * @param { object } els
+	 * @param { object } component
 	 * @param { Function } handler
 	 */
 	// eslint-disable-next-line sonarjs/cognitive-complexity
-	process(node, bus, els, handler) {
+	process(node, component, handler) {
 		const stack = [node]
 		while (stack.length) {
 			const current = stack.pop()
@@ -37,10 +36,10 @@ export class Nodes {
 
 					for (let i = 0; i < attrs.length; i++) {
 						const attr = attrs[i]
-						this.attribute(current, attr.name, attr.value, bus, els)
+						this.attribute(current, attr.name, attr.value, component)
 						if (attr.name.charCodeAt(0) === 58) {
 							hasDirectives = true
-							this.directive(attr, current, handler, toRemove, bus)
+							this.directive(attr, current, handler, toRemove, component)
 						} else if (attr.name === 'el') {
 							hasDirectives = true
 						}
@@ -67,14 +66,14 @@ export class Nodes {
 	 * @param { HTMLElement } node
 	 * @param { Function } handler
 	 * @param { Array } toRemove
-	 * @param { object } bus
+	 * @param { object } component
 	 */
-	directive(attr, node, handler, toRemove, bus) {
+	directive(attr, node, handler, toRemove, component) {
 		const name = attr.name.slice(1)
 		const key = kebabToCamel(name)
 
 		if (key.charCodeAt(0) === 111 && key.charCodeAt(1) === 110) {
-			this.listeners(node, key.slice(2).toLowerCase(), attr.value, bus)
+			this.listeners(node, key.slice(2).toLowerCase(), attr.value, component)
 		} else {
 			handler(node, key, attr.value)
 		}

@@ -2,10 +2,11 @@ import { log } from '@/log'
 /**
  * @param { string } code
  * @param { object } bus
- * @param { string } [key='']
+ * @param { object } els
+ * @param { string } key
  * @returns { Function }
  */
-export function dynamicFunction(code, bus, key = '') {
+export function dynamicFunction(code, bus, els, key = '') {
 	const localDeclaration = key ? `const ${key} = local` : ''
 
 	// eslint-disable-next-line sonarjs/code-eval
@@ -55,7 +56,7 @@ export function dynamicFunction(code, bus, key = '') {
 				}
 
 				if (prop === 'els') {
-					return bus.els
+					return els
 				}
 
 				if (prop === Symbol.unscopables) {
@@ -67,6 +68,10 @@ export function dynamicFunction(code, bus, key = '') {
 				log.error('ReferenceError: "{0}" is not defined', prop, el)
 			},
 			set(_, prop, value) {
+				if (prop === 'index') {
+					log.error(`Cannot set "${prop}" - index is read-only`, el)
+					return false
+				}
 				if (prop in bus.state) {
 					bus.state[prop] = value
 					return true

@@ -568,7 +568,7 @@ describe('Each Directive Complete Suite', () => {
 		})
 
 		await nextTick()
-		const listEl = root.els.listEl
+		const listEl = app.els.listEl
 
 		expect(listEl.children[0].els.nameSpan.textContent).toBe('First')
 		expect(listEl.children[1].els.nameSpan.textContent).toBe('Second')

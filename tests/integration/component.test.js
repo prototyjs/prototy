@@ -213,14 +213,14 @@ describe('Component Directive Complete Suite', () => {
 
 			await nextTick()
 
-			expect(app.root.els.cmp.els.firstEl).toBeDefined()
-			expect(app.root.els.cmp.els.secondEl).toBeUndefined()
+			expect(app.els.cmp.els.firstEl).toBeDefined()
+			expect(app.els.cmp.els.secondEl).toBeUndefined()
 
 			app.state.show = false
 			await nextTick()
 
-			expect(app.root.els.cmp.els.firstEl).toBeUndefined()
-			expect(app.root.els.cmp.els.secondEl).toBeDefined()
+			expect(app.els.cmp.els.firstEl).toBeUndefined()
+			expect(app.els.cmp.els.secondEl).toBeDefined()
 		})
 
 		it('should not recreate component when only props change', async () => {
