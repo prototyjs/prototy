@@ -146,8 +146,8 @@ describe('Props with Functional Directives', () => {
 
 	it('should pass props with functional directives in each', async () => {
 		root.innerHTML = `
-			<div :each="items" :component="components.item" el="list"></div>
-		`
+		<div :each="items" :component="components.item" el="list"></div>
+	`
 
 		const app = prototy({
 			root,
@@ -161,16 +161,16 @@ describe('Props with Functional Directives', () => {
 			components: {
 				item: {
 					template: `
-						<div el="itemContainer">
-							<span el="indexSpan"></span>
-							<span el="nameSpan"></span>
-							<span el="idSpan"></span>
-						</div>
-					`,
+					<div el="itemContainer">
+						<span el="indexSpan"></span>
+						<span el="nameSpan"></span>
+						<span el="idSpan"></span>
+					</div>
+				`,
 					elements: {
 						indexSpan: {
 							text({ props }) {
-								return String(props.index + 1)
+								return String(props.itemIndex + 1)
 							}
 						},
 						nameSpan: {

@@ -14,6 +14,10 @@ export function each(container, array, api, bus, modifier) {
 	const component = bus.components[container._component]
 	let componentBus = bus
 
+	const scope = container._scope || (container._scope = container.getAttribute('scope') || 'item')
+	const itemName = scope
+	const indexName = `${scope}Index`
+
 	if (component) {
 		componentBus = {
 			...bus,
@@ -37,7 +41,7 @@ export function each(container, array, api, bus, modifier) {
 		if (container._onceRendered) {
 			return
 		}
-		renderStaticList(container, array, { context: api.context, setup })
+		renderStaticList(container, array, itemName, indexName, { context: api.context, setup })
 		container._onceRendered = true
 		return
 	}
@@ -63,8 +67,23 @@ export function each(container, array, api, bus, modifier) {
 		return
 	}
 
+	const contextData = {}
+
 	for (let i = 0; i < arrLength; i++) {
 		const item = array[i]
+
+		const existingNode = children[i]
+		if (existingNode && existingNode._item === item) {
+
+			if (existingNode._index !== i) {
+				existingNode._index = i
+				contextData[itemName] = item
+				contextData[indexName] = i
+				api.context(existingNode, contextData)
+			}
+			continue
+		}
+
 		let node = nodeMap.get(item)
 
 		if (!node) {
@@ -75,7 +94,9 @@ export function each(container, array, api, bus, modifier) {
 			node._item = item
 			node._index = i
 
-			api.context(node, { item, index: i })
+			contextData[itemName] = item
+			contextData[indexName] = i
+			api.context(node, contextData)
 
 			container.dispatchEvent(new CustomEvent('create', {
 				detail: {
@@ -85,7 +106,10 @@ export function each(container, array, api, bus, modifier) {
 					type: 'each-item'
 				}
 			}))
-			setup(node)
+			if (!node._setupDone) {
+				setup(node)
+				node._setupDone = true
+			}
 		} else {
 			if (children[i] !== node) {
 				container.insertBefore(node, children[i] || null)
@@ -95,7 +119,9 @@ export function each(container, array, api, bus, modifier) {
 			node._item = item
 			node._index = i
 
-			api.context(node, { item, index: i })
+			contextData[itemName] = item
+			contextData[indexName] = i
+			api.context(node, contextData)
 
 			if (oldIndex !== i) {
 				container.dispatchEvent(new CustomEvent('update', {
@@ -110,7 +136,6 @@ export function each(container, array, api, bus, modifier) {
 			}
 		}
 	}
-
 	while (container.children.length > arrLength) {
 		const nodeToRemove = container.lastElementChild
 		container.dispatchEvent(new CustomEvent('destroy', {
@@ -125,3 +150,119 @@ export function each(container, array, api, bus, modifier) {
 		nodeToRemove.remove()
 	}
 }
+// export function each(container, array, api, bus, modifier) {
+// 	const isStatic = modifier === 'once' || (array?.length > 0 && !isObject(array[0]))
+// 	const component = bus.components[container._component]
+// 	let componentBus = bus
+//
+// 	if (component) {
+// 		componentBus = {
+// 			...bus,
+// 			params: {
+// 				...bus.params,
+// 				...component.params
+// 			},
+// 			methods: {
+// 				...bus.methods
+// 			}
+// 		}
+// 		bindMethods(componentBus.methods, component.methods, componentBus)
+// 	}
+//
+// 	const setup = (node) => {
+// 		node.els = {}
+// 		api.setup(node, { bus: componentBus, els: node.els, elements: component?.elements })
+// 	}
+//
+// 	if (isStatic) {
+// 		if (container._onceRendered) {
+// 			return
+// 		}
+// 		renderStaticList(container, array, { context: api.context, setup })
+// 		container._onceRendered = true
+// 		return
+// 	}
+//
+// 	const nodeMap = container._nodeMap || (container._nodeMap = new WeakMap())
+// 	const children = container.children
+// 	const arrLength = array?.length || 0
+//
+// 	if (!arrLength) {
+// 		while (container.firstChild) {
+// 			const node = container.firstChild
+// 			container.dispatchEvent(new CustomEvent('destroy', {
+// 				detail: {
+// 					node,
+// 					item: node._item,
+// 					index: node._index,
+// 					type: 'each-item'
+// 				}
+// 			}))
+// 			api.unprocess(node)
+// 			node.remove()
+// 		}
+// 		return
+// 	}
+//
+// 	for (let i = 0; i < arrLength; i++) {
+// 		const item = array[i]
+// 		let node = nodeMap.get(item)
+//
+// 		if (!node) {
+// 			node = container._template.cloneNode(true)
+// 			nodeMap.set(item, node)
+// 			container.insertBefore(node, children[i] || null)
+//
+// 			node._item = item
+// 			node._index = i
+//
+// 			api.context(node, { item, index: i })
+//
+// 			container.dispatchEvent(new CustomEvent('create', {
+// 				detail: {
+// 					node,
+// 					item,
+// 					index: i,
+// 					type: 'each-item'
+// 				}
+// 			}))
+// 			setup(node)
+// 		} else {
+// 			if (children[i] !== node) {
+// 				container.insertBefore(node, children[i] || null)
+// 			}
+//
+// 			const oldIndex = node._index
+// 			node._item = item
+// 			node._index = i
+//
+// 			api.context(node, { item, index: i })
+//
+// 			if (oldIndex !== i) {
+// 				container.dispatchEvent(new CustomEvent('update', {
+// 					detail: {
+// 						node,
+// 						item,
+// 						oldIndex,
+// 						newIndex: i,
+// 						type: 'each-item'
+// 					}
+// 				}))
+// 			}
+// 		}
+// 	}
+//
+// 	while (container.children.length > arrLength) {
+// 		const nodeToRemove = container.lastElementChild
+// 		container.dispatchEvent(new CustomEvent('destroy', {
+// 			detail: {
+// 				node: nodeToRemove,
+// 				item: nodeToRemove._item,
+// 				index: nodeToRemove._index,
+// 				type: 'each-item'
+// 			}
+// 		}))
+// 		api.unprocess(nodeToRemove)
+// 		nodeToRemove.remove()
+// 	}
+// }

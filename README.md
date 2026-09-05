@@ -390,13 +390,25 @@ components: {
 ```
 
 ## each (List Rendering)
-Renders a list of items based on an array. It patches the DOM dynamically and injects local scope variables into the loop context.
+Renders a list from an array with dynamic DOM patching and scope injection.
 
-* **Syntax:** Paired directly with a component: `:each="array" :component="components.name"`.
-* **Arrays of Primitives** (strings, numbers) are **always static** by default.
-* **Arrays of Objects** are **dynamic** and react to mutations. To force an array of objects to be static, use the `.once` modifier (`:each.once`).
-* **Scope Injections:** Injects `item` (current data) and `index` (current position) into the loop context.
-* **Component Access:** The current loop data (props.item) and position (props.index) are automatically passed into the child component and can be accessed within its elements.
+**Behavior by Array Type**
+
+* Arrays of Primitives (strings, numbers) — always static by default.
+* Arrays of Objects — dynamic and react to mutations. Use `.once` modifier (`:each.once`) to force static.
+
+**Scope Injection**
+
+Each iteration injects variables into the context:
+* `item` — the current item in the iteration
+* `itemIndex` — the current index (position) in the iteration
+
+> Note: Default index is `itemIndex` (not `index`) to support nested loops with distinct scope names.
+
+For nested loops, use the scope attribute to avoid naming conflicts:
+* Item variable: `{scope}` (e.g., `user`)
+* Index variable: `{scope}Index` (e.g., `userIndex`)
+
 
 ```html
 <!-- Always static by default (array of strings) -->
@@ -405,6 +417,10 @@ Renders a list of items based on an array. It patches the DOM dynamically and in
 <div :each="dynamicItems" :component="components.todoItem"></div>
 <!-- Static forced (array of objects) -->
 <div :each.once="forcedStaticItems" :component="components.todoItem" el="todoItems"></div>
+<!-- Custom scope -->
+<div :each="primitiveItems" scope="fruit">
+    <span :text="fruitIndex"></span>-<span :text="fruit"></span>
+</div>
 ```
 
 ```js
@@ -435,7 +451,7 @@ components: {
     elements: {
       itemEl: {
         title({ props }) {
-          return props.item.name + props.index
+          return props.item.name + props.itemIndex
         }
       }
     }

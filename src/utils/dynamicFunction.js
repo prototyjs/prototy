@@ -68,10 +68,6 @@ export function dynamicFunction(code, bus, els, key = '') {
 				log.error('ReferenceError: "{0}" is not defined', prop, el)
 			},
 			set(_, prop, value) {
-				if (prop === 'index') {
-					log.error(`Cannot set "${prop}" - index is read-only`, el)
-					return false
-				}
 				if (prop in bus.state) {
 					bus.state[prop] = value
 					return true
