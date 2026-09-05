@@ -200,7 +200,7 @@ describe('Component Directive Complete Suite', () => {
 
 	describe('Cleanup & Resource Management', () => {
 		it('should cleanup resources when component is destroyed', async () => {
-			document.body.innerHTML = '<div :component="show ? components.first : components.second"></div>'
+			document.body.innerHTML = '<div :component="show ? components.first : components.second" el="cmp"></div>'
 
 			const app = prototy({
 				root: document.body,
@@ -213,14 +213,14 @@ describe('Component Directive Complete Suite', () => {
 
 			await nextTick()
 
-			expect(app.els.firstEl).toBeDefined()
-			expect(app.els.secondEl).toBeUndefined()
+			expect(app.els.cmp.els.firstEl).toBeDefined()
+			expect(app.els.cmp.els.secondEl).toBeUndefined()
 
 			app.state.show = false
 			await nextTick()
 
-			expect(app.els.firstEl).toBeUndefined()
-			expect(app.els.secondEl).toBeDefined()
+			expect(app.els.cmp.els.firstEl).toBeUndefined()
+			expect(app.els.cmp.els.secondEl).toBeDefined()
 		})
 
 		it('should not recreate component when only props change', async () => {

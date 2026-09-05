@@ -1,9 +1,9 @@
 /**
  * @param { HTMLElement } element
  * @param { DocumentFragment } node
- * @param { object } methods
+ * @param { Function } setup
  */
-export function slots(element, node, methods) {
+export function slots(element, node, setup) {
 	if (!element._slots) {
 		return
 	}
@@ -17,7 +17,7 @@ export function slots(element, node, methods) {
 			slot._currentClone = clone
 
 			if (!clone._mounted) {
-				methods.setup(clone)
+				setup(clone)
 				clone._mounted = true
 			}
 		} else {

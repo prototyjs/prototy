@@ -1,20 +1,47 @@
 import { isObject } from '@/utils/isObject'
 import { renderStaticList } from '@/utils/renderStaticList'
+import { bindMethods } from '@/utils/bindMethods'
 /**
  * @param { HTMLElement } container
  * @param { Array } array
- * @param { object } methods
+ * @param { object } api
+ * @param { object } bus
  * @param { string } modifier
  */
 // eslint-disable-next-line sonarjs/cognitive-complexity
-export function each(container, array, methods, modifier) {
+export function each(container, array, api, bus, modifier) {
 	const isStatic = modifier === 'once' || (array?.length > 0 && !isObject(array[0]))
+	const component = bus.components[container._component]
+	let componentBus = bus
+
+	const scope = container._scope || (container._scope = container.getAttribute('scope') || 'item')
+	const itemName = scope
+	const indexName = `${scope}Index`
+
+	if (component) {
+		componentBus = {
+			...bus,
+			params: {
+				...bus.params,
+				...component.params
+			},
+			methods: {
+				...bus.methods
+			}
+		}
+		bindMethods(componentBus.methods, component.methods, componentBus)
+	}
+
+	const setup = (node) => {
+		node.els = {}
+		api.setup(node, { bus: componentBus, els: node.els, elements: component?.elements })
+	}
 
 	if (isStatic) {
 		if (container._onceRendered) {
 			return
 		}
-		renderStaticList(container, array, methods)
+		renderStaticList(container, array, itemName, indexName, { context: api.context, setup })
 		container._onceRendered = true
 		return
 	}
@@ -34,14 +61,29 @@ export function each(container, array, methods, modifier) {
 					type: 'each-item'
 				}
 			}))
-			methods.unprocess(node)
+			api.unprocess(node)
 			node.remove()
 		}
 		return
 	}
 
+	const contextData = {}
+
 	for (let i = 0; i < arrLength; i++) {
 		const item = array[i]
+
+		const existingNode = children[i]
+		if (existingNode && existingNode._item === item) {
+
+			if (existingNode._index !== i) {
+				existingNode._index = i
+				contextData[itemName] = item
+				contextData[indexName] = i
+				api.context(existingNode, contextData)
+			}
+			continue
+		}
+
 		let node = nodeMap.get(item)
 
 		if (!node) {
@@ -52,7 +94,9 @@ export function each(container, array, methods, modifier) {
 			node._item = item
 			node._index = i
 
-			methods.context(node, { item, index: i })
+			contextData[itemName] = item
+			contextData[indexName] = i
+			api.context(node, contextData)
 
 			container.dispatchEvent(new CustomEvent('create', {
 				detail: {
@@ -62,8 +106,10 @@ export function each(container, array, methods, modifier) {
 					type: 'each-item'
 				}
 			}))
-
-			methods.setup(node)
+			if (!node._setupDone) {
+				setup(node)
+				node._setupDone = true
+			}
 		} else {
 			if (children[i] !== node) {
 				container.insertBefore(node, children[i] || null)
@@ -73,7 +119,9 @@ export function each(container, array, methods, modifier) {
 			node._item = item
 			node._index = i
 
-			methods.context(node, { item, index: i })
+			contextData[itemName] = item
+			contextData[indexName] = i
+			api.context(node, contextData)
 
 			if (oldIndex !== i) {
 				container.dispatchEvent(new CustomEvent('update', {
@@ -88,7 +136,6 @@ export function each(container, array, methods, modifier) {
 			}
 		}
 	}
-
 	while (container.children.length > arrLength) {
 		const nodeToRemove = container.lastElementChild
 		container.dispatchEvent(new CustomEvent('destroy', {
@@ -99,7 +146,7 @@ export function each(container, array, methods, modifier) {
 				type: 'each-item'
 			}
 		}))
-		methods.unprocess(nodeToRemove)
+		api.unprocess(nodeToRemove)
 		nodeToRemove.remove()
 	}
 }

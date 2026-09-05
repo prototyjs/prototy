@@ -13,23 +13,22 @@ export class Directives {
 	 * @constructor
 	 * @param { object } clientDirectives
 	 * @param { object } bus
-	 * @param { object } methods
+	 * @param { object } api
 	 */
-	constructor(clientDirectives = {}, bus, methods) {
-		this.methods = methods
+	constructor(clientDirectives = {}, bus, api) {
+		this.api = api
 		/**
 		 * @type {{ [key: string]: Function }}
 		 */
 		this.directives = {
 			...clientDirectives,
 			...innerDirectives,
-			each: (element, value, modifier) => each(element, value, methods, modifier),
-			component: (element, value) => component(element, value, methods),
+			each: (element, value, modifier) => each(element, value, api, bus, modifier),
+			component: (element, value) => component(element, value, api, bus),
 			bind: (element, value, modifier, args, transform, directive, code) => bind(element, value, modifier, args, transform, code, bus)
 		}
 	}
 	/**
-	 *
 	 * @param { HTMLElement } element
 	 * @param { string } key
 	 * @param { any } value
@@ -43,13 +42,13 @@ export class Directives {
 		}
 		if (Object.hasOwn(this.directives, directive)) {
 
-			this.directives[directive](element, value, modifier, args, this.methods.transform, directive, code)
+			this.directives[directive](element, value, modifier, args, this.api.transform, directive, code)
 			return
 		}
 		if (directive in element) {
-			property(element, value, modifier, args, this.methods.transform, directive)
+			property(element, value, modifier, args, this.api.transform, directive)
 			return
 		}
-		attr(element, value, modifier, args, this.methods.transform, directive)
+		attr(element, value, modifier, args, this.api.transform, directive)
 	}
 }

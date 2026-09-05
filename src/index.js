@@ -15,7 +15,6 @@ function prototy(options) {
 
 	return {
 		...p.bus,
-		update: p.update.bind(p),
 		destroy: () => {
 			if (isDestroyed) {
 				return

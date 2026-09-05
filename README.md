@@ -1,202 +1,239 @@
+<h1 align="center">Prototy</h1>
 <p align="center">
-<img src="https://github.com/user-attachments/assets/0f424573-860f-4b46-8ca5-903579593028" width="220px" alt="prototy">
+A Seamless JavaScript Framework 🧶
 </p>
 <p align="center">
-A simple directive-oriented JS framework for rapid UI prototyping and hypothesis testing on the web. 💙
+<img src="./logo-prototy.svg" width="80px" height="80px" alt="logo-prototy">
 </p>
 <p align="center">
-<i>Single-file prototyping for instant UI validation.</i>
+  <a href="https://prototy.dev/">prototy.dev</a>
+  ·
+  <a href="https://youtube.com/@prototyjs">youtube.com/@prototyjs</a>
+  ·
+  <a href="https://youtube.com/@prototyjs">t.me/prototyjs</a>
 </p>
+
+<hr>
 
 ## Installation
 
 Add this script to your HTML:
 
 ```html
-<script src="path/to/prototy/index.js" type="module"></script>
+<script src="https://cdn.jsdelivr.net/gh/prototyjs/prototy@main/dist/prototy.global.js"></script>
+```
+```js
+const { prototy } = window.Prototy
 ```
 Or import it in your JS code:
 
 ```js
-import { prototy } from './path/to/prototy/index.js'
+import { prototy } from 'https://cdn.jsdelivr.net/gh/prototyjs/prototy@main/dist/prototy.es.js'
+// or
+import { prototy } from 'prototy'
 ```
 
 ## Let's start!
+- Mount the framework on a root element — the directive syntax will work inside it.
+- Prototy is a directive-oriented framework with declarative syntax and built-in reactivity.
 
-Prototy is a directive-oriented framework with declarative syntax and built-in reactivity.
-All directives start with `:`. You declare what the UI should look like based on your state, and the framework automatically updates the DOM when the state changes.
-
-Mount the framework on a root element — the directive syntax will work inside it.
-
-Just copy the code and start working!
-
-```js
-import { prototy } from './prototy/index.js'
-
-const app = prototy({
-  root: document.getElementById('app'),
-  state: { count: 0 }
-})
-```
+**Expressions Directives:**
 ```html
 <div id="app">
   <button :onclick="count++" :text="count"></button>
 </div>
 ```
-The `app` object contains: `state`, `methods`, `root`, `params`, `components`, `els`.
+```js
+prototy({
+  root: document.getElementById('app'),
+  state: { count: 0 }
+})
+```
 
-## Configuration Options
-
-| Option | Type | Description |
-|--------|------|-------------|
-| `state` | `object` | Initial reactive state |
-| `root` | `HTMLElement` | Root element of the application (default: `document.body`) |
-| `params` | `object` | Static parameters passed to the application |
-| `methods` | `object` | Object with methods to bind to the bus |
-| `directives` | `object` | Custom directive implementations |
-| `components` | `object` | Component template definitions |
-| `setters` | `object` | Custom setter functions for state properties |
-
+**Or Functions Directives:**
+```html
+<div id="app">
+  <button el="myBtn"></button>
+</div>
+```
+```js
+prototy({
+  // ...
+  elements: {
+    myBtn: {
+      text() { return this.state.count },
+      onclick() { this.state.count++ }
+    }
+  }
+})
+```
 
 ## Directives
 
-All directives start with `:`
+You declare what the UI should look like based on your state, and the framework automatically updates the DOM when the state changes.
 
-### `:text` — sets the text content of an element
+### text
+Sets the text content of an element.
 
 ```html
 <span :text="name"></span>
 <span :text="`Hello, ${name}`"></span>
+<span :text.json="{ arr: [0,1] }"></span>
 ```
 
-### `:bind` — binds an element's property to the state. State changes update the element, and user actions update the state
+| Modifier | Description | Example                     |
+|-------------|-------------|-----------------------------|
+| `fixed.N`    |Formats a number to N decimal places    | `:text.fixed.2="price"`     |
+| `int`    | Converts to an integer    | `:text.int="value"`         |
+| `abs`    | Absolute value   | `:text.abs="number"`        |
+| `round`    | Rounds to the nearest integer    | `:text.round="number"`      |
+| `clamp.min.max`    | Clamps the value between min and max    | `:text.clamp.0.100="value"` |
+| `unit`    | Appends a unit suffix (default 'px')    | `:text.unit.em="size"`      |
+| `trim`    | Removes whitespace from the beginning and end of a string    | `:text.trim="text"`         |
+| `upper`    | Converts to uppercase    | `:text.upper="text"`        |
+| `lower`    | Converts to lowercase    | `:text.lower="text"`        |
+| `capitalize`    | Capitalizes the first letter    | `:text.capitalize="text"`   |
+| `default.X`    | Default value    | `:text.default.-="name"`    |
+| `json`    | Converts the value to a JSON string    | `:text.json="{user: Nick}"` |
 
-Syntax: `:bind.property.event="expression"`
-```html
-<input :bind.value.input.trim="username">
-<input type="checkbox" :bind.checked.change="isActive">
-<textarea :bind.value.input="desc"></textarea>
-```
-> You cannot bind two `:bind` directives to the same event on one element.
+> Value modifiers for the following directives: `text`, `html`, `property`, `attribute`, `bind`.
 
-### `:each` —  lists
+### el
+The `el` attribute establishes a link between the HTML markup and your JavaScript configuration.
 
-Iterates over an array, creates a component for each element:
-```html
-<div :each="items" :component="components.item"></div>
-```
-Inside the component, you have access to:
-- `item` — current element
-- `index` — index (starting from 0)
-```js
-components: {
-  item: '<div><span :text="index"></span>: <span :text="item.name"></span></div>'
-}
-```
-Array reactivity: `push`, `pop`, `shift`, `unshift`, `reverse`, `sort`, `splice`
-
-> When using `reverse()` or reordering, the internal state of elements (entered text, checkboxes) stays with their data item, not with the position.
-> An empty array renders nothing. When elements are added, rendering happens automatically.
-
-### `:component` — component insertion
+* Using `:el="expression"` runs code dynamically during rendering with direct access to the element reference.
+* Using plain `el="..."` names the element, registering it for centralized JS tracking inside the `elements` block and caching it in `<element>.els`.
+* The variable `el` is always exposed inside inline expressions as a native reference to the current DOM element itself.
+* The variable `els` provides access to all DOM elements marked with the `el` attribute within the current component scope.
+* Names declared in **kebab-case** within the HTML template are automatically converted to **camelCase** in JavaScript.
 
 ```html
-<div :component="components.header"></div>
+<div :text.lower="el.tagName"></div>
+<!-- <div>div</div> -->
+<div :el="console.log(el)"></div>
 ```
-#### Passing data via `:props` (readonly inside component):
-
+Or Functions Directives:
 ```html
-<div :component="components.card" :props="{ title: title, count: 5 }"></div>
+<div el="my-custom-element"></div>
+<!-- <div>div</div> -->
 ```
 ```js
-components: {
-  card: '<div><h3 :text="title"></h3><span :text="count"></span></div>'
-}
+const app = prototy({
+  // ...
+  elements: {
+    myCustomElement: {  // els.myCustomElement
+      'text.lower'({ el, els }) { return el.tagName }
+    }
+  }
+})
+console.log(app.els.myCustomElement) // HTMLElement
 ```
-> Changing `:props` inside a component does NOT sync back to the parent. Use `state` for two-way binding.
 
-#### Dynamic component
+### property
+Set values for HTMLElement properties.
+
+- Objects will undergo mergers.
+- Booleans will be converted.
+- Any data type.
 
 ```html
-<div :component="components[currentTab]"></div>
-```
-#### Conditional rendering
 
-```html
-<div :component="isVisible && modal"></div>
-```
-
-### `:class` — dynamically applies CSS classes based on conditions in `state`
-
-```html
-<div :class="{ active: isActive, disabled: !isEnabled }"></div>
-```
-### `:show` — conditionally shows or hides an element (sets display: none)
-
-```html
-<div :show="isVisible">Visible</div>
-```
-### `:attr` — binds the value of any HTML attribute to the state
-
-```html
-<div :data-id="userId"></div>
-```
-The attribute is removed when value is `null` or `false`.
-
-### `:style` — dynamically applies inline styles
-
-```html
-<div :style="{ color: textColor, fontSize: fontSize + 'px' }"></div>
-```
-### `:html` — sets the inner HTML of an element
-
-```html
-<div :html="rawHtml"></div>
-```
-### `:el` — element reference
-
-```html
-<div el="header">Header</div>
-```
-```js
-console.log(app.els.header) // HTMLDivElement
-```
-Dynamic: `:el="params.el = el"` — the `el` variable references the current element.
-
-### `:dataset` — data attributes from object
-
-```html
+<div :style="{ fontSize: fontSize + 'px' }" style="color: red" el="myEl"></div>
 <div :dataset="{ userId: 123, role: 'admin' }"></div>
 <!-- Result: data-user-id="123" data-role="admin" -->
- ```
-### `:hidden` —  hide via hidden attribute
-
+```
 ```html
 <div :hidden="isHidden"></div>
+<button :disabled="isDisabled"></button>
 ```
-## Events
 
-### Directives `:on*` handle DOM events.
+Or in elements:
+```js
+myEl: {
+  style() {
+    return { fontSize: this.state.fontSize + 'px' }
+  }
+}
+```
+
+### attribute
+If it is not a property, it will create an attribute.
+
+> The attribute is dynamically removed when value is `undefined`, `null` or `false`.
 
 ```html
-<button :onclick="count++">Click</button>
-<input :oninput="value = event.target.value">
-<form :onsubmit="submit(event)">Submit</form>
+<label :for="username" el="myEl">Name</label>
+<!-- <label for="Nick">Name</label> -->
 ```
-Inside event handlers you have access to:
+Or in elements:
+```js
+myEl: {
+  for() { return this.state.username }
+}
+```
 
-- `el` — the current DOM element
+### class
+Dynamically applies CSS classes based on conditions in `state`.
 
-- `state` — reactive state
+```html
+<div :class="{ active: isActive, disabled: !isEnabled }" el="myEl"></div>
+```
+Or in elements:
+```js
+myEl: {
+  class() {
+    return { active: this.state.isActive, disabled: !this.state.isEnabled }
+  }
+}
+```
+### show
+Conditionally shows or hides an element (sets display: none).
 
-- `methods` — bound methods
+```html
+<div :show="isVisible" el="myEl">Visible</div>
+```
+Or in elements:
+```js
+myEl: {
+  show() { return this.state.isVisible }
+}
+```
 
-- `event` — native event object
+### html
+Sets the inner HTML of an element.
 
+```html
+<div :html="getSafeHtml()"></div>
+```
+```js
+myEl: {
+  html() { return this.methods.getSafeHtml() }
+}
+```
 
-### Event Modifiers
+### on*
+Set handle DOM events
 
-Modifiers change how the event is handled.
+> Inside event handlers you have access native `event` object
+
+```html
+<button :onclick.stop="count++" el="btn">Click</button>
+<input :oninput="value = event.target.value" el="input">
+<form :onsubmit.prevent.once="submit(event)" el="form">Submit</form>
+```
+Or in elements:
+```js
+btn: {
+  'onclick.stop'() { this.state.count++ }
+},
+input: {
+  oninput({ event }) { this.state.value = event.target.value }
+},
+form: {
+  'onsubmit.prevent.once'({ event }) { this.methods.submit(event) }
+}
+```
+
 | Modifier | Effect | Example |
 |--------|------|-------------|
 | `stop` | Stops event propagation | `:onclick.stop` |
@@ -208,227 +245,473 @@ Modifiers change how the event is handled.
 | `passive` | Improves scroll performance | `:onscroll.passive` |
 
 
-```html
-<a :onclick.prevent="navigate">No page reload</a>
-```
+### bind (Two-way Data Binding)
+Binds an element's property to a state path. UI inputs automatically update the data, and data mutations instantly refresh the UI.
 
-### Lifecycle Events
-
-#### `:oncreate`
-Fires when a component is created and mounted to the DOM.
+**Syntax:** `:bind.property.eventType.modifier="statePath"`
 
 ```html
-<div 
-  :component="components.card"
-  :oncreate="onCardCreated">
-</div>
+<textarea :bind.value.input.trim="product.desc" el="desc"></textarea>
+<input type="checkbox" :bind.checked.change="isActive">
 ```
-The handler receives an object with:
-
-- `name` — component name
-
-- `target` — the DOM element
-
-
-#### `:oncreate.async`
-For async initialization. The component waits for the promise to resolve.
-
-```html
-<div 
-  :component="components.card"
-  :oncreate.async="initCard">
-</div>
-```
+Or in elements:
 ```js
-methods: {
-  async initCard({ name, target, signal }) {
-    // signal.aborted — true if component was destroyed before completion
-    await fetch(`/api/card/${name}`)
+desc: {
+  'bind.value.input.trim'({ props }) {
+    return {
+      get: () => this.state.product.desc,
+      set: (val) => this.state.product.desc = val
+    }
   }
 }
 ```
-#### `:ondestroy`
-Fires when a component is removed from the DOM.
-```html
-<div 
-  :component="components.card"
-  :ondestroy="onCardDestroyed">
-</div>
-```
-The handler receives `{ name, target }` — component name and the DOM element being removed.
+> Multiple `bind` directives cannot occupy the same event channel on a single element.
 
-## Public API
+## component
+Inserts reusable UI blocks into the DOM. Components support dynamic rendering, isolated properties, lifecycle events, and declarative markup.
 
-The `prototy()` function returns an `app` object with the following properties and methods:
-
-| Property/Method | Type | Description |
-|----------------|------|-------------|
-| `app.state` | `object` | Reactive state. Changes trigger UI updates. |
-| `app.methods` | `object` | Bound methods from configuration. |
-| `app.root` | `HTMLElement` | Root element of the application. |
-| `app.params` | `object` | Static parameters from configuration. |
-| `app.components` | `object` | Registered component templates. |
-| `app.els` | `object` | Elements marked with `el` attribute. |
-| `app.update(path, value)` | `function` | Manually update nested state by dot-notation path. |
-| `app.destroy()` | `function` | Clean up and remove all reactivity from the application. |
-
-### `app.destroy()`
-
-Completely removes the application: cleans up all reactive effects, event listeners, and component references.
+### Registering Components
+Components can be registered globally in JavaScript during the application initialization inside the `components` object, or declared directly in HTML.
 
 ```js
-const app = prototy({ state: { count: 0 } })
-
-// Later, when you no longer need the app:
-app.destroy()
-```
-
-### `app.update(path, value)`
-
-Manually update a nested state property.
-```js
-app.update('user.profile.name', 'Alice') // Success
-app.update('user.z.x', 100)              // Error: path "user.z.x" is unreachable
-app.update(null, 10)                     // Error: update() expects path to be a string
-```
-
-### Accessing the internal bus
-
-Inside methods and event handlers, `this.bus` gives access to the same object:
-
-```js
-methods: {
-  logBus() {
-    console.log(this.bus)
-    // {
-    //   root: HTMLElement,
-    //   state: { ... },
-    //   methods: { ... },
-    //   params: { ... },
-    //   components: { ... },
-    //   els: { ... }
-    // }
-  }
-}
-```
-> Use `bus` to access the root element, registered components, or elements marked with `el` attribute.
-
-
-### Slots (`<slot>`)
-
-Slots allow you to pass HTML content into a component. You define a placeholder in the component template, and when using the component, you fill it with your own content.
-#### Named slots
-
-In the component template, declare `<slot name="name">`. When using the component, specify `slot="name"` on any element — it will be placed in the slot's position:
-```js
-// Component definition
 const app = prototy({
+  root: document.body,
   components: {
-    card: `<div class="card"><slot name="header"></slot></div>`
+    // Shorthand HTML string definition
+    header: '<header><h1 el="head">My App</h1></header>',
+    // Detailed component placeholder used below
+    card: '<div><h3 :text="title"></h3><span :text="count"></span></div>'
+  }
+})
+console.log(app.els.header.els.head)
+```
+
+```html
+<!-- Basic rendering -->
+<div :component="components.header" el="header"></div>
+<!-- Dynamic component switching -->
+<div :component="components[currentTab]"></div>
+<!-- Falsy fallback (renders nothing if 'show' is false) -->
+<div :component="show && components.card"></div>
+```
+Or in elements:
+```js
+header: {
+  component() {
+    return this.components.header
+  }
+}
+```
+
+### Declaring Components in HTML
+You can define templates directly in your markup using the `<template component="...">` tag. Prototy automatically parses and exposes them inside the `components` scope.
+
+```html
+<template component="myButton">
+  <button class="btn">Click Me</button>
+</template>
+<!-- Instantiation -->
+<div :component="components.myButton"></div>
+```
+
+### props
+Properties passed to a component are injected directly into its local reactive scope. Child elements can read and mutate them just like standard state variables.
+
+```html
+<!-- Template Approach -->
+<div :component="components.card" :props="{ title: pageTitle, count: 5 }"></div>
+<!-- Elements Approach -->
+<div el="cardPlaceholder"></div>
+```
+Or in elements:
+```js
+cardPlaceholder: {
+  component() {
+    return this.components.card
+  },
+  props() {
+    return { title: this.state.pageTitle, count: 5 }
+  }
+}
+```
+
+### oncreate & ondestroy
+Handle component state changes directly via event directives or centralize them inside `elements`.
+
+* **`:oncreate`** — Fires after the component is created and mounted to the DOM. Receives `{ name, target }`.
+* **`:ondestroy`** — Fires when the component is removed from the DOM. Receives `{ name, target }`.
+* **`:oncreate.async`** — Pauses rendering until the returned Promise resolves. Receives `{ name, target, signal }`.
+
+```html
+<!-- Template Approach -->
+<div :component="components.card" :oncreate.async="initCard"></div>
+<!-- Elements Approach -->
+<div el="asyncCard"></div>
+```
+Or in elements:
+```js
+asyncCard: {
+  component() {
+    return this.components.card
+  },
+  'oncreate.async'({ name, target, signal }) {
+    // signal.aborted is true if the component was destroyed mid-fetch
+    await fetch(`/api/card/${name}`)
+  },
+  ondestroy({ name }) {
+    console.log(`${name} was safely removed`)
+  }
+}
+```
+
+## slots
+Slots allow content projection from parent templates into components using named placeholders.
+
+* **Named Slots:** Linked using the `slot="name"` attribute in the template and `<slot name="name"></slot>` inside the component.
+* **Reactivity:** Projected content retains full reactivity, even if the parent component switches dynamically.
+* **Fallback Content:** Elements inside `<slot>` tags render automatically if no slot content is provided by the parent.
+* **Nesting:** Slots support deep nesting, maintaining state synchronization across all levels.
+
+```html
+<div :component="components.card">
+  <!-- Dynamic content projected into the slot -->
+  <h1 slot="header" :text="title"></h1>
+</div>
+```
+```js
+components: {
+	card: `
+    <div class="card">
+      <slot name="header">Default Header</slot>
+      <div class="card-body">Content</div>
+    </div>
+  `
+}
+```
+
+## each (List Rendering)
+Renders a list from an array with dynamic DOM patching and scope injection.
+
+**Behavior by Array Type**
+
+* Arrays of Primitives (strings, numbers) — always static by default.
+* Arrays of Objects — dynamic and react to mutations. Use `.once` modifier (`:each.once`) to force static.
+
+**Scope Injection**
+
+Each iteration injects variables into the context:
+* `item` — the current item in the iteration
+* `itemIndex` — the current index (position) in the iteration
+
+> Note: Default index is `itemIndex` (not `index`) to support nested loops with distinct scope names.
+
+For nested loops, use the scope attribute to avoid naming conflicts:
+* Item variable: `{scope}` (e.g., `user`)
+* Index variable: `{scope}Index` (e.g., `userIndex`)
+
+
+```html
+<!-- Always static by default (array of strings) -->
+<div :each="primitiveItems" :component="components.todoItem"></div>
+<!-- Dynamic by default (array of objects) -->
+<div :each="dynamicItems" :component="components.todoItem"></div>
+<!-- Static forced (array of objects) -->
+<div :each.once="forcedStaticItems" :component="components.todoItem" el="todoItems"></div>
+<!-- Custom scope -->
+<div :each="primitiveItems" scope="fruit">
+    <span :text="fruitIndex"></span>-<span :text="fruit"></span>
+</div>
+```
+
+```js
+const app = prototy({
+  root: document.body,
+  state: {
+    primitiveItems: ['Apple', 'Banana'], // Static
+    dynamicItems: [{ id: 1, name: 'Nick' }, { id: 2, name: 'John' }], // Dynamic
+    forcedStaticItems: [{ name: 'A' }, { name: 'B' }] // Static via .once
+  },
+  components: {
+    todoItem: '<div el="itemEl"><span :text="index"></span>: <span :text="item"></span></div>',
   }
 })
 ```
-```html
-<!-- Using the component -->
-<div :component="components.card">
-  <h1 slot="header">Card header</h1>
-</div>
+Or in elements:
+```js
+todoItems: {
+  'each.once'() {
+    return this.state.forcedStaticItems
+  }
+}
 ```
-## Utility functions
+```js
+components: {
+  todoItem: {
+    tempate: '...',
+    elements: {
+      itemEl: {
+        title({ props }) {
+          return props.item.name + props.itemIndex
+        }
+      }
+    }
+  }
+}
+```
+## Configuration Options
+
+Prototy core configurations are defined inside a single schema object. It unifies your global state, static variables, methods, and component definitions into a predictable, centralized ecosystem.
 
 ```js
-import { nextTick, isObject, isEqual, kebabToCamel } from './prototy/index.js'
+const app = prototy({
+  root: HTMLElement,
+  state: { ... },
+  params: { ... },
+  methods: { ... },
+  computed: { ... },
+  setters: { ... },
+  elements: { ... },
+  components: {
+    myComponent: {
+      template: '',
+      elements: { ... }
+    }
+  },
+  created() { ... },
+  ready() { ... },
+  directives: {},
+  modifiers: {},
+})
 ```
-- `nextTick()` — wait for DOM update
+### root
+The root DOM element where the application mounts.
 
-- `isObject()` — check if value is an object
+```js
+root: document.getElementById('app')
+```
 
-- `isEqual(a, b)` — deep comparison
+### state
+The single, reactive source of truth for the entire application. Modifying these values triggers automatic UI updates.
 
-- `kebabToCamel()` — `user-name` → `userName`
+* **JS:** Access via `this.state` (both in global scope and components).
+* **Templates:** Bind directly by key name.
 
-## Modifiers
-
-Transform values before they are applied. Work with any directive.
+```js
+state: {
+  user: { username: 'Nick', age: 20 },
+  rgb: ['red', 'green', 'blue']
+}
+```
 ```html
-<span :text.upper="name"></span>
-<input :bind.value.input.trim="username">
+<div :text="user.username"></div>
+<div :text.json="rgb"></div>
 ```
-| Modifier | Description | Example |
-|-------------|-------------|-------------|
-| `fixed.N`    |Formats a number to N decimal places    | `:text.fixed.2="price"`    |
-| `int`    | Converts to an integer    | `:text.int="value"`    |
-| `abs`    | Absolute value   | `:text.abs="number"`    |
-| `round`    | Rounds to the nearest integer    | `:text.round="number"`    |
-| `clamp.min.max`    | Clamps the value between min and max    | `:text.clamp.0.100="value"`    |
-| `unit`    | Appends a unit suffix (default 'px')    | `:text.unit.em="size"`    |
-| `trim`    | Removes whitespace from the beginning and end of a string    | `:text.trim="text"`    |
-| `upper`    | Converts to uppercase    | `:text.upper="text"`    |
-| `lower`    | Converts to lowercase    | `:text.lower="text"`    |
-| `capitalize`    | Capitalizes the first letter    | `:text.capitalize="text"`    |
-| `default.X`    | Default value    | `:text.default.-="name"`    |
-| `json`    | Converts the value to a JSON string    | `:text.json="user"`    |
 
-## Setters
+### params
+Static configuration or constants. Changing these values will not trigger UI updates.
 
-Intercept changes for validation:
+* **JS:** Access via `this.params` (both in global scope and components).
+* **Templates:** Bind directly by key name (no prefix required).
+
+```js
+params: {
+  apiUrl: 'https://example.com',
+  maxUploadSize: 5120
+}
+```
+```html
+<a :href="apiUrl">API Link</a>
+```
+
+### methods
+Functions for business logic, events, and mutations. Executed within the instance context.
+
+* **JS:** Access via `this.methods` (both in global scope and components).
+* **Templates:** Bind directly by method name.
+
+```js
+methods: {
+  increment() {
+    this.state.count++
+  },
+  fetchData() {
+    console.log(`Connecting to ${this.params.apiUrl}`)
+  }
+}
+```
+```html
+<button :onclick="increment()">Increment</button>
+```
+
+### computed
+Read-only reactive values derived from the state. They cache results and re-evaluate only when their state dependencies change.
+- Available via `this.state.computedName` in JS and directly as `:text="computedName"` in templates.
+- Can depend on other computed properties.
+- Read-only. Modifications throw an error.
+
+```js
+computed: {
+  fullName() {
+    return `${this.state.firstName} ${this.state.lastName}`
+  },
+  totalCount() {
+    return this.state.items.length // Re-calculates on push/pop operations
+  }
+}
+console.log(app.state.fullName)
+```
+
+### setters
+Interceptors that validate, sanitize, or transform state mutations before they are saved.
+They can target nested properties using dot notation and function as observers (watchers) for side effects.
+
 ```js
 setters: {
-  age(newVal) { return Math.max(0, Math.min(120, newVal)) }
-}
-```
-
-
-## Custom directives (advanced)
-
-Create your own directives by adding them to the `directives` option.
-
-
-```js
-directives: {
-  highlight(element, value) {
-    element.style.backgroundColor = value ? 'yellow' : ''
+  'product.count'(newVal) { // Deep path tracking
+    return Math.max(0, Math.min(100, newVal))
   },
-  tooltip(element, value, modifier) {
-    element.title = value
-    if (modifier === 'top') element.setAttribute('data-position', 'top')
+  currentTheme(newVal) {
+    localStorage.setItem('theme', newVal)  // Save to storage
+    return newVal
   }
 }
 ```
+
+### elements
+An alternative, centralized way to manage directives from JavaScript instead of cluttering the HTML template.
+
+* **Syntax:** Every directive must be a standard method to preserve `this`.
+* **Kebab-to-Camel:** HTML `el="main-title"` automatically maps to `mainTitle` in JS.
+* **Arguments:** Every directive method receives a `{ el, els, props, event }` context object as its first parameter.
+
 ```html
-<div :highlight="isActive"></div>
-<div :tooltip.top="'Tooltip'"></div>
+<div el="main-title"></div>
+<button el="submit-btn">submit</button>
+```
+```js
+elements: {
+  mainTitle: {
+    text() {
+      return this.state.username
+    }
+  },
+  submitBtn: {
+    'onclick.stop.prevent'({ el, event }) {
+      console.log('Clicked element:', el)
+    }
+  }
+}
 ```
 
-### Parameters passed to a custom directive (directive function signature)
+### components
+Reusable UI blocks that define their own markup, parameters, methods, and element behaviors while sharing the single global reactive state.
 
-When you create a custom directive, your function receives these parameters in order:
+* **Full Syntax:** An object with a `template` string, along with optional `elements`, `params`, and `methods`.
+* **Shorthand Syntax:** A direct string definition for simple, logic-free templates.
+* **Context Merging (`this`):** Component-specific `params` and `methods` are merged into the instance context.
 
 ```js
-function myDirective(element, value, modifier, args, transform, directive, code)
+components: {
+  userCard: {
+    template: `
+      <div class="card">
+        <h3 class="user-name"></h3>
+        <button class="btn-reset" el="reset-btn">Reset</button>
+      </div>`,
+    elements: {
+      resetBtn: {
+        onclick() {
+          this.methods.reset()
+		}
+      }
+    },
+    params: { ... },
+    methods: {
+      reset() { ... }
+    }
+  },
+  head: `<h1 :text="head"></h1>`
+}
 ```
-| Parameter | Description |
-|-------------|-------------|
-| `element`    |The DOM element    |
-| `value`    | The evaluated expression value   |
-| `modifier`    | The first modifier (e.g., `'top'` from `:my.top`)   | 
-| `args`    | Array of additional arguments (e.g., `['arg1', 'arg2']` from `:my.top.arg1.arg2`)    | 
-| `transform`    | Function to apply built-in modifiers    | 
-| `directive`    | Directive name (`'myDirective'`)   | 
-| `code`    | Original expression source code    | 
 
-### Using built-in modifiers in custom directives
+### created & ready
+Functions that execute automatically at specific stages of the application lifecycle.
 
-You can apply built-in modifiers to values inside your custom directive:
+* **created()**: Fires immediately after the application instance is initialized, before the DOM is processed. Ideal for fetching initial data.
+* **ready()**: Fires after the DOM has been parsed, elements are bound, and the application is fully interactive.
+
 ```js
+created() {
+  console.log('Instance created, loading config...')
+},
+ready() {
+  console.log('DOM is bound and ready!')
+}
+```
+
+### directives & modifiers
+Custom directives extend HTML with low-level DOM manipulations, while modifiers post-process directive values.
+
+```js
+state: { price: 120 },
 directives: {
-  displayValue(element, value, modifier, args, transform) {
-    const transformed = transform(value, modifier, args)
-    element.textContent = transformed
+  // Arguments: element, value, modifier, args, transform, directive, code
+  format(element, value, modifier, args, transform) {
+    // transform() applies the modifier (e.g. 'currency') and passes extra args (e.g. ['$'])
+    const formatted = transform(value, modifier, args)
+    element.textContent = formatted
   }
+},
+modifiers: {
+  currency: (value, symbol = '€') => `${symbol}${Number(value).toFixed(2)}`
 }
 ```
 ```html
-<div :displayValue.upper.trim="name"></div>
-<!-- Applies 'upper' and 'trim' before passing to the directive -->
- ```
+<!-- Renders: "$120.00" -->
+<div :format.currency.$="price"></div>
+```
+
+**Directive Arguments:**
+* **`element`** — The target DOM element.
+* **`value`** — The evaluated expression value.
+* **`modifier`** — The first modifier string (e.g., `'currency'`).
+* **`args`** — Array of additional modifiers/arguments (e.g., `['$']`).
+* **`transform`** — Internal helper function to apply the modifiers.
+* **`directive`** — The directive name as a string (e.g., `'format'`).
+* **`code`** — The raw expression source code (e.g., `'price'`).
+
+
+## Public API
+The `prototy()` constructor returns an `app` instance with the following interface:
+
+* **`app.state`** — Reactive data layer. Mutations trigger UI re-renders.
+* **`app.methods`** — Action handlers bound to the instance context.
+* **`app.params`** — Static, non-reactive configuration constants.
+* **`app.root`** — Target DOM element where the app is mounted.
+* **`app.els`** — Cached DOM elements marked with the `el` attribute.
+* **`app.components`** — Registered templates and their individual cached `els`.
+* **`app.destroy()`** — Method to clean up event listeners and completely remove reactivity.
+
+```js
+const app = prototy({ root: '#app', state: { count: 0 } })
+
+app.state.count++            // Mutates state and schedules UI update
+app.destroy()                // Cleans up the instance
+```
+
+## Utility functions
+Helper utilities exported from the library core:
+
+```js
+import { nextTick, isObject, isEqual, kebabToCamel } from 'prototy'
+```
+
+* **`nextTick()`** — Returns a Promise. Waits for the next asynchronous DOM update cycle to finish.
+* **`isObject(val)`** — Returns a boolean. Checks if the provided value is a plain object.
+* **`isEqual(a, b)`** — Returns a boolean. Performs a deep structural comparison between two values.
+* **`kebabToCamel(str)`** — Returns a string. Converts dash-case strings to camelCase (e.g., `'user-name'` → `'userName'`).
+
+```js
+app.state.count = 10
+await nextTick() // Ensures the DOM now reflects the value 10
+```

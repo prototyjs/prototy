@@ -1,39 +1,58 @@
 import { render } from '@/component/render'
 import { slots } from '@/component/slots'
 import { dispatchEvent } from '@/utils/dispatchEvent'
-
+import { bindMethods } from '@/utils/bindMethods'
 /**
  * @param { HTMLElement } element
  * @param { string } value
- * @param { object } methods
+ * @param { object } api
+ * @param { object } bus
  */
-export function component(element, value = {}, methods) {
+export function component(element, value = {}, api, bus) {
 	if (element._abortController) {
 		element._abortController.abort()
 	}
 	const controller = new AbortController()
 	element._abortController = controller
 
+	const remove = (node) => {
+		while (node.firstChild) {
+			api.unprocess(node.firstChild, node.els)
+			node.firstChild.remove()
+		}
+	}
+
 	if (element._component) {
 		dispatchEvent(element, 'destroy', { name: element._component })
-		while (element.firstChild) {
-			if (methods.unprocess) {
-				methods.unprocess(element.firstChild)
-			}
-			element.firstChild.remove()
-		}
+		remove(element)
 	}
 
 	if (!value || !value.template) {
 		element.innerHTML = ''
 		return
 	}
+	element.els = {}
+	const componentBus = {
+		...bus,
+		params: {
+			...bus.params,
+			...value.params
+		},
+		methods: {
+			...bus.methods
+		}
+	}
+	bindMethods(componentBus.methods, value.methods, componentBus)
+
+	const setup = (node) => {
+		api.setup(node, { bus: componentBus, els: element.els, elements: value.elements })
+	}
 
 	const node = render(value.template)
 	element._component = value.name
 
 	if (element._hasEach) {
-		slots(element, node, methods.setup)
+		slots(element, node, setup)
 		const template = node.firstElementChild
 
 		if (template) {
@@ -47,21 +66,13 @@ export function component(element, value = {}, methods) {
 		if (controller.signal.aborted) {
 			return
 		}
-
-		slots(element, node, methods)
-
-		while (element.firstChild) {
-			methods.unprocess(element.firstChild)
-			element.firstChild.remove()
-		}
-
+		slots(element, node, setup)
+		remove(element)
 		element.appendChild(node)
-
 		Array.from(element.children).forEach(child => {
-			methods.setup(child)
+			setup(child)
 		})
 	}
-
 	if (element._async) {
 		dispatchEvent(element, 'create', { name: value.name, signal: controller.signal }, start)
 	} else {
