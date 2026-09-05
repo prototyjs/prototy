@@ -383,7 +383,7 @@ class Prototy {
 		    }
 		    const fullPath = path ? `${path}.${property.toString()}` : property.toString()
 		    let newValue = value
-		    if (isObject(value) && !value[IS_PROXY]) {
+		    if (isObject(value) && !(value instanceof Date) && !value[IS_PROXY]) {
 					newValue = self.createProxy(value, fullPath)
 		    }
 		    if (typeof self.setters?.[fullPath] === 'function' && !self.activeSetters.has(fullPath)) {
